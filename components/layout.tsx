@@ -3,14 +3,16 @@ import Image from 'next/image'
 import styles from './layout.module.css'
 import utilStyles from '../styles/utils.module.css'
 import Link from 'next/link'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
 
 export default function Layout({
-                                   children,
-                                   home
-                               }: {
+       children,
+       home
+   }: {
     children: React.ReactNode
     home?: boolean
 }) {
@@ -34,15 +36,33 @@ export default function Layout({
             <header className={styles.header}>
                 {home ? (
                     <>
-                        <Image
-                            priority
-                            src="/images/profile.png"
-                            className={utilStyles.borderCircle}
-                            height={144}
-                            width={144}
-                            alt={name}
-                        />
+                        <Link href="/about-me">
+                            <a>
+                                <div className={styles.profileContainer}>
+                                    <Image
+                                        priority
+                                        src="/images/profile.png"
+                                        className={`${utilStyles.borderCircle} ${styles.profilePic}`}
+                                        height={144}
+                                        width={144}
+                                        alt={name}
+                                    />
+                                </div>
+                            </a>
+                        </Link>
                         <h1 className={utilStyles.heading2Xl}>{name}</h1>
+                        <div className={styles.largeSocialRow}>
+                            <a href="https://github.com/jerrettdavis" target="_blank">
+                                <div className={styles.socialIcon}>
+                                    <FontAwesomeIcon icon={faGithub} />
+                                </div>
+                            </a>
+                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank">
+                                <div className={styles.socialIcon}>
+                                    <FontAwesomeIcon icon={faLinkedin} />
+                                </div>
+                            </a>
+                        </div>
                     </>
                 ) : (
                     <>

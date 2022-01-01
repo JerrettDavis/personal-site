@@ -18,10 +18,13 @@ export default function Home({
     return (
         <Layout home>
             <Head>
-                <title>{siteTitle}</title>
+                <title>Jerrett Davis - The Overengineer</title>
             </Head>
             <section className={utilStyles.headingMd}>
-                <p>Hello! I'm Jerrett, but everyone just calls me JD.</p>
+                <p>
+                    Hello! I'm Jerrett, but everyone just calls me JD. I like to write code and occasionally ramble about stuff.{' '}
+                    <Link href="/about-me">More about me.</Link>
+                </p>
             </section>
             <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
                 <h2 className={utilStyles.headingLg}>Blog</h2>

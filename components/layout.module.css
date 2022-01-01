@@ -14,3 +14,34 @@
     margin: 3rem 0 0;
 }
 
+.largeSocialRow {
+    display: flex;
+}
+
+.socialIcon {
+    width: 3rem;
+    height: 3rem;
+    padding: .7rem;
+    border-radius: 2.5rem;
+    background-color: #ededed;
+    color: #333;
+    margin: 4px;
+}
+
+.profileContainer {
+    margin: 4px;
+}
+
+.profileContainer > * {
+    overflow: visible !important;
+}
+
+.socialIcon:hover {
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
+}
+
+.profilePic:hover {
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
+}
