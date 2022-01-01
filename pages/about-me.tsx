@@ -7,7 +7,9 @@ export default function AboutMe() {
                 <title>About Me - Jerrett Davis</title>
             </Head>
             <div>
-                Me
+                <h1>About Me</h1>
+                <h2>My Experience</h2>
+                <h2>My Interests</h2>
             </div>
         </div>
     )
