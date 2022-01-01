@@ -25,3 +25,7 @@ img {
     max-width: 100%;
     display: block;
 }
+
+.hljs {
+    font-size: 14px;
+}
