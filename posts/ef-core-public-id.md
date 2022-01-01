@@ -1,0 +1,173 @@
+---
+title: 'Simple Public ID Generation in EF Core'
+date: '2021-12-27'
+---
+
+# Background
+
+I've had the fortune of working in many codebases leveraging all sorts of different technologies. However, regardless of the stack, one of the many issues I've found shared among them is the exposure of sensitive internal implementation details. More specifically, one of the most common culprits has been the pervasiveness of database keys finding their way in front of users. Whether that's through URLs, JSON payloads, or websockets makes no difference; the presence of implementation details in userland is a problem.
+
+In lieu of turning this into a discussion about the issues surrounding database keys being leaked, below are some good articles about the root of the problem:
+
+- [Tom Harrison - UUID or GUID as Primary Keys? Be Careful!](https://tomharrisonjr.com/uuid-or-guid-as-primary-keys-be-careful-7b2aa3dcb439)
+- [Petre Popescu - Exposing sequential IDs is bad! Here is how to avoid it.](https://petrepopescu.tech/2021/01/exposing-sequential-ids-is-bad-here-is-how-to-avoid-it/)
+
+# Problems
+
+Like most developers, I hate writing more code than necessary. While investigating rewriting our system to hide internal IDs, it quickly became apparent I'd need something as unobtrusive as possible. My goal was to have a near turn-key solution that required next-to-zero developer intervention. With that in mind, I came up with some core problems to address:
+
+- We can't expose database keys
+- We need to generate an immutable public identifier for all sensitive public entities
+- Public identifiers must be customizable for different situations
+- We need to avoid code repetition
+- We need to supplement existing EF Linq extensions to ease fetching public entities
+
+# Implementation
+
+## Hiding Primary Keys
+
+Our first step was to completely remove publicly accessible primary keys from our models directly. While this may not be a good fit for every project (or even every entity within a project), it made sense in the vast majority of ours. To accomplish this, we converted each previously public `Id` to a private, readonly `_id`. Like so:
+
+```csharp
+// old
+public int Id { get; set; }
+
+// new
+private readonly int _id;
+```
+
+The above change also required a slight update to our entity configuration code:
+
+```csharp
+public class MyEntityConfiguration : IEntityTypeConfiguration<MyEntity>
+{
+    public void Configure(EntityTypeBuilder<MyEntity> builder)
+    {
+        // We now have to explicitly tell EF to map this private property
+        // This alone will create migrations with an identity field named '_id'
+        builder.HasKey("_id");
+
+        // The following is optional, but it helps add a bit of explicitness
+        // And it renames the property. Some may actually like the property being '_id'
+        builder.Property("_id")
+            .HasColumnName("Id")
+            .ValueGeneratedOnAdd();
+    }
+}
+```
+It is worth noting that while we did not elect to do so, you could define an empty interface that you place on all classes that hide their primary key. This could enable you to apply the property configurations en masse. A similar approach will be demonstrated later for configuring public entities.
+
+## Generating a Public Identifier for all Public Entities
+
+After we removed the publicly accessible primary keys from our models, we still needed  a way of accessing those entities. To accomplish this, we defined a new interface: `IPublicEntity`. This simple interface, while only defining a single property, underpins the entirety of the automated ID generation logic.
+
+```csharp
+public interface IPublicEntity
+{
+    string PublicId { get; }
+}
+```
+
+Once we have the `PublicId` on our entities, we have to tell EF to generate that value for us. We can do that with the help of a [`ValueGenerator`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.valuegeneration.valuegenerator?view=efcore-5.0) and the `PropertyBuilder` extension [`HasValueGenerator`](https://docs.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.metadata.builders.propertybuilder.hasvaluegenerator?view=efcore-5.0#Microsoft_EntityFrameworkCore_Metadata_Builders_PropertyBuilder_HasValueGenerator_System_Type_). The `ValueGenerator` abstract class, as shown implemented below, consists of a method to generate values (`Next`) and a property indicating if the values generated should be replaced by the database (`GeneratesTemporaryValues`).
+
+```csharp
+public class PublicIdValueGenerator : ValueGenerator<string>
+{
+    public override string Next(EntityEntry entry)
+    {
+        if (entry == null)
+            throw new ArgumentNullException(nameof(entry));
+            
+        return Guid.NewGuid().ToString();
+    }
+
+    public override bool GeneratesTemporaryValues => false;
+}
+```
+The `PublicIdValueGenerator` also has access to the underlying IoC container, so if you wanted to fetch a service to generate the IDs, you could do that like so:
+
+```csharp
+// old 
+return Guid.NewGuid().ToString();
+
+// new
+var gen = entry.Context.GetService<IUniqueIdGenerator>();
+return gen.CreateId();
+```
+Once we have our generator implemented, we need a way of telling our entities to use it. One approach is to define a class implementing `IEntityTypeConfiguration<TEntity>` like below.
+
+```csharp
+public class MyEntityConfiguration : IEntityTypeConfiguration<MyEntity>
+{
+    public void Configure(EntityTypeBuilder<MyEntity> builder)
+    {
+        builder.Property(e => e.PublicId)
+            .HasValueGenerator<PublicIdValueGenerator>();
+    }
+}
+```
+
+Alternatively, as a less tedious approach, you can configure all the classes implementing `IPublicEntity` en masse from the EF database context.
+
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Finds all the classes implementing IEntityTypeConfiguration in the assembly
+    // and applies them to the context.
+    modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+    
+    // Get a list of all entities that implement IPublicEntity
+    var publicEntities = modelBuilder.Model.GetEntityTypes()
+        .Where(i => i.ClrType.IsAssignableTo(typeof(IPublicEntity)));
+    foreach (var item in publicEntities)
+    {
+        // Add value generator to each entity
+        modelBuilder.Entity(item.ClrType)
+            .Property(nameof(IPublicEntity.PublicId)) // Will be 'PublicId'
+            .HasValueGenerator<PublicIdValueGenerator>();
+    }
+    
+    base.OnModelCreating(modelBuilder);
+}
+```
+Using the latter approach, creating new public entities becomes as simple as implementing the `IPublicEntity` interface on any class you wish to make public.
+
+## Simplify Operations on Public Entities
+
+Since we're moving away from passing around our public IDs, no longer having access to Linq's `Find` and `FindAsync` methods can prove a bit irksome. To help ease matters a bit, we can write an extension method to mimic `Find`'s functionality, but tailored for `IPublicEntities` instead. To do this, we need to create an extension for the underlying `IQueryable`s that underpin much of EF Core's functionality, and maybe a couple more for good measure.
+
+```csharp
+public static class QueryableExtensions
+{
+    public static Task<bool> PublicEntityExistsAsync<TEntity>(
+        this IQueryable<TEntity> queryable,
+        string publicId, 
+        CancellationToken cancellationToken = default) 
+        where TEntity : class, IPublicEntity =>
+        queryable.AnyAsync(e => e.PublicId == publicId, 
+            cancellationToken);
+    
+    public static Task<TEntity?> FindPublicEntityAsync<TEntity>(
+        this IQueryable<TEntity> queryable,
+        string publicId,
+        CancellationToken cancellationToken = default)
+        where TEntity : class, IPublicEntity =>
+        queryable.FirstOrDefaultAsync(e => e.PublicId == publicId,
+            cancellationToken);
+
+    public static Task<TEntity> SinglePublicEntityAsync<TEntity>(
+        this IQueryable<TEntity> queryable,
+        string publicId,
+        CancellationToken cancellationToken = default)
+        where TEntity : class, IPublicEntity =>
+        queryable.SingleAsync(e => e.PublicId == publicId,
+            cancellationToken);
+}
+```
+For most intents and purposes, the `SinglePublicEntityAsync` and `FindPublicEntityAsync` methods above mimic the Linq methods they're named after. The `FindPublicEntityAsync` method is actually backed by `FirstOrDefaultAsync` and as such, it lacks some of `FindAsync`'s caching abilities, but it *does* have `FirstOrDefaultAsync`'s ability to easily load related data!
+
+# Conclusion
+
+Implementing universal public IDs in a scalable and reusable way was *far* easier than I initially anticipated when I began researching the matter. Thankfully, this allows us to implement a rather vital feature with minimal effort on the developer's behalf. You can find a runnable example of the code on my [GitHub Page](https://github.com/JerrettDavis/EfCorePublicIdDemo).
+
+If you have any questions, feel free to reach out!
