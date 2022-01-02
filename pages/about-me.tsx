@@ -19,12 +19,10 @@ export default function AboutMe() {
                             and scalable infrastructure.
                         </p>
                         <p>
-                            <em>
-                                Disclaimer: While I will discuss my professional experience here, I do not intend for this
-                                to be a professional bio. I'm hoping to take a bit more of a casual, friendly tone here.{' '}
-                                If you would like a more business-oriented biography, please take a look a my{' '}
-                                <a href="https://www.linkedin.com/in/jddpro/" target="_blank">LinkedIn</a>.
-                            </em>
+                            While I will discuss my professional experience here, I do not intend for this
+                            to be a professional bio. I'm hoping to take a bit more of a casual, friendly tone here.{' '}
+                            If you would like a more business-oriented biography, please take a look a my{' '}
+                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank">LinkedIn</a>.
                         </p>
                     </div>
                 </section>
