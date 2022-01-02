@@ -1,10 +1,15 @@
 import Head from 'next/head'
-import Layout, { siteTitle } from '../components/layout'
+import Layout from '../components/layout'
 import utilStyles from '../styles/utils.module.css'
-import { getSortedPostsData } from '../lib/posts'
+import {getSortedPostsData} from '../lib/posts'
 import Link from 'next/link'
 import Date from '../components/date'
-import { GetStaticProps } from 'next'
+import {GetStaticProps} from 'next'
+import dynamic from "next/dynamic";
+
+const ThemeToggle = dynamic(() => import('../components/themeToggle'), {
+    ssr: false,
+});
 
 export default function Home({
          allPostsData
@@ -26,6 +31,7 @@ export default function Home({
                     <Link href="/about-me">More about me.</Link>
                 </p>
             </section>
+            <ThemeToggle />
             <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
                 <h2 className={utilStyles.headingLg}>Blog</h2>
                 <ul className={utilStyles.list}>

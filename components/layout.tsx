@@ -37,7 +37,7 @@ export default function Layout({
                 {home ? (
                     <>
                         <Link href="/about-me">
-                            <a>
+                            <a title="Go to my About Me page" aria-label="Go to my About Me page">
                                 <div className={styles.profileContainer}>
                                     <Image
                                         priority
@@ -45,19 +45,27 @@ export default function Layout({
                                         className={`${utilStyles.borderCircle} ${styles.profilePic}`}
                                         height={144}
                                         width={144}
-                                        alt={name}
+                                        alt={'Photo of ' + name}
                                     />
                                 </div>
                             </a>
                         </Link>
                         <h1 className={utilStyles.heading2Xl}>{name}</h1>
                         <div className={styles.largeSocialRow}>
-                            <a href="https://github.com/jerrettdavis" target="_blank">
+                            <a href="https://github.com/jerrettdavis"
+                               target="_blank"
+                               title="My Github page"
+                               aria-label="Go to my Github page"
+                            >
                                 <div className={styles.socialIcon}>
                                     <FontAwesomeIcon icon={faGithub} />
                                 </div>
                             </a>
-                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank">
+                            <a href="https://www.linkedin.com/in/jddpro/"
+                               target="_blank"
+                               title="My LinkedIn page"
+                               aria-label="Go to my LinkedIn page"
+                            >
                                 <div className={styles.socialIcon}>
                                     <FontAwesomeIcon icon={faLinkedin} />
                                 </div>
