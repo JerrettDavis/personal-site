@@ -3,14 +3,16 @@ body[data-theme="light"] {
     --color-text-primary: #27201a;
     --color-text-secondary: #008bab;
     --color-bg-primary: #fff;
-    --color-bg-toggle: #1e90ff;
+    --color-bg-toggle: #008bab;
+    --color-bg-thumb: white;
 }
 
 body[data-theme="dark"] {
     --color-text-primary: #e3e3e3;
-    --color-text-secondary: #08bdd4;
-    --color-bg-primary: #15232d;
-    --color-bg-toggle: #a9a9a9;
+    --color-text-secondary: #247ba0;
+    --color-bg-primary: #0a1720;
+    --color-bg-toggle: #2f3334;
+    --color-bg-thumb: #247ba0
 }
 
 html,

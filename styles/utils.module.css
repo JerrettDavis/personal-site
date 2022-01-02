@@ -45,6 +45,10 @@
     margin: 4px;
 }
 
+.marginLeft8 {
+    margin-left: 8px;
+}
+
 .list {
     list-style: none;
     padding: 0;

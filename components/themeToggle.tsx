@@ -2,14 +2,14 @@ import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 
 const ToggleButton = styled.button`
-  --toggle-width: 80px;
-  --toggle-height: 38px;
+  --toggle-width: 64px;
+  --toggle-height: 32px;
   --toggle-padding: 4px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  font-size: 1.5rem;
+  font-size: 1rem;
   line-height: 1;
   width: var(--toggle-width);
   height: var(--toggle-height);
@@ -37,8 +37,8 @@ const ToggleThumb = styled.span`
   width: calc(var(--toggle-height) - (var(--toggle-padding) * 2));
   height: calc(var(--toggle-height) - (var(--toggle-padding) * 2));
   border-radius: 50%;
-  background: white;
-  transition: transform 0.25s ease-in-out;
+  background: var(--color-bg-thumb);
+  transition: transform 0.25s ease-in-out, background 0.25s ease-in-out;
   transform: ${(p: {activeTheme: string}) =>
           p.activeTheme === "dark"
                   ? "translate3d(calc(var(--toggle-width) - var(--toggle-height)), 0, 0)"

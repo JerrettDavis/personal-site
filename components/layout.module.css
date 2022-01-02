@@ -1,7 +1,20 @@
 .container {
-     max-width: 48rem;
+    max-width: 48rem;
     padding: 0 1rem;
     margin: 3rem auto 6rem;
+}
+
+.topActions, .topActions a {
+    width: 100%;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: end;
+    color: var(--color-text-primary);
+}
+
+.topActions .buttonLink {
+    max-height: 32px;
+    max-width: 32px;
 }
 
 .header {
