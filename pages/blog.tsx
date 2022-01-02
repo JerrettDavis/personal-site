@@ -21,20 +21,39 @@ export default function Blog({
                 <title>the overengineer. - Jerrett Davis</title>
             </Head>
             <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
-                <h2 className={utilStyles.headingLg}>Blog</h2>
-                <ul className={utilStyles.list}>
-                    {allPostsData.map(({ id, date, title }) => (
-                        <li className={utilStyles.listItem} key={id}>
-                            <Link href={`/posts/${id}`}>
-                                <a>{title}</a>
-                            </Link>
-                            <br />
-                            <small className={utilStyles.lightText}>
-                                <Date dateString={date} />
-                            </small>
-                        </li>
-                    ))}
-                </ul>
+                <h1>the overengineer.</h1>
+                <section>
+                    <p>
+                        I've been told I have a penchant for <em>occasionally</em> over-engineering solutions to certain problems.
+                        On my ever-present mission for improvement, my struggles sometimes breathe life into new, inventive ways to
+                        solve challenges. However, more often than not, I'm left with something many friends have affectionately
+                        described as <em>cursed</em>.
+                    </p>
+                    <p>
+                        As an exercise in self-reflection and as digital manifestation of the idiom <em>"Misery loves company"</em>,
+                        I present my developer blog: <strong>the overengineer.</strong>
+                    </p>
+                    <p>
+                        I also publish my posts on <a href="https://hashnode.jerrettdavis.com">Hashnode</a>.
+                    </p>
+                </section>
+                <hr />
+                <section>
+                    <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
+                    <ul className={utilStyles.list}>
+                        {allPostsData.map(({ id, date, title }) => (
+                            <li className={utilStyles.listItem} key={id}>
+                                <Link href={`/posts/${id}`}>
+                                    <a>{title}</a>
+                                </Link>
+                                <br />
+                                <small className={utilStyles.lightText}>
+                                    <Date dateString={date} />
+                                </small>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
             </section>
         </Layout>
     )

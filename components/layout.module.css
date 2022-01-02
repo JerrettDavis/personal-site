@@ -1,14 +1,14 @@
 .container {
     max-width: 48rem;
     padding: 0 1rem;
-    margin: 3rem auto 6rem;
+    margin: .5rem auto 6rem;
 }
 
 .topActions, .topActions a {
     width: 100%;
     padding: 4px 8px;
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     color: var(--color-text-primary);
 }
 
