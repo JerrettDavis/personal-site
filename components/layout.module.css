@@ -1,7 +1,20 @@
 .container {
-    max-width: 36rem;
+    max-width: 48rem;
     padding: 0 1rem;
-    margin: 3rem auto 6rem;
+    margin: .5rem auto 6rem;
+}
+
+.topActions, .topActions a {
+    width: 100%;
+    padding: 4px 8px;
+    display: flex;
+    justify-content: flex-end;
+    color: var(--color-text-primary);
+}
+
+.topActions .buttonLink {
+    max-height: 32px;
+    max-width: 32px;
 }
 
 .header {
@@ -12,4 +25,36 @@
 
 .backToHome {
     margin: 3rem 0 0;
+}
+
+.largeSocialRow {
+    display: flex;
+}
+
+.socialIcon {
+    width: 3rem;
+    height: 3rem;
+    padding: .7rem;
+    border-radius: 2.5rem;
+    background-color: #ededed;
+    color: #333;
+    margin: 4px;
+}
+
+.profileContainer {
+    margin: 4px;
+}
+
+.profileContainer > * {
+    overflow: visible !important;
+}
+
+.socialIcon:hover {
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
+}
+
+.profilePic:hover {
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
 }

@@ -1,11 +1,35 @@
+body,
+body[data-theme="light"] {
+    --color-text-primary: #27201a;
+    --color-text-secondary: #008bab;
+    --color-bg-primary: #fff;
+    --color-bg-toggle: #008bab;
+    --color-bg-thumb: white;
+}
+
+body[data-theme="dark"] {
+    --color-text-primary: #e3e3e3;
+    --color-text-secondary: #247ba0;
+    --color-bg-primary: #0a1720;
+    --color-bg-toggle: #2f3334;
+    --color-bg-thumb: #247ba0
+}
+
 html,
 body {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
     padding: 0;
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu,
     Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
     line-height: 1.6;
     font-size: 18px;
+    transition: background 0.25s ease-in-out;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-secondary);
 }
 
 * {
@@ -24,4 +48,8 @@ a:hover {
 img {
     max-width: 100%;
     display: block;
+}
+
+.hljs {
+    font-size: 14px;
 }

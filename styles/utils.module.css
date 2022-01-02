@@ -37,6 +37,18 @@
     padding-top: 1px;
 }
 
+.p4 {
+    padding: 4px;
+}
+
+.m4 {
+    margin: 4px;
+}
+
+.marginLeft8 {
+    margin-left: 8px;
+}
+
 .list {
     list-style: none;
     padding: 0;
