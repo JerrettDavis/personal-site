@@ -2,6 +2,7 @@ body,
 body[data-theme="light"] {
     --color-text-primary: #27201a;
     --color-text-secondary: #008bab;
+    --color-link: #ab1fdd;
     --color-bg-primary: #fff;
     --color-bg-toggle: #008bab;
     --color-bg-thumb: white;
@@ -10,6 +11,7 @@ body[data-theme="light"] {
 body[data-theme="dark"] {
     --color-text-primary: #e3e3e3;
     --color-text-secondary: #247ba0;
+    --color-link: #b47aee;
     --color-bg-primary: #0a1720;
     --color-bg-toggle: #2f3334;
     --color-bg-thumb: #247ba0
@@ -37,7 +39,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    color: #0070f3;
+    color: var(--color-link);
     text-decoration: none;
 }
 
