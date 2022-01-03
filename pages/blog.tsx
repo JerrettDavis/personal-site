@@ -30,7 +30,7 @@ export default function Blog({
                         described as <em>cursed</em>.
                     </p>
                     <p>
-                        As an exercise in self-reflection and as digital manifestation of the idiom <em>"Misery loves company"</em>,
+                        As an exercise in self-reflection and as a digital manifestation of the idiom <em>"Misery loves company"</em>,
                         I present my developer blog: <strong>the overengineer.</strong>
                     </p>
                     <p>
