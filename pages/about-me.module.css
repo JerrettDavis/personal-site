@@ -1,0 +1,8 @@
+.noTopMargin {
+    margin-top: 0;
+}
+
+h1.articlePad, h2.articlePad, h3.articlePad, h4.articlePad, h5.articlePad {
+    margin-top: 2rem;
+    margin-bottom: 0;
+}
