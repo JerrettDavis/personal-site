@@ -1,6 +1,6 @@
 body,
 body[data-theme="light"] {
-    --color-primary: #27201a;
+    --color-primary: #008bab;
     --color-text-primary: #27201a;
     --color-text-secondary: #008bab;
     --color-link: #ab1fdd;
@@ -10,7 +10,7 @@ body[data-theme="light"] {
 }
 
 body[data-theme="dark"] {
-    --color-primary: #e3e3e3;
+    --color-primary: #247ba0;
     --color-text-primary: #e3e3e3;
     --color-text-secondary: #247ba0;
     --color-link: #b47aee;

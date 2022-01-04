@@ -6,9 +6,9 @@ import utilStyles from '../../styles/utils.module.css'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import styled from "@emotion/styled";
 
-const Tag = styled.span`
+const Tag = styled.div`
   display: inline-block;
-  border-color: var(--color-primary);
+  border-color: var(--color-primary) !important;
   border: 1px solid;
   padding: 8px 16px;
   margin: 0 8px;
