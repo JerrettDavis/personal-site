@@ -9,6 +9,13 @@ import rehypeStringify from 'rehype-stringify'
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
+export default interface PostData {
+    title: string;
+    date: string;
+    contentHtml: string;
+    tags: string[] | undefined | null;
+}
+
 export function getSortedPostsData() {
     // Get file names under /posts
     const fileNames = fs.readdirSync(postsDirectory)
@@ -50,7 +57,7 @@ export function getAllPostIds() {
     })
 }
 
-export async function getPostData(id: string) {
+export async function getPostData(id: string): Promise<PostData> {
     const fullPath = path.join(postsDirectory, `${id}.md`)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
 
@@ -65,11 +72,14 @@ export async function getPostData(id: string) {
         .use(rehypeStringify)
         .process(matterResult.content)
     const contentHtml = processedContent.toString()
+    const tags = matterResult.data.tags?.split(' ') || [];
 
     // Combine the data with the id and contentHtml
+    // noinspection CommaExpressionJS
     return {
         id,
         contentHtml,
-        ...(matterResult.data as { date: string; title: string })
-    }
+        ...(matterResult.data as { date: string; title: string },
+        tags)
+    } as any as PostData;
 }
