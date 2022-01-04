@@ -1,18 +1,27 @@
 import Layout from '../../components/layout'
-import { getAllPostIds, getPostData } from '../../lib/posts'
+import PostData, { getAllPostIds, getPostData } from '../../lib/posts'
 import Head from 'next/head'
 import Date from '../../components/date'
 import utilStyles from '../../styles/utils.module.css'
 import { GetStaticProps, GetStaticPaths } from 'next'
+import styled from "@emotion/styled";
+
+const Tag = styled.span`
+  display: inline-block;
+  border-color: var(--color-primary);
+  border: 1px solid;
+  padding: 8px 16px;
+  margin: 0 8px;
+`;
+
+const TagContainer = styled.div`
+  margin-top: 3rem;
+`;
 
 export default function Post({
          postData
      }: {
-    postData: {
-        title: string
-        date: string
-        contentHtml: string
-    }
+    postData: PostData
 }) {
     return (
         <Layout>
@@ -25,6 +34,12 @@ export default function Post({
                     <Date dateString={postData.date} />
                 </div>
                 <div dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+                {!!postData.tags && (
+                    <TagContainer>
+                        {postData.tags.map(t =>
+                            <Tag key={t}>#{t}</Tag>)}
+                    </TagContainer>
+                )}
             </article>
         </Layout>
     )
