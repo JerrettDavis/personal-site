@@ -9,16 +9,45 @@ import dynamic from "next/dynamic";
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
 
+export enum PageType {
+    Home,
+    BlogPost
+}
+
 const ThemeToggle = dynamic(() => import('../components/themeToggle'), {
     ssr: false,
 });
 
+const HomeLink = () => (
+    <div className={styles.backTo}>
+        <Link href="/">
+            <a>← Back to home</a>
+        </Link>
+    </div>
+);
+
+const BlogLink = () => (
+    <div className={styles.backTo}>
+        <Link href="/blog">
+            <a>← Back to blog</a>
+        </Link>
+    </div>
+);
+
+const GoBackToLink = (props) => {
+    if (props.pageType == PageType.Home)
+        return (<></>);
+    if (props.pageType == PageType.BlogPost)
+        return (<BlogLink />);
+    return (<HomeLink />);
+};
+
 export default function Layout({
        children,
-       home
+       pageType
    }: {
     children: React.ReactNode
-    home?: boolean
+    pageType?: PageType
 }) {
     return (
         <div>
@@ -60,13 +89,7 @@ export default function Layout({
             </div>
             <div className={styles.container}>
                 <main>{children}</main>
-                {!home && (
-                    <div className={styles.backToHome}>
-                        <Link href="/">
-                            <a>← Back to home</a>
-                        </Link>
-                    </div>
-                )}
+                 <GoBackToLink pageType={pageType}  />
             </div>
 
         </div>

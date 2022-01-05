@@ -17,6 +17,7 @@ export default interface PostData {
     title: string;
     date: string;
     useToc: boolean | undefined | null
+    wordCount: number;
     contentHtml: string;
     tags: string[] | undefined | null;
 }
@@ -62,12 +63,21 @@ export function getAllPostIds() {
     })
 }
 
+    function multiSplit(str, seps) {
+    return seps.reduce((seg, sep) => seg.reduce(
+        (out, seg) => out.concat(seg.split(sep)), []
+    ), [str]).filter(x => x);
+}
+
 export async function getPostData(id: string): Promise<PostData> {
     const fullPath = path.join(postsDirectory, `${id}.md`)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
 
     // Use gray-matter to parse the post metadata section
     const matterResult = matter(fileContents)
+    const wordCount = multiSplit(matterResult.content, [' ', '\n'])
+        .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
+        .length;
 
     // Use remark to convert markdown into HTML string
     let builder = unified()
@@ -93,6 +103,7 @@ export async function getPostData(id: string): Promise<PostData> {
         id,
         contentHtml,
         ...(matterResult.data as { date: string; title: string },
+        wordCount,
         tags)
     } as any as PostData;
 }
