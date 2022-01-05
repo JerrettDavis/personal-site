@@ -3,20 +3,24 @@ body[data-theme="light"] {
     --color-primary: #008bab;
     --color-text-primary: #27201a;
     --color-text-secondary: #008bab;
+    --color-text-deemphasized: #555577;
     --color-link: #ab1fdd;
     --color-bg-primary: #fff;
     --color-bg-toggle: #008bab;
     --color-bg-thumb: white;
+    --color-border: #ccccee;
 }
 
 body[data-theme="dark"] {
     --color-primary: #247ba0;
     --color-text-primary: #e3e3e3;
     --color-text-secondary: #247ba0;
+    --color-text-deemphasized: #aaaacc;
     --color-link: #b47aee;
     --color-bg-primary: #0a1720;
     --color-bg-toggle: #2f3334;
-    --color-bg-thumb: #247ba0
+    --color-bg-thumb: #247ba0;
+    --color-border: #333365;
 }
 
 html,
@@ -56,4 +60,9 @@ img {
 
 .hljs {
     font-size: 14px;
+}
+
+.toc {
+    margin: 8px 0;
+    border: 1px solid var(--color-border);
 }

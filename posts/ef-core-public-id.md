@@ -1,6 +1,7 @@
 ---
 title: 'Simple Public ID Generation in EF Core'
 date: '2021-12-27'
+useToc: true
 ---
 
 # Background

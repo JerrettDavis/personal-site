@@ -1,22 +1,17 @@
 import Head from 'next/head'
-import Layout from '../components/layout'
+import Layout, {PageType} from '../components/layout'
 import utilStyles from '../styles/utils.module.css'
 import {getSortedPostsData} from '../lib/posts'
 import Link from 'next/link'
 import {GetStaticProps} from 'next'
-import dynamic from "next/dynamic";
 import styles from "../components/layout.module.css";
 import Image from "next/image";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub, faLinkedin} from "@fortawesome/free-brands-svg-icons";
 
-const ThemeToggle = dynamic(() => import('../components/themeToggle'), {
-    ssr: false,
-});
-
 export default function Home() {
     return (
-        <Layout home>
+        <Layout pageType={PageType.Home}>
             <Head>
                 <title>Jerrett Davis - The Overengineer</title>
             </Head>
