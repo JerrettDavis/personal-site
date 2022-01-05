@@ -2,16 +2,21 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 import {unified} from 'unified'
+import remarkCapitalize from 'remark-capitalize';
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
+import rehypeFormat from "rehype-format";
 import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from "rehype-slug";
 import rehypeStringify from 'rehype-stringify'
+import rehypeToc from '@jsdevtools/rehype-toc';
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
 export default interface PostData {
     title: string;
     date: string;
+    useToc: boolean | undefined | null
     contentHtml: string;
     tags: string[] | undefined | null;
 }
@@ -65,13 +70,21 @@ export async function getPostData(id: string): Promise<PostData> {
     const matterResult = matter(fileContents)
 
     // Use remark to convert markdown into HTML string
-    const processedContent = await unified()
+    let builder = unified()
         .use(remarkParse)
         .use(remarkRehype)
+        .use(remarkCapitalize)
         .use(rehypeHighlight)
-        .use(rehypeStringify)
-        .process(matterResult.content)
-    const contentHtml = processedContent.toString()
+        .use(rehypeSlug);
+
+    if (!!matterResult.data.useToc)
+        builder = builder.use(rehypeToc);
+
+    const processedContent = await builder.use(rehypeStringify)
+        .use(rehypeFormat)
+        .process(matterResult.content);
+
+    const contentHtml = processedContent.toString();
     const tags = matterResult.data.tags?.split(' ') || [];
 
     // Combine the data with the id and contentHtml
