@@ -21,7 +21,7 @@ const ThemeToggle = dynamic(() => import('../components/themeToggle'), {
 const HomeLink = () => (
     <div className={styles.backTo}>
         <Link href="/">
-            <a>← Back to home</a>
+            ← Back to home
         </Link>
     </div>
 );
@@ -29,7 +29,7 @@ const HomeLink = () => (
 const BlogLink = () => (
     <div className={styles.backTo}>
         <Link href="/blog">
-            <a>← Back to blog</a>
+            ← Back to blog
         </Link>
     </div>
 );
