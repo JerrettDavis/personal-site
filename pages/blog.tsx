@@ -12,6 +12,7 @@ export default function Blog({
     allPostsData: {
         date: string
         title: string
+        stub: string
         id: string
     }[]
 }) {
@@ -41,7 +42,7 @@ export default function Blog({
                 <section>
                     <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
                     <ul className={utilStyles.list}>
-                        {allPostsData.map(({ id, date, title }) => (
+                        {allPostsData.map(({ id, stub, date, title }) => (
                             <li className={utilStyles.listItem} key={id}>
                                 <Link href={`/posts/${id}`}>
                                     {title}
@@ -50,6 +51,8 @@ export default function Blog({
                                 <small className={utilStyles.lightText}>
                                     <Date dateString={date} />
                                 </small>
+                                <br />
+                                <div>{stub}</div>
                             </li>
                         ))}
                     </ul>

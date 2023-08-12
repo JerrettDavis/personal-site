@@ -10,6 +10,8 @@ import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from 'rehype-stringify'
 import rehypeToc from '@jsdevtools/rehype-toc';
+import strip from 'strip-markdown'
+import {remark} from "remark";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -35,15 +37,19 @@ export function getSortedPostsData() {
 
         // Use gray-matter to parse the post metadata section
         const matterResult = matter(fileContents)
+        let content = remark()
+            .use(strip)
+            .processSync(matterResult.content);
 
         // Combine the data with the id
         return {
             id,
+            stub: content.toString().substring(0, 160) + '...',
             ...(matterResult.data as { date: string; title: string })
         }
     })
     // Sort posts by date
-    return allPostsData.sort((a, b) => {
+    return allPostsData.sort( (a, b) => {
         if (a.date < b.date) {
             return 1
         } else {
@@ -100,10 +106,10 @@ export async function getPostData(id: string): Promise<PostData> {
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
     return {
-        id,
-        contentHtml,
-        ...(matterResult.data as { date: string; title: string },
-        wordCount,
-        tags)
-    } as any as PostData;
+        id: id,
+        contentHtml: contentHtml,
+        ...(matterResult.data as { date: string; title: string }),
+        wordCount: wordCount,
+        tags: tags
+} as any as PostData;
 }
