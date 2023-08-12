@@ -61,6 +61,7 @@ export default function Post({
      }: {
     postData: PostData
 }) {
+    console.log(postData);
     return (
         <Layout pageType={PageType.BlogPost}>
             <Head>
@@ -75,7 +76,7 @@ export default function Post({
                         Published on <BoldString><Date dateString={postData.date} /></BoldString>
                     </PublishedOnBox>
                     <ReadingTimeRow className={utilStyles.lightText}>
-                        <span>Word Count: <BoldString>{postData.wordCount.toLocaleString()}</BoldString></span>
+                        <span>Word Count: <BoldString>{postData.wordCount?.toLocaleString()}</BoldString></span>
                         <ReadingTimeDisplay>
                             <FontAwesomeIcon height={14} width={14} icon={faClock} /> <ReadingTime wordCount={postData.wordCount} /> min read
                         </ReadingTimeDisplay>
