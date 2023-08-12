@@ -106,10 +106,10 @@ export async function getPostData(id: string): Promise<PostData> {
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
     return {
-        id,
-        contentHtml,
-        ...(matterResult.data as { date: string; title: string },
-        wordCount,
-        tags)
-    } as any as PostData;
+        id: id,
+        contentHtml: contentHtml,
+        ...(matterResult.data as { date: string; title: string }),
+        wordCount: wordCount,
+        tags: tags
+} as any as PostData;
 }
