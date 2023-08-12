@@ -16,19 +16,17 @@ export default function Home() {
                 <title>Jerrett Davis - The Overengineer</title>
             </Head>
             <header className={styles.header}>
-                <Link href="/about-me">
-                    <a title="Go to my About Me page" aria-label="Go to my About Me page">
-                        <div className={styles.profileContainer}>
-                            <Image
-                                priority
-                                src="/images/profile.png"
-                                className={`${utilStyles.borderCircle} ${styles.profilePic}`}
-                                height={144}
-                                width={144}
-                                alt={'Photo of Jerrett Davis'}
-                            />
-                        </div>
-                    </a>
+                <Link href="/about-me" title="Go to my About Me page" aria-label="Go to my About Me page">
+                    <div className={styles.profileContainer}>
+                        <Image
+                            priority
+                            src="/images/profile.png"
+                            className={`${utilStyles.borderCircle} ${styles.profilePic}`}
+                            height={144}
+                            width={144}
+                            alt={'Photo of Jerrett Davis'}
+                        />
+                    </div>
                 </Link>
                 <h1 className={utilStyles.heading2Xl}>Jerrett Davis</h1>
                 <div className={styles.largeSocialRow}>
