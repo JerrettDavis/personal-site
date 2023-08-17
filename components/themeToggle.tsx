@@ -5,6 +5,7 @@ const ToggleButton = styled.button`
   --toggle-width: 64px;
   --toggle-height: 32px;
   --toggle-padding: 4px;
+  color: var(--color-text-primary);
   position: relative;
   display: flex;
   align-items: center;

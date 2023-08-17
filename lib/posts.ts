@@ -16,21 +16,22 @@ import {formatTags} from "./tags";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
-export default interface PostData {
-    title: string;
-    date: string;
+export default interface PostData extends PostBase {
     useToc: boolean | undefined | null
     wordCount: number;
     contentHtml: string;
-    tags: string[] | undefined | null;
 }
 
-export interface PostSummary {
-    title: string;
-    date: string;
+export interface PostSummary extends PostBase {
     id: string;
     stub: string;
-    tags: string[] | undefined | null;
+}
+
+interface PostBase {
+    title: string;
+    date: string;
+    tags?: string[] | undefined | null;
+    categories?: string[] | undefined | null;
 }
 
 export async function getSortedPostsData(): Promise<PostSummary[]> {
@@ -64,13 +65,26 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
 export async function getAllPostIds() {
     const fileNames = await fs.readdir(postsDirectory)
     return fileNames.map(fileName => {
+export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
+    return (await fs.readdir(postsDirectory))
+        .map(fileName => {
         return {
             params: {
                 id: fileName.replace(/\.md$/, '')
             }
         }
-    })
+    });
 }
+
+function multiSplit(str, seps) {
+export const getAllPostMetadata = async () : Promise<matter.GrayMatterFile<string>[]> =>
+    await Promise.all(
+        (await fs.readdir(postsDirectory))
+            .map(async (fileName: string) => {
+                const fullPath: string = path.join(postsDirectory, fileName);
+                const fileContents: string = await fs.readFile(fullPath, 'utf8');
+                return matter(fileContents);
+            }));
 
 function multiSplit(str, seps) {
     return seps.reduce((seg, sep) => seg.reduce(

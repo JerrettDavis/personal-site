@@ -60,6 +60,10 @@ export default function Home() {
     )
 }
 
+export default interface BaseProps<TModel> {
+    props: TModel
+}
+
 export const getStaticProps: GetStaticProps = async () => {
     const allPostsData = await getSortedPostsData()
     return {
