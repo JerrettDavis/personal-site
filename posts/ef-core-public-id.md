@@ -2,6 +2,8 @@
 title: 'Simple Public ID Generation in EF Core'
 date: '2021-12-27'
 useToc: true
+tags: ['csharp', 'dotnet', 'ef-core', 'entity-framework', 'entity-framework-core', 'programming', 'coding']
+categories: ['Programming', 'Programming/Architecture']
 ---
 
 # Background

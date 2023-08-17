@@ -60,5 +60,5 @@
 }
 
 .lightText {
-    color: #666;
+    color: var(--color-text-deemphasized);
 }
