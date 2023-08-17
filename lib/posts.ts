@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
 import {unified} from 'unified'
@@ -12,6 +12,7 @@ import rehypeStringify from 'rehype-stringify'
 import rehypeToc from '@jsdevtools/rehype-toc';
 import strip from 'strip-markdown'
 import {remark} from "remark";
+import {formatTags} from "./tags";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -24,42 +25,44 @@ export default interface PostData {
     tags: string[] | undefined | null;
 }
 
-export function getSortedPostsData() {
-    // Get file names under /posts
-    const fileNames = fs.readdirSync(postsDirectory)
-    const allPostsData = fileNames.map(fileName => {
-        // Remove ".md" from file name to get id
-        const id = fileName.replace(/\.md$/, '')
-
-        // Read markdown file as string
-        const fullPath = path.join(postsDirectory, fileName)
-        const fileContents = fs.readFileSync(fullPath, 'utf8')
-
-        // Use gray-matter to parse the post metadata section
-        const matterResult = matter(fileContents)
-        let content = remark()
-            .use(strip)
-            .processSync(matterResult.content);
-
-        // Combine the data with the id
-        return {
-            id,
-            stub: content.toString().substring(0, 160) + '...',
-            ...(matterResult.data as { date: string; title: string })
-        }
-    })
-    // Sort posts by date
-    return allPostsData.sort( (a, b) => {
-        if (a.date < b.date) {
-            return 1
-        } else {
-            return -1
-        }
-    })
+export interface PostSummary {
+    title: string;
+    date: string;
+    id: string;
+    stub: string;
+    tags: string[] | undefined | null;
 }
 
-export function getAllPostIds() {
-    const fileNames = fs.readdirSync(postsDirectory)
+export async function getSortedPostsData(): Promise<PostSummary[]> {
+    // Get file names under /posts
+    const fileNames: string[] = await fs.readdir(postsDirectory)
+    const allPostsData: PostSummary[] = await Promise.all(
+        fileNames.map(async (fileName) => {
+            const id = fileName.replace(/\.md$/, '');
+            const fullPath = path.join(postsDirectory, fileName);
+            const fileContents = await fs.readFile(fullPath, 'utf8');
+            const matterResult = matter(fileContents);
+            const content = remark()
+                .use(strip)
+                .processSync(matterResult.content)
+                .toString()
+                .substring(0, 160) + '...';
+            const tags = formatTags(matterResult.data.tags);
+
+            return {
+                id,
+                stub: content,
+                ...(matterResult.data as { date: string; title: string }),
+                tags: tags,
+            };
+        })
+    );
+
+    return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export async function getAllPostIds() {
+    const fileNames = await fs.readdir(postsDirectory)
     return fileNames.map(fileName => {
         return {
             params: {
@@ -69,7 +72,7 @@ export function getAllPostIds() {
     })
 }
 
-    function multiSplit(str, seps) {
+function multiSplit(str, seps) {
     return seps.reduce((seg, sep) => seg.reduce(
         (out, seg) => out.concat(seg.split(sep)), []
     ), [str]).filter(x => x);
@@ -77,7 +80,7 @@ export function getAllPostIds() {
 
 export async function getPostData(id: string): Promise<PostData> {
     const fullPath = path.join(postsDirectory, `${id}.md`)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
+    const fileContents = await fs.readFile(fullPath, 'utf8')
 
     // Use gray-matter to parse the post metadata section
     const matterResult = matter(fileContents)
@@ -101,7 +104,7 @@ export async function getPostData(id: string): Promise<PostData> {
         .process(matterResult.content);
 
     const contentHtml = processedContent.toString();
-    const tags = matterResult.data.tags?.split(' ') || [];
+    const tags = formatTags(matterResult.data.tags);
 
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
@@ -111,5 +114,5 @@ export async function getPostData(id: string): Promise<PostData> {
         ...(matterResult.data as { date: string; title: string }),
         wordCount: wordCount,
         tags: tags
-} as any as PostData;
+    } as any as PostData;
 }
