@@ -7,6 +7,8 @@ import {GetStaticProps} from "next";
 import {getSortedPostsData, PostSummary} from "../../lib/posts";
 import styled from "@emotion/styled";
 import {getSortedTagsData, TagData} from "../../lib/tags";
+import {Category, getAllCategories} from "../../lib/categories";
+import BaseProps from "../index";
 
 const Tag = styled.div`
   display: inline-block;
@@ -21,13 +23,13 @@ const BlogContent = styled.div`
   flex-direction: row;
 `;
 
-const TagListContainer = styled.div`
+const RightListContainer = styled.div`
   margin-left: 32px;
   font-size: 0.8em;
   flex-grow: 1;
 `;
 
-const TagListItem = styled.li`
+const RightListItem = styled.li`
   margin: 0 0 8px 0;
   white-space: nowrap;
 `;
@@ -35,11 +37,9 @@ const TagListItem = styled.li`
 export default function Index(
     {
         postSummaries,
-        allTagData
-    }: {
-        postSummaries: PostSummary[],
-        allTagData: TagData[]
-    }) {
+        tags,
+        categories
+    }: BlogIndexPropsModel) {
     return (
         <Layout>
             <Head>
@@ -93,35 +93,81 @@ export default function Index(
                             ))}
                         </ul>
                     </section>
-                    { !!allTagData
-                        ?  <TagListContainer>
-                        <h2 className={utilStyles.headingLg}>Tags</h2>
-                        <ul className={utilStyles.list}>
-                            {allTagData.map((tag) => (
-                                <TagListItem className={utilStyles.listItem} key={tag.tagName}>
-                                    <Link href={`/blog/tags/${tag.tagName}`}>
-                                        #{tag.tagName}
-                                    </Link>
-                                </TagListItem>
-                            ))}
-                        </ul>
-                    </TagListContainer>
+                    {!!tags || !!categories
+                        ?
+                        <RightListContainer>
+                            {createTagsIfPresent(tags)}
+                            {createCategoriesIfPresent(categories)}
+                        </RightListContainer>
                         : <></>
                     }
                 </BlogContent>
-
             </section>
         </Layout>
     )
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
+    if (!!tags) {
+        return (
+            <div>
+                <h2 className={utilStyles.headingLg}>Tags</h2>
+                <ul className={utilStyles.list}>
+                    {tags.map((tag) => (
+                        <RightListItem className={utilStyles.listItem} key={tag.tagName}>
+                            <Link href={`/blog/tags/${tag.tagName}`}>
+                                #{tag.tagName}
+                            </Link>
+                        </RightListItem>
+                    ))}
+                </ul>
+            </div>
+        );
+    } else {
+        return <></>;
+    }
+}
+
+const createCategoriesIfPresent = (categories?: Category[] | null | undefined) => {
+    if(!!categories) {
+        return (
+            <div>
+                <h2 className={utilStyles.headingLg}>Categories</h2>
+                <ul className={utilStyles.list}>
+                    {categories.map((category) => (
+                        <RightListItem className={utilStyles.listItem} key={category.categoryName}>
+                            <Link href={`/blog/categories/${category.categoryPath}`}>
+                                {category.categoryName} ({category.count})
+                            </Link>
+                        </RightListItem>
+                    ))}
+                </ul>
+            </div>
+        );
+    } else {
+        return <></>;
+    }
+}
+
+interface BlogIndexPropsModel {
+    postSummaries: PostSummary[],
+    tags: TagData[],
+    categories: Category[],
+}
+
+interface BlogIndexProps extends BaseProps<BlogIndexPropsModel> {
+}
+
+
+export const getStaticProps: GetStaticProps = async (): Promise<BlogIndexProps> => {
     const postSummaries = await getSortedPostsData()
-    const allTagData = await getSortedTagsData()
+    const tags = await getSortedTagsData()
+    const categories = await getAllCategories();
     return {
         props: {
             postSummaries: postSummaries,
-            allTagData: allTagData
+            tags: tags,
+            categories: categories
         }
-    }
+    };
 }

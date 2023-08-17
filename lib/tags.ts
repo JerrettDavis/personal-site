@@ -1,7 +1,5 @@
 import path from "path";
-import fs from "fs/promises";
-import matter, {GrayMatterFile} from "gray-matter";
-import {getSortedPostsData, PostSummary} from "./posts";
+import {getAllPostMetadata, getSortedPostsData, PostSummary} from "./posts";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -15,25 +13,24 @@ export interface TagData {
     tagName: string;
 }
 
+const getAllTags = async (): Promise<string[]> =>
+    (await getAllPostMetadata())
+        .flatMap(m => formatTags(m.data.tags));
+
 export async function getSortedTagsData(): Promise<TagData[]> {
-    const fileNames: string[] = await fs.readdir(postsDirectory);
-    const tags: string[] = (await Promise.all(
-        fileNames.map(async (fileName: string) => {
-            const fullPath: string = path.join(postsDirectory, fileName);
-            const fileContents: string = await fs.readFile(fullPath, 'utf8');
-            const matterResult: GrayMatterFile<string> = matter(fileContents);
-            return formatTags(matterResult.data.tags);
-        })))
-        .flat();
-    return Array.from(new Set(tags)).map((t: string) => <TagData>{ tagName: t });
+    return (await getAllTags()).map((tag: string) => {
+        return {
+            tagName: tag
+        }
+    });
 }
 
 export async function getAllTagIds() {
-    const tags: TagData[] = await getSortedTagsData();
-    return tags.map((tag: TagData) => {
+    const tags: string[] = await getAllTags();
+    return tags.map((tag: string) => {
         return {
             params: {
-                tag: tag.tagName
+                tag: tag
             }
         }
     })
