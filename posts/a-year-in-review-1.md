@@ -1,7 +1,8 @@
 ---
 title: 'A Year in Review'
 date: '2023-08-13'
-tags: 'personal coding-challenge'
+tags: ['personal', 'life-update', 'coding-challenge']
+categories: ['Personal']
 ---
 
 2022 (and much of 2023) was a massive period of change. I started the year off with the intention of writing code every 
