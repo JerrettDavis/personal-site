@@ -1,16 +1,15 @@
-import {getAllPostMetadata} from "./posts";
+import {getAllPostMetadata, getSortedPostsData, PostSummary} from "./posts";
 
 
 export interface Category {
     categoryName: string;
     categoryPath: string;
     count: number;
-    categories: Category[];
 }
 
 const getAllRawCategories = async (): Promise<string[]> =>
     (await getAllPostMetadata())
-        .flatMap(m=> <string[]>m.data.categories);
+        .flatMap(m => <string[]>m.data.categories);
 
 export const getAllCategories = async (): Promise<Category[]> => {
     const categoryCounts: any = (await getAllRawCategories())
@@ -20,12 +19,10 @@ export const getAllCategories = async (): Promise<Category[]> => {
         }, {});
     const categories = Object.keys(categoryCounts);
     return categories.map((categoryName: string) => {
-        const categoryParts: string[] = categoryName.split('/');
         return {
-            categoryName: categoryName, //categoryParts[categoryParts.length - 1],
+            categoryName: categoryName,
             categoryPath: getCategoryPath(categoryName),
-            count: categoryCounts[categoryName],
-            categories: []
+            count: categoryCounts[categoryName]
         };
     });
 }
@@ -39,3 +36,9 @@ const getCategoryPath = (categoryName: string): string =>
     categoryName
         .toLowerCase()
         .replace(' ', '-');
+
+export async function getPostsForCategory(category: string): Promise<PostSummary[]> {
+    const postData = (await getSortedPostsData());
+    return postData
+        .filter((p: PostSummary) => p.categories.find((c: string) => c.toLowerCase() === category.toLowerCase()));
+}

@@ -12,9 +12,9 @@ import BaseProps from "../index";
 
 const Tag = styled.div`
   display: inline-block;
-  color: var(--color-text-deemphasized);
-  padding: 0 4px 8px 0;
-  margin: 0 8px 4px 0;
+  color: var(--color-link-deemphasized);
+  padding-right: 4px;
+  margin-right: 8px;
   font-size: .7em;
 `;
 

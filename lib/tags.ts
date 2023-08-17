@@ -1,7 +1,4 @@
-import path from "path";
 import {getAllPostMetadata, getSortedPostsData, PostSummary} from "./posts";
-
-const postsDirectory = path.join(process.cwd(), 'posts')
 
 export const formatTags = (tags: string[] | string | undefined | null): string[] => {
     if (tags === undefined || tags === null) return [];
@@ -14,8 +11,8 @@ export interface TagData {
 }
 
 const getAllTags = async (): Promise<string[]> =>
-    (await getAllPostMetadata())
-        .flatMap(m => formatTags(m.data.tags));
+    Array.from(new Set((await getAllPostMetadata())
+        .flatMap(m => formatTags(m.data.tags))));
 
 export async function getSortedTagsData(): Promise<TagData[]> {
     return (await getAllTags()).map((tag: string) => {

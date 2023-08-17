@@ -1,13 +1,12 @@
 import {GetStaticPaths, GetStaticProps} from "next";
 import {PostSummary} from "../../../lib/posts";
-import {getAllTagIds, getPostsForTag} from "../../../lib/tags";
 import Layout, {PageType} from "../../../components/layout";
 import Head from "next/head";
 import utilStyles from "../../../styles/utils.module.css";
 import Link from "next/link";
 import Date from "../../../components/date";
 import styled from "@emotion/styled";
-import {Category, getAllCategories, getCategoryData} from "../../../lib/categories";
+import {Category, getAllCategories, getCategoryData, getPostsForCategory} from "../../../lib/categories";
 
 
 const Tag = styled.div`
@@ -18,24 +17,25 @@ const Tag = styled.div`
   font-size: .7em;
 `;
 
-export default function PostCategory({
-    category,
-    categoryData,
-    postData
-}: {
-    category: string,
-    categoryData: Category,
-    postData: PostSummary[]
-}) {
+export default function PostCategory(
+    {
+        categoryData,
+        postData
+    }: {
+        categoryData: Category,
+        postData: PostSummary[]
+    }) {
+    const shortName = categoryData.categoryName.split('/').pop();
+    const title = `Posts in ${shortName} - the overengineer. - Jerrett Davis`;
     return (
         <Layout pageType={PageType.BlogPost}>
             <Head>
-                <title>Posts in category {categoryData.categoryName} - the overengineer. - Jerrett Davis</title>
+                <title>{title}</title>
             </Head>
             <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
                 <h1>the overengineer.</h1>
                 <section>
-                    <h2 className={utilStyles.headingLg}>Most Recent Posts in {categoryData.categoryName}</h2>
+                    <h2 className={utilStyles.headingLg}>Most Recent Posts in {shortName}</h2>
                     <ul className={utilStyles.list}>
                         {!!postData && postData.map(({id, stub, date, title, tags}) => (
                             <li className={utilStyles.listItem} key={id}>
@@ -51,12 +51,13 @@ export default function PostCategory({
                                 <div>
                                     {tags.map((t) => (
                                         <Link href={`/blog/categories/${t}`} key={t}>
-                                            <Tag key={t}>#{t}</Tag>
+                                            <Tag>#{t}</Tag>
                                         </Link>
                                     ))}
                                 </div>
                             </li>
                         ))}
+                        {(!postData || postData.length === 0) && <li>No posts found in this category.</li>}
                     </ul>
                 </section>
             </section>
@@ -81,14 +82,13 @@ export const getStaticPaths: GetStaticPaths = async () => {
     }
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const postData = null;
+export const getStaticProps: GetStaticProps = async ({params}) => {
+    const postData = await getPostsForCategory((params.category as string[]).join('/'));
     const categoryData = await getCategoryData((params.category as string[]).join('/'));
     return {
         props: {
-            category: params.category,
             categoryData: categoryData,
-            postData
+            postData: postData
         }
     }
 }
