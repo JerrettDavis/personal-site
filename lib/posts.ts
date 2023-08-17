@@ -62,9 +62,6 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
     return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export async function getAllPostIds() {
-    const fileNames = await fs.readdir(postsDirectory)
-    return fileNames.map(fileName => {
 export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
     return (await fs.readdir(postsDirectory))
         .map(fileName => {
@@ -76,7 +73,6 @@ export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
     });
 }
 
-function multiSplit(str, seps) {
 export const getAllPostMetadata = async () : Promise<matter.GrayMatterFile<string>[]> =>
     await Promise.all(
         (await fs.readdir(postsDirectory))
