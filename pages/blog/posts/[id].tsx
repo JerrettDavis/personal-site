@@ -1,12 +1,13 @@
-import Layout, {PageType} from '../../components/layout'
-import PostData, {getAllPostIds, getPostData} from '../../lib/posts'
+import Layout, {PageType} from '../../../components/layout'
+import PostData, {getAllPostIds, getPostData} from '../../../lib/posts'
 import Head from 'next/head'
-import Date from '../../components/date'
-import utilStyles from '../../styles/utils.module.css'
+import Date from '../../../components/date'
+import utilStyles from '../../../styles/utils.module.css'
 import {GetStaticPaths, GetStaticProps} from 'next'
 import styled from "@emotion/styled";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faClock} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 const Tag = styled.div`
   display: inline-block;
@@ -87,7 +88,9 @@ export default function Post({
                 {!!postData.tags && (
                     <TagContainer>
                         {postData.tags.map(t =>
-                            <Tag key={t}>#{t}</Tag>)}
+                            <Link href={`/blog/tags/${t}`} key={t}>
+                                <Tag>#{t}</Tag>
+                            </Link>)}
                     </TagContainer>
                 )}
             </article>
@@ -96,7 +99,7 @@ export default function Post({
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const paths = getAllPostIds()
+    const paths = await getAllPostIds()
     return {
         paths,
         fallback: false

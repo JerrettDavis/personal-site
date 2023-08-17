@@ -1,7 +1,7 @@
 ---
 title: '365 Days of Code - Week 1'
 date: '2022-01-02'
-tags: 'coding coding-challenge'
+tags: ['coding', 'coding-challenge']
 ---
 
 In many hobbyist communities, there's often a rally at the beginning of the year to participate in some sort of `365 Days of X`. For example, in photography communities they often advocate for photographers to participate in `365 Photo Challenge`, where participants are asked to take a unique, interesting photo once a day, every day, for an entire year. Now on its surface, this seems like a rather mundane task, but participants of these challenges will attest that they're anything but!
