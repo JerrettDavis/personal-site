@@ -9,6 +9,7 @@ import styled from "@emotion/styled";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
+import Image from "next/image";
 
 const Tag = styled.div`
   display: inline-block;
@@ -21,6 +22,21 @@ const Tag = styled.div`
 const BlogContent = styled.div`
   display: flex;
   flex-direction: row;
+`;
+
+const PostContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const PostContent = styled.div`
+  flex: 2 1 auto;
+`;
+
+const FeatureImageContainer = styled.div`
+  flex: 1 1 auto;
+  width: 100%;
+  position: relative;
 `;
 
 const RightListContainer = styled.div`
@@ -71,24 +87,32 @@ export default function Index(
                     <section>
                         <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
                         <ul className={utilStyles.list}>
-                            {postSummaries.map(({id, stub, date, title, tags}) => (
+                            {postSummaries.map(({id, stub, date, title,featured, tags}) => (
                                 <li className={utilStyles.listItem} key={id}>
-                                    <Link href={`/blog/posts/${id}`}>
-                                        {title}
-                                    </Link>
-                                    <br/>
-                                    <small className={utilStyles.lightText}>
-                                        <Date dateString={date}/>
-                                    </small>
-                                    <br/>
-                                    <div>{stub}</div>
-                                    <div>
-                                        {tags.map((t) => (
-                                            <Link href={`/blog/tags/${t}`} key={t}>
-                                                <Tag key={t}>#{t}</Tag>
+                                    <PostContainer>
+                                        <PostContent>
+                                            <Link href={`/blog/posts/${id}`}>
+                                                {title}
                                             </Link>
-                                        ))}
-                                    </div>
+                                            <br/>
+                                            <small className={utilStyles.lightText}>
+                                                <Date dateString={date}/>
+                                            </small>
+                                            <br/>
+                                            <div>{stub}</div>
+                                            <div>
+                                                {tags.map((t) => (
+                                                    <Link href={`/blog/tags/${t}`} key={t}>
+                                                        <Tag key={t}>#{t}</Tag>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </PostContent>
+                                        <FeatureImageContainer style={{position:'relative'}}>
+                                            {!!featured && <Image src={featured} alt="Featured Image for the Post" fill />}
+                                            {!featured && <div style={{height: '100%', width: '100px', backgroundColor: 'var(--color-bg-deemphasized)'}}></div>}
+                                        </FeatureImageContainer>
+                                    </PostContainer>
                                 </li>
                             ))}
                         </ul>
