@@ -8,6 +8,7 @@ import styled from "@emotion/styled";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faClock} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import Image from "next/image";
 
 const Tag = styled.div`
   display: inline-block;
@@ -70,7 +71,14 @@ export default function Post({
             </Head>
             <article>
                 <h1 className={utilStyles.headingXl}>{postData.title}</h1>
-
+                {postData.featured && (
+                    <Image
+                        width={940}
+                        height={470}
+                        src={postData.featured}
+                        alt={postData.title}
+                    />
+                )}
                 <ArticleInfoContainer>
                     <AuthorName>{author}</AuthorName>
                     <PublishedOnBox className={utilStyles.lightText}>

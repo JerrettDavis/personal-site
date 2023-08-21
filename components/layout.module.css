@@ -4,6 +4,13 @@
     margin: .5rem auto 6rem;
 }
 
+@media screen and (min-width: 64rem) {
+    .container {
+        max-width: 64rem;
+        padding: 4rem 1rem;
+    }
+}
+
 .topActions, .topActions a {
     width: 100%;
     padding: 4px 8px;
