@@ -7,6 +7,7 @@ import Link from "next/link";
 import Date from "../../../components/date";
 import styled from "@emotion/styled";
 import {Category, getAllCategories, getCategoryData, getPostsForCategory} from "../../../lib/categories";
+import PostSummaries from "../../../components/postSummaries";
 
 
 const Tag = styled.div`
@@ -36,29 +37,7 @@ export default function PostCategory(
                 <h1>the overengineer.</h1>
                 <section>
                     <h2 className={utilStyles.headingLg}>Most Recent Posts in {shortName}</h2>
-                    <ul className={utilStyles.list}>
-                        {!!postData && postData.map(({id, stub, date, title, tags}) => (
-                            <li className={utilStyles.listItem} key={id}>
-                                <Link href={`/blog/posts/${id}`}>
-                                    {title}
-                                </Link>
-                                <br/>
-                                <small className={utilStyles.lightText}>
-                                    <Date dateString={date}/>
-                                </small>
-                                <br/>
-                                <div>{stub}</div>
-                                <div>
-                                    {tags.map((t) => (
-                                        <Link href={`/blog/categories/${t}`} key={t}>
-                                            <Tag>#{t}</Tag>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </li>
-                        ))}
-                        {(!postData || postData.length === 0) && <li>No posts found in this category.</li>}
-                    </ul>
+                    <PostSummaries postSummaries={postData} />
                 </section>
             </section>
         </Layout>

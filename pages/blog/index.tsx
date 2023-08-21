@@ -2,41 +2,17 @@ import Layout from "../../components/layout";
 import Head from "next/head";
 import utilStyles from "../../styles/utils.module.css";
 import Link from "next/link";
-import Date from "../../components/date";
 import {GetStaticProps} from "next";
 import {getSortedPostsData, PostSummary} from "../../lib/posts";
 import styled from "@emotion/styled";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
-import Image from "next/image";
-
-const Tag = styled.div`
-  display: inline-block;
-  color: var(--color-link-deemphasized);
-  padding-right: 4px;
-  margin-right: 8px;
-  font-size: .7em;
-`;
+import PostSummaries from "../../components/postSummaries";
 
 const BlogContent = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const PostContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const PostContent = styled.div`
-  flex: 2 1 auto;
-`;
-
-const FeatureImageContainer = styled.div`
-  flex: 1 1 auto;
-  width: 100%;
-  position: relative;
 `;
 
 const RightListContainer = styled.div`
@@ -86,42 +62,14 @@ export default function Index(
                 <BlogContent>
                     <section>
                         <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
-                        <ul className={utilStyles.list}>
-                            {postSummaries.map(({id, stub, date, title,featured, tags}) => (
-                                <li className={utilStyles.listItem} key={id}>
-                                    <PostContainer>
-                                        <PostContent>
-                                            <Link href={`/blog/posts/${id}`}>
-                                                {title}
-                                            </Link>
-                                            <br/>
-                                            <small className={utilStyles.lightText}>
-                                                <Date dateString={date}/>
-                                            </small>
-                                            <br/>
-                                            <div>{stub}</div>
-                                            <div>
-                                                {tags.map((t) => (
-                                                    <Link href={`/blog/tags/${t}`} key={t}>
-                                                        <Tag key={t}>#{t}</Tag>
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        </PostContent>
-                                        <FeatureImageContainer style={{position:'relative'}}>
-                                            {!!featured && <Image src={featured} alt="Featured Image for the Post" fill />}
-                                            {!featured && <div style={{height: '100%', width: '100px', backgroundColor: 'var(--color-bg-deemphasized)'}}></div>}
-                                        </FeatureImageContainer>
-                                    </PostContainer>
-                                </li>
-                            ))}
-                        </ul>
+                        <PostSummaries postSummaries={postSummaries}/>
                     </section>
                     {!!tags || !!categories
                         ?
                         <RightListContainer>
-                            {createTagsIfPresent(tags)}
                             {createCategoriesIfPresent(categories)}
+                            <br/>
+                            {createTagsIfPresent(tags)}
                         </RightListContainer>
                         : <></>
                     }
@@ -153,7 +101,7 @@ const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
 }
 
 const createCategoriesIfPresent = (categories?: Category[] | null | undefined) => {
-    if(!!categories) {
+    if (!!categories) {
         return (
             <div>
                 <h2 className={utilStyles.headingLg}>Categories</h2>

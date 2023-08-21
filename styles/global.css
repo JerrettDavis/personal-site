@@ -10,6 +10,8 @@ body[data-theme="light"] {
     --color-bg-toggle: #00809d;
     --color-bg-thumb: white;
     --color-border: #ccccee;
+    --color-placeholder-bg-start: #f5f5f5;
+    --color-placeholder-bg-end: #e0e0e0;
 }
 
 body[data-theme="dark"] {
@@ -22,7 +24,9 @@ body[data-theme="dark"] {
     --color-bg-primary: #0d1b1e;
     --color-bg-toggle: #2f3334;
     --color-bg-thumb: #A879C7;
-    --color-border: #ABB7BC;
+    --color-border: #3c5358;
+    --color-placeholder-bg-start: #25383c;
+    --color-placeholder-bg-end: #061113;
 }
 
 html,
@@ -67,6 +71,10 @@ img {
 
 .hljs {
     font-size: 14px;
+}
+
+hr {
+    border-color: var(--color-border);
 }
 
 .toc {
