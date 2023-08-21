@@ -30,16 +30,19 @@ export interface PostSummary extends PostBase {
 interface PostBase {
     title: string;
     date: string;
+    featured?: string | undefined | null;
     tags?: string[] | undefined | null;
     categories?: string[] | undefined | null;
 }
 
+//TODO: Need to do proper MDX loading
+//https://github.com/hashicorp/next-mdx-remote#react-server-components-rsc--nextjs-app-directory-support
 export async function getSortedPostsData(): Promise<PostSummary[]> {
     // Get file names under /posts
     const fileNames: string[] = await fs.readdir(postsDirectory)
     const allPostsData: PostSummary[] = await Promise.all(
         fileNames.map(async (fileName) => {
-            const id = fileName.replace(/\.md$/, '');
+            const id = fileName.replace(/\.mdx$/, '');
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
             const matterResult = matter(fileContents);
@@ -67,7 +70,7 @@ export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
         .map(fileName => {
         return {
             params: {
-                id: fileName.replace(/\.md$/, '')
+                id: fileName.replace(/\.mdx$/, '')
             }
         }
     });
@@ -89,7 +92,7 @@ function multiSplit(str, seps) {
 }
 
 export async function getPostData(id: string): Promise<PostData> {
-    const fullPath = path.join(postsDirectory, `${id}.md`)
+    const fullPath = path.join(postsDirectory, `${id}.mdx`)
     const fileContents = await fs.readFile(fullPath, 'utf8')
 
     // Use gray-matter to parse the post metadata section
@@ -121,7 +124,7 @@ export async function getPostData(id: string): Promise<PostData> {
     return {
         id: id,
         contentHtml: contentHtml,
-        ...(matterResult.data as { date: string; title: string }),
+        ...(matterResult.data as { date: string; title: string, featured?: string | undefined | null }),
         wordCount: wordCount,
         tags: tags
     } as any as PostData;

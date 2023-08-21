@@ -2,21 +2,13 @@ import Layout from "../../components/layout";
 import Head from "next/head";
 import utilStyles from "../../styles/utils.module.css";
 import Link from "next/link";
-import Date from "../../components/date";
 import {GetStaticProps} from "next";
 import {getSortedPostsData, PostSummary} from "../../lib/posts";
 import styled from "@emotion/styled";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
-
-const Tag = styled.div`
-  display: inline-block;
-  color: var(--color-link-deemphasized);
-  padding-right: 4px;
-  margin-right: 8px;
-  font-size: .7em;
-`;
+import PostSummaries from "../../components/postSummaries";
 
 const BlogContent = styled.div`
   display: flex;
@@ -70,34 +62,14 @@ export default function Index(
                 <BlogContent>
                     <section>
                         <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
-                        <ul className={utilStyles.list}>
-                            {postSummaries.map(({id, stub, date, title, tags}) => (
-                                <li className={utilStyles.listItem} key={id}>
-                                    <Link href={`/blog/posts/${id}`}>
-                                        {title}
-                                    </Link>
-                                    <br/>
-                                    <small className={utilStyles.lightText}>
-                                        <Date dateString={date}/>
-                                    </small>
-                                    <br/>
-                                    <div>{stub}</div>
-                                    <div>
-                                        {tags.map((t) => (
-                                            <Link href={`/blog/tags/${t}`} key={t}>
-                                                <Tag key={t}>#{t}</Tag>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                        <PostSummaries postSummaries={postSummaries}/>
                     </section>
                     {!!tags || !!categories
                         ?
                         <RightListContainer>
-                            {createTagsIfPresent(tags)}
                             {createCategoriesIfPresent(categories)}
+                            <br/>
+                            {createTagsIfPresent(tags)}
                         </RightListContainer>
                         : <></>
                     }
@@ -129,7 +101,7 @@ const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
 }
 
 const createCategoriesIfPresent = (categories?: Category[] | null | undefined) => {
-    if(!!categories) {
+    if (!!categories) {
         return (
             <div>
                 <h2 className={utilStyles.headingLg}>Categories</h2>
