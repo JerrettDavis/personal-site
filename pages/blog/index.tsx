@@ -9,6 +9,7 @@ import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
 import PostSummaries from "../../components/postSummaries";
+import generateRssFeed from "../../utils/generateRSSFeed";
 
 const BlogContent = styled.div`
   display: flex;
@@ -135,6 +136,7 @@ export const getStaticProps: GetStaticProps = async (): Promise<BlogIndexProps> 
     const postSummaries = await getSortedPostsData()
     const tags = await getSortedTagsData()
     const categories = await getAllCategories();
+    await generateRssFeed();
     return {
         props: {
             postSummaries: postSummaries,

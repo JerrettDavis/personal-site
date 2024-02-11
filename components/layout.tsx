@@ -5,7 +5,8 @@ import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faGithub, faLinkedin} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
-import {faBlog, faHome} from "@fortawesome/free-solid-svg-icons";
+import React from "react";
+import {faBlog, faHome, faRss} from "@fortawesome/free-solid-svg-icons";
 import styled from "@emotion/styled";
 
 const name = 'Jerrett Davis'
@@ -110,6 +111,14 @@ export default function Layout({
                    className={styles.buttonLink}
                 >
                     <FontAwesomeIcon icon={faLinkedin}/>
+                </a>
+                <a href="/rss.xml"
+                   target="_blank"
+                   title="RSS Feed"
+                   aria-label="Go to my RSS Feed"
+                   className={styles.buttonLink}
+                >
+                    <FontAwesomeIcon icon={faRss}/>
                 </a>
                 <HiddenSpacer/>
                 <div className={utilStyles.marginLeft8}>
