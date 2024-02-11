@@ -5,6 +5,8 @@ import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faGithub, faLinkedin} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
+import {faRss} from "@fortawesome/free-solid-svg-icons";
+import React from "react";
 
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
@@ -80,7 +82,7 @@ export default function Layout({
                    aria-label="Go to my Github page"
                    className={styles.buttonLink}
                 >
-                    <FontAwesomeIcon icon={faGithub} />
+                    <FontAwesomeIcon icon={faGithub}/>
                 </a>
                 <a href="https://www.linkedin.com/in/jddpro/"
                    target="_blank"
@@ -88,15 +90,23 @@ export default function Layout({
                    aria-label="Go to my LinkedIn page"
                    className={styles.buttonLink}
                 >
-                    <FontAwesomeIcon icon={faLinkedin}  />
+                    <FontAwesomeIcon icon={faLinkedin}/>
+                </a>
+                <a href="/rss.xml"
+                   target="_blank"
+                   title="RSS Feed"
+                   aria-label="Go to my RSS Feed"
+                   className={styles.buttonLink}
+                >
+                    <FontAwesomeIcon icon={faRss}/>
                 </a>
                 <div className={utilStyles.marginLeft8}>
-                    <ThemeToggle />
+                    <ThemeToggle/>
                 </div>
             </div>
             <div className={styles.container}>
                 <main>{children}</main>
-                 <GoBackToLink pageType={pageType}  />
+                <GoBackToLink pageType={pageType}/>
             </div>
 
         </div>

@@ -36,7 +36,7 @@ export default function Home() {
                        aria-label="Go to my Github page"
                     >
                         <div className={styles.socialIcon}>
-                            <FontAwesomeIcon icon={faGithub} />
+                            <FontAwesomeIcon icon={faGithub}/>
                         </div>
                     </a>
                     <a href="https://www.linkedin.com/in/jddpro/"
@@ -45,15 +45,17 @@ export default function Home() {
                        aria-label="Go to my LinkedIn page"
                     >
                         <div className={styles.socialIcon}>
-                            <FontAwesomeIcon icon={faLinkedin} />
+                            <FontAwesomeIcon icon={faLinkedin}/>
                         </div>
                     </a>
                 </div>
             </header>
             <section className={utilStyles.headingMd}>
                 <p>
-                    Hello! I'm Jerrett, but everyone just calls me JD. I like to write code and occasionally ramble about stuff.{' '}
-                    You can read more <Link href="/about-me">about me here.</Link> I've also been working on a <Link href="/blog">blog</Link>!
+                    Hello! I'm Jerrett, but everyone just calls me JD. I like to write code and occasionally ramble
+                    about stuff.{' '}
+                    You can read more <Link href="/about-me">about me here.</Link> I've also been working on a <Link
+                    href="/blog">blog</Link>!
                 </p>
             </section>
         </Layout>
