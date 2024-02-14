@@ -9,7 +9,7 @@ description: 'Learn how to automate the retrieval and restoration of production 
 
 # Background
 In cloud-hosted applications, it is common to restrict access to production databases. This is a good practice, but it can
-make it difficult for various teams to access the data they need for development, testing, reporting, data analysis, etc.
+make it difficult for various teams to access the data they need for development, testing, reporting, and data analysis.
 One way to solve this problem is to create a daily process that copies the production database to a location that is accessible
 to the teams that need it. In this article, we will create a docker container that will download the latest backup of a
 production database from Azure Blob Storage and restore it to a local SQL Server instance.
@@ -295,7 +295,7 @@ If everything went to plan, your directory should look like this:
 
 Now before we can build the Docker container, we need to make a few final changes to our `Dockerfile`.
 We need to copy all the files from our local machine to the container and set the correct permissions on the scripts.
-Add the following lines to your `Dockerfile` directly after the `USER roo` line:
+Add the following lines to your `Dockerfile` directly after the `USER root` line:
 
 ```Dockerfile
 RUN mkdir /home/mssql && chown mssql /home/mssql && \
@@ -348,7 +348,7 @@ If everything went to plan you should see the name of your database in the outpu
 # Conclusion
 In this article, we created a Docker container that automates the process of downloading the latest backup of a production database from Azure Blob Storage and restoring it to a local SQL Server instance.
 We used a combination of bash scripts and Docker to create a portable and easy-to-use solution that can be run on any machine that has Docker installed. This solution can be used to provide teams with access
-to the latest production data for development, testing, reporting, data analysis, etc. The container can be run on a schedule using a CRON job to ensure that the data is always up-to-date. This solution can be
+to the latest production data for development, testing, reporting, data analysis, or other internal uses. The container can be run on a schedule using a CRON job to ensure that the data is always up-to-date. This solution can be
 easily extended to support other databases and cloud storage providers.
 
 The code for this solution is available on [GitHub](https://github.com/JerrettDavis/az-bacpac-blob-mssql-importer).
