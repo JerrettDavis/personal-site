@@ -1,0 +1,356 @@
+---
+title: 'Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker'
+date: '2024-02-27'
+featured: '/images/posts/automating-daily-database-restores/featured.png'
+useToc: true
+tags: ['docker', 'bash', 'azure', 'scripting', 'automation']
+categories: ['Programming', 'Programming/Automation']
+description: 'Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.'
+---
+
+# Background
+In cloud-hosted applications, it is common to restrict access to production databases. This is a good practice, but it can
+make it difficult for various teams to access the data they need for development, testing, reporting, and data analysis.
+One way to solve this problem is to create a daily process that copies the production database to a location that is accessible
+to the teams that need it. In this article, we will create a docker container that will download the latest backup of a
+production database from Azure Blob Storage and restore it to a local SQL Server instance.
+
+# Prerequisites
+This article assumes that you have already set up an automation to back up your production database to Azure Blob Storage.
+If you have not done this, you can follow the instructions in this article: [Automating Nightly Database Backups to Azure Blob Storage](https://techcommunity.microsoft.com/t5/azure-database-support-blog/automate-exporting-of-azure-sql-database-as-bacpac-to-blog/ba-p/2409213).
+The script in the article is reaching end of life, and an updated version can be found [here](https://github.com/josegomera/AzureAutomation/tree/master/scripts/sqlDatabase).
+
+Docker must be installed and configured to used Linux containers on your local machine. If you do not
+have Docker installed, you can download it from [Docker's website](https://www.docker.com/products/docker-desktop).
+
+# Setting up the Docker Container
+The first step is to create a Dockerfile that will be used to build the container. The Dockerfile will contain the instructions
+on how to configure the container and what commands to run when the container is started. For our environment, we will
+require Microsoft SQL Server to be installed in the container. We will use the official Microsoft SQL Server Docker image as a base.
+
+## Base Dockerfile
+Create a new directory on your local machine and create a file called `Dockerfile` in the directory. Add the following content to the file:
+
+```Dockerfile
+FROM mcr.microsoft.com/mssql/server:2022-CU11-ubuntu-22.04
+
+# Set environment variables for the container
+ARG ACCOUNT_NAME
+ENV ACCOUNT_NAME=$ACCOUNT_NAME
+ARG ACCOUNT_KEY
+ENV ACCOUNT_KEY=$ACCOUNT_KEY
+ARG CONTAINER_NAME
+ENV CONTAINER_NAME=$CONTAINER_NAME
+
+ARG CRON_SCHEDULE="0 4 * * *"
+ENV CRON_SCHEDULE=$CRON_SCHEDULE
+
+ARG DATABASE_NAME=MyDatabase
+ENV DATABASE_NAME=$DATABASE_NAME
+ENV MSSQL_SA_PASSWORD=yourStrong(!)Password
+ENV ACCEPT_EULA=Y
+ENV MSSQL_PID=Developer
+
+# Create a working directory for our tools and scripts and copy all the files from the host machine to the container
+COPY . /sql
+WORKDIR /sql
+```
+
+## Install Azure CLI
+To find and download the latest backup of the production database, we will need to install the Azure CLI in the container.
+We'll also need wget, cron, unzip, and a few other utilities to help us automate the process. Microsoft does offer a script
+to install the Azure CLI, but in my testing it did not work as expected in the Docker container. Instead, we will use
+the [manual installation instructions](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt#option-2-step-by-step-installation-instructions).
+
+Update the `Dockerfile` to include the following lines after the `WORKDIR` line:
+
+```Dockerfile
+# Must be root to install packages
+USER root
+
+# Install Dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    unzip cron wget apt-transport-https \
+    software-properties-common ca-certificates curl \
+    apt-transport-https lsb-release gnupg && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install az cli
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -sLS https://packages.microsoft.com/keys/microsoft.asc | \
+        gpg --dearmor | \
+        tee /etc/apt/keyrings/microsoft.gpg > /dev/null && \
+    chmod go+r /etc/apt/keyrings/microsoft.gpg && \
+    AZ_DIST=$(lsb_release -cs) && \
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $AZ_DIST main" | \
+    tee /etc/apt/sources.list.d/azure-cli.list && \
+    apt-get update && \
+    apt-get install azure-cli && \
+    rm -rf /var/lib/apt/lists/*
+```
+
+## Install SqlPackage
+To import the backup bacpac file that we're going to download from Azure Blob Storage, we will need to install the `sqlpackage` utility.
+This utility is used to import and export bacpac files to and from SQL Server. The utility has [evergreen links](https://learn.microsoft.com/en-us/sql/tools/sqlpackage/sqlpackage-download?view=sql-server-ver16#supported-operating-systems)
+available, so we can use the link to download the latest version of the utility.
+
+Add the following lines to the end of the `Dockerfile`:
+
+```Dockerfile
+# Install SQLPackage for Linux and make it executable
+RUN wget -q -O sqlpackage.zip https://aka.ms/sqlpackage-linux \
+    && unzip -qq sqlpackage.zip -d /sql/sqlpackage \
+    && chmod +x /sql/sqlpackage/sqlpackage \
+    && rm sqlpackage.zip
+```
+The above lines download the latest version of the `sqlpackage` utility from Microsoft's website, unzip it, make it executable, and then remove the zip file.
+
+
+## Entrypoint
+
+Finally, we need to add our entrypoint script to the container. This script will be run when the container starts, and it
+will perform all the necessary steps to download the latest backup from Azure Blob Storage and restore it to the local SQL Server instance.
+
+Add the following lines to the end of the `Dockerfile`:
+
+```Dockerfile
+# Switch back to mssql user
+USER mssql
+
+EXPOSE 1433
+
+CMD /bin/bash ./entrypoint.sh
+```
+We need to switch back to the `mssql` user to run the SQL Server process, so we make use of the `USER` command to do this.
+The `EXPOSE` command tells Docker that the container listens on the specified network ports at runtime.
+The `CMD` command specifies the command that will be run when the container starts. In this case, we are running the `entrypoint.sh` script.
+
+We will make some final changes to our `Dockerfile` later, but for now, save the file and close it.
+
+# The Scripts
+As we alluded to at the end of our `Dockerfile`, we need to create an `entrypoint.sh` script that will be run when the container starts.
+Since this container is based on the official Microsoft SQL Server Docker image, we need to ensure the original entrypoint is also run
+alongside our custom entrypoint script. To do this, we need to create an additional script that we will call in our `entrypoint.sh` script.
+
+## entrypoint.sh
+Create two new files in the same directory as your `Dockerfile` called `entrypoint.sh` and `initialize-database-and-jobs.sh`.
+Add the following content to `entrypoint.sh`:
+
+```bash
+#!/bin/bash
+/sql/initialize-database-and-jobs.sh & /opt/mssql/bin/sqlservr
+```
+
+You'll note that we are running the `initialize-database-and-jobs.sh` script in the background and then starting the SQL Server process.
+This `&` syntax is necessary to ensure that the original entrypoint script is also run without the docker container exiting immediately after
+the script completes.
+
+## initialize-database-and-jobs.sh
+
+Add the following content to `initialize-database-and-jobs.sh`:
+```bash
+#!/bin/bash
+
+# wait 30 seconds for SQL Server to start up
+echo "Waiting for SQL Server to start"
+sleep 30s
+
+# Download the bacpac file from the Azure Blob Storage
+echo "Downloading bacpac file from Azure Blob Storage"
+bash /sql/download-latest.sh $ACCOUNT_NAME $ACCOUNT_KEY $CONTAINER_NAME /sql/backup.bacpac
+backupJob=$?
+
+if [ "$backupJob" -eq 0 ]
+then
+    echo "Successfully downloaded bacpac file from Azure Blob Storage!"
+    echo "Enabling SQL Server authentication..."
+    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -i /sql/enable-authentication.sql
+    echo "SQL Server authentication enabled. Waiting for 10 seconds before importing the bacpac file..."
+    sleep 10s
+
+    # Import the bacpac file into the SQL Server
+    /sql/sqlpackage/sqlpackage /a:import /sf:/sql/backup.bacpac /tsn:localhost,1433 /tdn:$DATABASE_NAME /tu:sa /tp:$MSSQL_SA_PASSWORD /ttsc:True
+
+    # Set up 4am CRON job to re-import the database
+    echo "$CRON_SCHEDULE /bin/bash /sql/reimport-database.sh" | crontab -
+    echo "CRON job set up successfully"
+    exit 0
+else
+    echo "Failed to download bacpac file from Azure Blob Storage"
+    exit 1
+fi
+```
+
+This short script does quite a few operations. First, it's recommended to wait for SQL Server to start up before attempting to connect to it.
+We set up a 30-second timer to wait for SQL Server to start. We then download the latest backup from Azure Blob Storage using the `download-latest.sh` script.
+If the download is successful, we use the built-in `sqlcmd` utility to enable SQL Server authentication. We then wait for 10 seconds to ensure that the
+SQL Server has stabilized. We then use the `sqlpackage` utility to import the bacpac file into the SQL Server. Finally, we set up a CRON job to run the
+`reimport-database.sh` script at a frequency specified by the `CRON_SCHEDULE` environment variable. We then exit the script with a success code.
+
+We need to create the `download-latest.sh` and `reimport-database.sh` scripts that are called in the `initialize-database-and-jobs.sh` script.
+
+## download-latest.sh
+
+Create a new file called `download-latest.sh` and add the following content:
+```bash
+#!/bin/bash
+
+# Description: This script downloads the latest backup from an Azure Storage Account
+# Usage: bash DownloadLatest.sh <storageAccountName> <storageAccountKey> <containerName> <localPath>
+
+accountName=$1
+accountKey=$2
+containerName=$3
+localPath=${4:-"./backup.bacpac"}
+
+# Get the name of the latest blob
+firstBlob=$(az storage blob list --account-key $accountKey --account-name $accountName -c $containerName --query "[?properties.lastModified!=null]|[?ends_with(name, '.bacpac')]|[0].name" -o tsv)
+
+# Check if $firstBlob is not null (i.e., there are blobs found)
+if [ -n "$firstBlob" ]; then
+    az storage blob download --account-key $accountKey --account-name $accountName -c $containerName --name $firstBlob --file $localPath --output none
+    exit 0
+else
+    exit 1
+fi
+```
+
+The Azure CLI lets us write queries to filter the results of the `az storage blob list` command. The queries are written in
+[JMESPath](https://jmespath.org/), which is a query language for JSON. In this case, we are filtering the results to only include blobs that end with the
+`.bacpac` extension and then selecting the first one as ordered by the `lastModified` property. If there are no blobs found, the script exits with a failure code.
+If we find a blob, we download it to the local path specified by the `localPath` variable.
+
+## enable-authentication.sql
+
+Create a new file called `enable-authentication.sql` and add the following content:
+```sql
+sp_configure 'contained database authentication', 1;
+GO
+RECONFIGURE;
+GO
+```
+
+This script enables contained database authentication in the SQL Server instance. This is necessary to allow the `sa` user to authenticate to the database
+when importing the bacpac file.
+
+## reimport-database.sh
+
+Create a new file called `reimport-database.sh` and add the following content:
+```bash
+#!/bin/bash
+
+echo "Downloading bacpac file from Azure Blob Storage"
+bash /sql/download-latest.sh $ACCOUNT_NAME $ACCOUNT_KEY $CONTAINER_NAME /sql/backup.bacpac
+backupJob=$?
+if [ "$backupJob" -eq 0 ]
+then
+    echo "Successfully downloaded bacpac file from Azure Blob Storage!"
+    echo "Kill all connections to the database"
+    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -i /sql/kill-all-connections.sql
+    databaseName=$DATABASE_NAME
+    existingDatabaseName="${databaseName}_$(date +%s)"
+    echo "Renaming existing database to $existingDatabaseName"
+    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -Q "ALTER DATABASE $databaseName MODIFY NAME = $existingDatabaseName;"
+    echo "Renamed existing database to $existingDatabaseName"
+    echo "Importing bacpac file into the SQL Server"
+    /sql/sqlpackage/sqlpackage /a:import /sf:/sql/backup.bacpac /tsn:localhost,1433 /tdn:$DATABASE_NAME /tu:sa /tp:$MSSQL_SA_PASSWORD /ttsc:True
+else
+    echo "Failed to download bacpac file from Azure Blob Storage"
+    exit 1
+fi
+```
+
+You'll notice that this script is very similar to the `initialize-database-and-jobs.sh` script. The main difference is that we are renaming the existing database
+before importing the new bacpac file. This is necessary because the `sqlpackage` utility does not support overwriting an existing database.
+We also need to kill all connections to the database before renaming it. We do this by running a SQL script that we will create called `kill-all-connections.sql`.
+
+## kill-all-connections.sql
+
+Create a new file called `kill-all-connections.sql` and add the following content:
+```sql
+-- kill all connections to the database
+DECLARE @killCommand NVARCHAR(MAX) = '';
+
+SELECT @killCommand = @killCommand + 'KILL ' + CAST(spid AS VARCHAR) + ';'
+FROM sys.sysprocesses
+WHERE dbid > 4;
+
+EXEC sp_executesql @killCommand;
+```
+
+As its name suggests, this script kills all connections to the database. This is necessary to ensure that we can rename the database without any active connections.
+
+## Final Directory Structure and Dockerfile Changes
+If everything went to plan, your directory should look like this:
+```
+.
+├── Dockerfile
+├── entrypoint.sh
+├── initialize-database-and-jobs.sh
+├── download-latest.sh
+├── enable-authentication.sql
+├── reimport-database.sh
+├── kill-all-connections.sql
+```
+
+Now before we can build the Docker container, we need to make a few final changes to our `Dockerfile`.
+We need to copy all the files from our local machine to the container and set the correct permissions on the scripts.
+Add the following lines to your `Dockerfile` directly after the `USER root` line:
+
+```Dockerfile
+RUN mkdir /home/mssql && chown mssql /home/mssql && \
+    chmod +x /sql/initialize-database-and-jobs.sh && \
+    chmod +x /sql/entrypoint.sh && \
+    chmod +x /sql/download-latest.sh
+```
+
+The `mkdir` command creates a new directory in the container and the `chown` command changes the owner of the directory to the `mssql` user.
+We then set the correct permissions on the scripts using the `chmod` command. Save the `Dockerfile` and close it.
+
+# Building the Docker Container
+Now that we have all the necessary files, we can build the Docker container. Open a terminal and navigate to the directory where your `Dockerfile` is located.
+Run the following command to build the container:
+
+```bash
+docker build -t azure-local-database-refresh .
+```
+
+This command will build the container using the `Dockerfile` in the current directory and tag the container with the name `azure-local-database-refresh`.
+The build process may take a few minutes to complete. Once it's done, you can run the container using the following command:
+
+```bash
+docker run -e ACCOUNT_NAME=<storageAccountName> -e ACCOUNT_KEY=<storageAccountKey> -e CONTAINER_NAME=<containerName> -e DATABASE_NAME=MyDatabase -p 1433:1433 -it  azure-local-database-refresh
+```
+
+Replace `<storageAccountName>`, `<storageAccountKey>`, and `<containerName>` with the appropriate values for your Azure Blob Storage account. The `-p` flag maps port 1433 of the container to port 1433 of your local machine.
+This allows you to connect to the SQL Server instance running in the container from your local machine. The `-it` flag runs the container in interactive mode, which allows you to see the output of the container in your terminal.
+
+You should see the output of the container in your terminal. If everything is working correctly, you should see messages indicating that the bacpac file has been downloaded and imported into the SQL Server instance. The import
+process can take a several minutes to complete, depending on the size of the database. Once the import process is complete, you should see a message indicating that the CRON job has been set up successfully.
+
+# Testing the Container
+Now that we have our container up and running, we can test it by connecting to the SQL Server instance and verifying that the database has been restored.
+Open a new terminal and run the following command to connect to the SQL Server instance running in the container:
+
+```bash
+docker exec -it <containerId> /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P yourStrong(!)Password
+```
+
+Replace `<containerId>` with the ID of your container. This command will open an interactive SQL Server prompt. Run the following command to verify that the database has been restored:
+
+```sql
+SELECT name FROM sys.databases;
+```
+
+If everything went to plan you should see the name of your database in the output. You can also run queries against the database to verify that the data has been restored correctly.
+
+
+# Conclusion
+In this article, we created a Docker container that automates the process of downloading the latest backup of a production database from Azure Blob Storage and restoring it to a local SQL Server instance.
+We used a combination of bash scripts and Docker to create a portable and easy-to-use solution that can be run on any machine that has Docker installed. This solution can be used to provide teams with access
+to the latest production data for development, testing, reporting, data analysis, or other internal uses. The container can be run on a schedule using a CRON job to ensure that the data is always up-to-date. This solution can be
+easily extended to support other databases and cloud storage providers.
+
+The code for this solution is available on [GitHub](https://github.com/JerrettDavis/az-bacpac-blob-mssql-importer).
+This docker container is also available on [Docker Hub](https://hub.docker.com/r/jdhproductions/az-bacpac-blob-mssql-importer).

@@ -13,6 +13,8 @@ import rehypeToc from '@jsdevtools/rehype-toc';
 import strip from 'strip-markdown'
 import {remark} from "remark";
 import {formatTags} from "./tags";
+import {common} from "lowlight";
+import dockerfile from "highlight.js/lib/languages/dockerfile";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -106,7 +108,7 @@ export async function getPostData(id: string): Promise<PostData> {
         .use(remarkParse)
         .use(remarkRehype)
         .use(remarkCapitalize)
-        .use(rehypeHighlight)
+        .use(rehypeHighlight, {languages: {...common,dockerfile}})
         .use(rehypeSlug);
 
     if (!!matterResult.data.useToc)
