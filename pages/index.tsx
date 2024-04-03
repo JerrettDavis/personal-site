@@ -7,7 +7,7 @@ import {GetStaticProps} from 'next'
 import styles from "../components/layout.module.css";
 import Image from "next/image";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faGithub, faLinkedin} from "@fortawesome/free-brands-svg-icons";
+import {faGithub, faLinkedin, faMastodon} from "@fortawesome/free-brands-svg-icons";
 
 export default function Home() {
     return (
@@ -37,6 +37,15 @@ export default function Home() {
                     >
                         <div className={styles.socialIcon}>
                             <FontAwesomeIcon icon={faGithub}/>
+                        </div>
+                    </a>
+                    <a href="https://mastodon.social/@JerrettDavis"
+                       target="_blank"
+                       title="My Mastodon.Social page"
+                       aria-label="Go to my Mastodon.Social page"
+                    >
+                        <div className={styles.socialIcon}>
+                            <FontAwesomeIcon icon={faMastodon}/>
                         </div>
                     </a>
                     <a href="https://www.linkedin.com/in/jddpro/"
