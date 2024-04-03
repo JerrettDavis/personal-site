@@ -3,7 +3,7 @@ import styles from './layout.module.css'
 import utilStyles from '../styles/utils.module.css'
 import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faGithub, faLinkedin} from '@fortawesome/free-brands-svg-icons'
+import {faGithub, faLinkedin, faMastodon} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
 import React from "react";
 import {faBlog, faHome, faRss} from "@fortawesome/free-solid-svg-icons";
@@ -103,6 +103,14 @@ export default function Layout({
                    className={styles.buttonLink}
                 >
                     <FontAwesomeIcon icon={faGithub}/>
+                </a>
+                <a href="https://mastodon.social/@JerrettDavis"
+                   target="_blank"
+                   title="My Mastodon.Social page"
+                   aria-label="Go to my Mastodon.Social page"
+                   className={styles.buttonLink}
+                >
+                    <FontAwesomeIcon icon={faMastodon}/>
                 </a>
                 <a href="https://www.linkedin.com/in/jddpro/"
                    target="_blank"
