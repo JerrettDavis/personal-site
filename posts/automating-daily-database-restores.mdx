@@ -205,7 +205,12 @@ containerName=$3
 localPath=${4:-"./backup.bacpac"}
 
 # Get the name of the latest blob
-firstBlob=$(az storage blob list --account-key $accountKey --account-name $accountName -c $containerName --query "[?properties.lastModified!=null]|[?ends_with(name, '.bacpac')]|[0].name" -o tsv)
+firstBlob=$(az storage blob list \
+    --account-key $accountKey \
+    --account-name $accountName \
+    -c $containerName \
+    --query "[?properties.lastModified!=null && ends_with(name, '.bacpac')]|sort_by(@, &properties.lastModified)[-1].name" \
+    -o tsv)
 
 # Check if $firstBlob is not null (i.e., there are blobs found)
 if [ -n "$firstBlob" ]; then
