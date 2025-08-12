@@ -37,8 +37,6 @@ interface PostBase {
     categories?: string[] | undefined | null;
 }
 
-//TODO: Need to do proper MDX loading
-//https://github.com/hashicorp/next-mdx-remote#react-server-components-rsc--nextjs-app-directory-support
 export async function getSortedPostsData(): Promise<PostSummary[]> {
     // Get file names under /posts
     const fileNames: string[] = await fs.readdir(postsDirectory)
@@ -60,6 +58,7 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
                 stub: content,
                 ...(matterResult.data as { date: string; title: string }),
                 tags: tags,
+                categories: matterResult.data.categories || null,
             };
         })
     );
@@ -128,6 +127,7 @@ export async function getPostData(id: string): Promise<PostData> {
         contentHtml: contentHtml,
         ...(matterResult.data as { date: string; title: string, featured?: string | undefined | null }),
         wordCount: wordCount,
-        tags: tags
+        tags: tags,
+        categories: matterResult.data.categories || null,
     } as any as PostData;
 }
