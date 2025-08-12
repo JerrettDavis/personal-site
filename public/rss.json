@@ -1,0 +1,45 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "Jerrett Davis | The Overengineer Blog Posts | RSS Feed",
+    "home_page_url": "https://jerrettdavis.com",
+    "feed_url": "https://jerrettdavis.com/rss.json",
+    "description": "The Overengineer Blog. Anything worth doing is worth overdoing.",
+    "icon": "https://jerrettdavis.com/profile.png",
+    "items": [
+        {
+            "id": "https://jerrettdavis.com/blog/what-is-code",
+            "url": "https://jerrettdavis.com/blog/what-is-code",
+            "title": "What is \"Code\"?",
+            "summary": "A beginner-friendly exploration of what “code” really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
+            "date_modified": "2025-08-11T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/automating-daily-database-restores",
+            "url": "https://jerrettdavis.com/blog/automating-daily-database-restores",
+            "title": "Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker",
+            "summary": "Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.",
+            "date_modified": "2024-02-27T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/a-year-in-review-1",
+            "url": "https://jerrettdavis.com/blog/a-year-in-review-1",
+            "title": "A Year in Review",
+            "summary": "Reflecting on the author's experiences throughout 2022, including attempts at a 365-day coding challenge, the impact of significant life events such as the birth of their daughter, and the shifting priorities and challenges faced during the year.",
+            "date_modified": "2023-08-13T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/365-days-of-code-week-1",
+            "url": "https://jerrettdavis.com/blog/365-days-of-code-week-1",
+            "title": "365 Days of Code - Week 1",
+            "summary": "A recap of the first week participating in the \"365 Days of Code\" challenge, where the author commits and pushes code related to a personal project daily. The post discusses the motivation behind the challenge, the author's goals, and the results of the first week, including the migration of the personal website from WordPress to a Static Site built with Next.js and React, and the creation of a command line weather client.",
+            "date_modified": "2022-01-02T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/ef-core-public-id",
+            "url": "https://jerrettdavis.com/blog/ef-core-public-id",
+            "title": "Simple Public ID Generation in EF Core",
+            "summary": "A guide detailing the implementation of a simple public ID generation system in Entity Framework Core (EF Core). The post discusses the background motivation, problems encountered, and the implementation steps, including hiding primary keys, generating public identifiers, and simplifying operations on public entities.",
+            "date_modified": "2021-12-27T00:00:00.000Z"
+        }
+    ]
+}
