@@ -1,0 +1,212 @@
+---
+date: '2025-09-17'
+author: 'Jerrett Davis'
+tags: ['bdd', 'tdd', 'testing', 'architecture', 'solid', 'playwright', 'fluent', 'dotnet', 'tinybdd']
+description: 'Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.'
+---
+
+# Announcing TinyBDD: Fluent, Executable Scenarios for .NET
+
+👉 [GitHub](https://github.com/jerrettdavis/tinybdd) · [NuGet](https://www.nuget.org/packages/TinyBDD) · [Docs](https://jerrettdavis.github.io/TinyBDD/
+
+---
+
+What if the shortest path from *“we need this”* to *“it works in prod”* was just a single fluent line of code?
+
+TinyBDD is my attempt to make that path real. It’s a lightweight .NET library that lets you write tests in a fluent, Gherkin-ish style—tests that read like acceptance criteria but execute like unit tests. The goal is not ceremony, but clarity: a shared, human-parsable DSL that can span from domain rules to browser automation without losing intent.  
+
+This post is the practical follow-up to my earlier [essay on BDD](https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd). There, I dug into the *why*. Here, we’ll focus on the *how*: how to go from acceptance criteria to running tests in minutes, how to use Given/When/Then to model even the smallest units, how to orchestrate full end-to-end flows with Playwright, and how writing this way naturally nudges your architecture toward SOLID and composable design.
+
+---
+
+## From acceptance criteria to running tests in minutes
+
+Every team has seen a story like this written in Jira or Confluence:
+
+```
+
+Scenario: Gold member gets free shipping
+Given the customer is a "gold" member
+And they have a cart totaling \$12.00
+When they checkout with standard shipping
+Then the shipping cost is \$0.00
+And the order total is \$12.00
+
+```
+
+With TinyBDD, you don’t need separate `.feature` files unless you want them. You can capture that same intent directly in your test framework, keeping the semantics without the tooling overhead:
+
+```csharp
+await Given("a gold customer with a $12 cart", () => new Cart(Customer.Gold(), 12.00m))
+     .When("they choose standard shipping", cart => cart.Checkout(Shipping.Standard))
+     .Then("shipping is free", order => order.ShippingTotal == 0.00m)             // Pass/Fail with booleans
+     .And("order total is $12.00", order => Expect.For(order.Total).ToBe(12.00m)) // Or Assertions
+     .AssertPassed();
+````
+
+The keywords map one-to-one with the business story. Each step is explicit and composable, and the whole chain is easy to read—even for someone outside the dev team. Because the language matches what stakeholders already use, the test itself becomes a living contract.
+
+---
+
+## Unit tests that read like behavior
+
+Behavior-driven style isn’t just for top-level acceptance tests. It works equally well for small pieces of logic: a pure function, a discount rule, a transformer. By expressing them as Given/When/Then, you get readability—tiny scenarios that explain the intent before diving into implementation detail—and design pressure, because the format gently encourages pure, composable functions.
+
+Example: a simple discount calculation.
+
+```csharp
+await Given("a silver customer with $100 cart", () => (Tier: "silver", Amount: 100m))
+     .When("discount is applied", x => Discounts.Apply(x.Tier, x.Amount))
+     .Then("result is $95", result => result == 95m)
+     .AssertPassed();
+```
+
+Even at this scale, the benefits are obvious. You isolate the decision logic, assert outcomes in plain language, and end up with code that composes neatly into bigger flows later.
+
+---
+
+## End-to-end UI tests with Playwright
+
+TinyBDD also works at the other end of the spectrum: full-stack, end-to-end tests. Here, the key is keeping steps thin and expressive while pushing implementation detail into helpers like page objects or service wrappers. That way, the scenario text stays stable even if the UI shifts underneath.
+
+```csharp
+await Given("a new browser and logged-in gold user", async () =>
+{
+    var pw = await PlaywrightFactory.LaunchAsync();
+    var page = await pw.NewPageAsync();
+    await AuthSteps.LoginAsGoldAsync(page);
+    return page;
+})
+.When("user adds a $12 item to cart", async page =>
+{
+    await CatalogSteps.AddItemAsync(page, "SKU-123", 12.00m);
+    return page;
+})
+.And("proceeds to checkout with standard shipping", CheckoutSteps.StandardAsync)
+.Then("shipping is free", async page =>
+{
+    var shipping = await CartSteps.ReadShippingAsync(page);
+    return shipping == 0.00m;
+})
+.And("order total is $12.00", async page =>
+{
+    var total = await CartSteps.ReadTotalAsync(page);
+    return total == 12.00m;
+})
+.AssertPassed();
+```
+
+Scenarios like this are readable enough for a stakeholder to skim, while still giving engineers the control they need under the hood. Stable wording, deterministic helpers, and tagging (`smoke`, `ui`, `checkout`) all contribute to making suites like this maintainable in real CI pipelines.
+
+---
+
+### Patterns that keep this maintainable
+
+The trick to making end-to-end scenarios sustainable is resisting the temptation to let your steps do all the heavy lifting. The step chain should stay thin and intention-revealing, while the real mechanics live in helpers: page objects, domain services, or test utilities. This keeps the scenario text stable even as the implementation evolves. A good rule of thumb is that a non-technical stakeholder should be able to scan the steps and nod along without ever seeing the helper code. Deterministic helpers—free from hidden global state—are key to repeatable results. And once you have a handful of scenarios, you’ll want to tag them (`smoke`, `ui`, `checkout`, etc.) so that CI pipelines can run fast slices for quick feedback and broader sweeps when confidence matters most.
+
+---
+
+### Let tests guide your design
+
+When you write tests in a behavior-first style, architectural friction surfaces quickly. A step that requires half a dozen parameters is rarely a coincidence—it usually means your modules are too tightly coupled. Repeating the same tedious setup across multiple scenarios suggests the absence of a proper abstraction. And if you struggle to phrase a step cleanly, the problem may not be the test at all, but the clarity of your domain language.
+
+These moments of friction are signals. Often, the fix is to extract a pure function from a messy edge, create a port or adapter to decouple infrastructure from business rules, or split a workflow into smaller seams that deserve their own scenarios. In other words: the pressure you feel in writing the test is your design telling you what it wants to become.
+
+---
+
+### BDD and the drift toward SOLID and functional design
+
+Consistently writing scenarios has a shaping effect on code. Steps that do one clear thing align with the Single Responsibility Principle. The ability to add new scenarios without editing existing ones echoes the Open/Closed Principle. And abstractions that are narrow, well-defined, and swappable make substituting fakes and stubs trivial, pushing you toward Liskov, ISP, and DIP almost by default.
+
+The same is true for functional composition. Pure functions naturally slide into Given/When/Then flows. Side effects are easiest to reason about when pushed to the edges—fetching in a Given, transforming in a When, and observing in a Then. And when steps are small and named, they read like a pipeline instead of a mess of conditionals. By following the test style, you often find yourself following the design style too.
+
+---
+
+### A practical way to start tomorrow
+
+If this feels overwhelming, don’t boil the ocean. Start with one slice of functionality that everyone values and recognizes—maybe a login path or a simple checkout. Write just two or three scenarios, and make sure the wording mirrors how the business describes the flow. Delegate the mechanics to helpers, not the scenario text. Keep your domain logic in pure functions wherever possible so it’s trivial to call from a `When` step. And once you’ve got a couple of green runs, wire in some tags so you can choose between smoke tests, integration runs, or the full suite depending on your CI needs.
+
+As you go, pay attention to the words. If step text feels clumsy, it probably means your ubiquitous language is clumsy too. Refining that wording in collaboration with stakeholders isn’t overhead—it’s the work. And when naming friction crops up, it’s often a smell that your design needs another seam or abstraction.
+
+---
+
+### Fluent examples you can copy-paste
+
+Unit-level:
+
+```csharp
+await Given("subtotal is $120 and tier is gold", () => (Subtotal: 120m, Tier: "gold"))
+     .When("finalize price", x => Pricing.Finalize(x.Tier, x.Subtotal))
+     .Then("applies 10% discount", price => price == 108m)
+     .AssertPassed();
+```
+
+API-level:
+
+```csharp
+await Given("a seeded test tenant", TestData.SeedTenantAsync)
+     .When("posting to /invoices", async _ => await Api.PostAsync("/invoices", new { amount = 250 }))
+     .Then("returns 201", r => r.StatusCode == 201)
+     .And("body contains invoice id", r => r.Json.Value<string>("id") is { Length: > 0 })
+     .AssertPassed();
+```
+
+UI-level:
+
+```csharp
+await Given("a logged-in admin", BrowserSteps.LoginAsAdminAsync)
+     .When("they create a user named Dana", page => AdminUsers.CreateAsync(page, "Dana"))
+     .Then("Dana appears in the grid", page => AdminUsers.ExistsAsync(page, "Dana"))
+     .AssertPassed();
+```
+
+---
+
+### Readable Gherkin-style output
+
+One of the nicest touches in TinyBDD is how your scenarios *report themselves* when you run the tests. Pair your scenarios with the appropriate base class (`TinyBddXunitBase`, `TinyBddXunitV3Base`, `TinyBddNUnitBase`, or `TinyBddMSTestBase`), and the test runner will print structured Gherkin output alongside normal results.  
+
+That means the Given/When/Then flow you wrote doesn’t just execute—it shows up exactly as you’d expect, step by step, with timings and pass/fail indicators. It turns your test logs into living specifications.
+
+For example, here’s the output from a mediator scenario:
+
+```
+
+Feature: Behavioral - Mediator (commands, notifications, streaming, behaviors)
+Scenario: Send: command handler runs through behaviors and returns value
+Given a mediator with pre/post/whole behaviors and a Ping->Pong handler [OK] 2 ms
+When sending Ping(5) [OK] 4 ms
+Then result is pong:5 [OK] 2 ms
+And behaviors logged pre, whole before/after, and post [OK] 0 ms
+
+```
+
+Instead of squinting at assertions in code, you see a natural-language story of what happened. That’s invaluable when sharing results with stakeholders or debugging failures in CI. And because the feature and scenario titles come from your test class and attributes, the logs stay consistent with the language you use in code reviews, planning, and conversations.
+
+---
+
+### Avoiding common anti-patterns
+
+Every test framework accumulates bad habits if left unchecked, and TinyBDD is no exception. The most obvious trap is clever wording: steps like *“When magic happens”* don’t help anyone and fail to serve as documentation. Instead, the wording should describe an intention that a stakeholder would immediately recognize, such as *“When the admin disables the account”*. Another trap is letting a single step conceal multiple actions or checks. Keep your flow honest: `When` should drive effects, and `Then` or `And` should assert results.
+
+Setup is another danger zone. If your `Given` steps are littered with manual wiring of objects, it’s time for factories or builders to take over. And at the UI layer, brittle selectors quickly make tests flaky; encapsulating them in page objects and using explicit test IDs pays off many times over. Avoiding these pitfalls keeps your suite readable, stable, and genuinely valuable.
+
+---
+
+### The payoff
+
+When scenarios read like the business and execute like the code, something special happens. Your tests stop being just a safety net and start becoming living documentation. They never go stale because they’re executable. They provide immediate feedback on drift, so change becomes safer. They subtly nudge your codebase toward SOLID principles and functional seams. And for new developers, they become the best possible onboarding guide: open the suite, read the stories, and understand how the system behaves.
+
+You don’t need to retool your world to reach this point. Start with one scenario. Make it pass. Share it with your team. Repeat. In a few sprints, you’ll have a suite of stories that stack from units to workflows, and a codebase that’s easier to evolve because the behaviors are crystal clear.
+
+---
+
+### Appendix — A quick PR lens
+
+As you review changes, ask yourself: does this PR add or update scenarios that the business would recognize? Do the steps read like natural English, each mapping to a single intent? Are the domain rules isolated in pure functions rather than tangled in infrastructure? Did we create or clarify a port instead of hard-coding dependencies? Can we tag and run this slice of scenarios independently in CI?
+
+If you can answer “yes” to most of those, you’re not just writing tests—you’re building shared understanding, guiding design, and accelerating delivery. That’s the real promise of TinyBDD.
+
+---
+
+👉 [Get TinyBDD on GitHub](https://github.com/jerrettdavis/tinybdd) · [NuGet](https://www.nuget.org/packages/TinyBDD) · [Docs](https://jerrettdavis.github.io/TinyBDD/)
