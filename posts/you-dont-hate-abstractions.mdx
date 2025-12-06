@@ -1,3 +1,4 @@
+
 ---
 title: "You Don't Hate Abstractions"
 description: 'A plea to developers to embrace abstractions. Carefully.'
@@ -24,58 +25,59 @@ And your reverie begins to rot.
 > `StandardUserNameDisplayStrategy`, `FormalUserNameDisplayStrategy`,  
 > `InformalUserNameDisplayStrategy`, `UserNameDisplayModule`, …
 
-Your soft chuckle hardens into an incredulous, throat-scraping noise somewhere
+Incredulous, your chuckle hardens into a throat-scraping noise somewhere
 between a laugh and a cry.
 
-"What in the Gang-of-Fuck is happening here," you think, as your pulse ticks up.
-"Either someone read Refactoring.Guru like it was scripture and decided to
+"What in the Gang-of-Fuck is happening here," you think, feeling your pulse tick up.
+"Either someone read [Refactoring.Guru](https://refactoring.guru) like it was scripture and decided to
 baptize the codebase in every pattern they learned, or a grizzled enterprise
 veteran escaped some Netflix-adjacent monolith and is trying to upskill in
 TypeScript. Because surely no sane developer would build this much redirection
 for such a trivial feature… right?"
 
+That tiny, spiraling task is a perfect microcosm of a continuous debate across engineering circles: when does abstraction help, and when does it become a hindrance?
+
 ---
 
-I recently stumbled across the humorous and largely valid article [You're Not Building Netflix: Stop Coding Like You Are](https://dev.to/adamthedeveloper/youre-not-building-netflix-stop-coding-like-you-are-1707?ref=dailydev) by Adam — The Developer. It resonates in many ways, but its critique ends up misdirected.
+I recently stumbled across the humorous article [You're Not Building Netflix: Stop Coding Like You Are](https://dev.to/adamthedeveloper/youre-not-building-netflix-stop-coding-like-you-are-1707?ref=dailydev) by Adam — The Developer. But though it resonates in many ways, its broader critique is ultimately misdirected.
 
-Adam opens with a more complete version of the code mocked in my prologue, and they use the verbosity and obscurity of that abstraction pile as the springboard for a rebuke of using enterprise patterns pretty much across the board. While the author does allow for some abstractions, they're limited in application and scope.
+Adam opens with a more complete version of the code mocked in my prologue, and uses the verbosity and obscurity of that abstraction pile as the springboard for a rebuke of using enterprise patterns pretty much across the board. While the author does allow for some abstractions, they're limited in application and scope.
 
-The problem isn’t that the complaint is wrong.  
-It’s that it points the finger at the wrong culprit.
+The problem isn’t that the complaint is wrong. It’s that it points the finger at the wrong culprit, just about literally missing the forest for the trees.
 
-Abstractions are fundamental and essential. They are the elementary particles of software, the quarks and leptons that bind into the subatomic structures that become the atoms our earliest techno-wizards fused into molecules. Today we combine those same basic elements into the compounds and contraptions we ship to millions. Without abstractions, we are left helpless in the ever-increasing parallel streams of pulsating electrical currents that rush through specialized, intricately forged rocks that artisan wizards once trapped lightning inside and somehow convinced to think.
+Abstractions are fundamental and essential. They are the elementary particles of software, the quarks and leptons that bind into the subatomic structures that become the atoms our earliest techno-wizards fused into molecules. Today we combine those same basic elements into the compounds and contraptions made for use by millions. Without abstractions, we are left helpless in the ever-increasing parallel streams of pulsating electrical currents, rushing through specialized, intricately forged rocks that artisan wizards once trapped lightning inside and somehow convinced to think.
 
-But even with all that power at our disposal, the way we use these building blocks matters. Chemistry offers a fitting parallel. Food chemists, for example, have spent decades learning how to repurpose industrial byproducts into stabilizers, textures, preservatives, and anything else that can be quietly slipped into a recipe. Much of this work is impressive and innovative, but some of it is little more than creative waste disposal disguised as convenience. It is a brilliant hack in the short term and a lingering problem in the long one.
+But even with all that power at our disposal, the way we use these building blocks matters. Chemistry offers a fitting parallel. Food chemists, for example, have spent decades learning how to repurpose industrial byproducts into stabilizers, textures, preservatives, and anything else that can be quietly slipped into a recipe. Much of this work is impressive and innovative, but some of it is little more than creative waste disposal disguised as convenience: a brilliant hack in the short term and a lingering problem in the long one.
 
-Developers can fall into the same pattern. We learn a new technique or pattern or clever trick and then spend the next year pouring it into every beaker we can find. We are not always discovering better processes. Sometimes we are just repackaging the same residue and calling it progress. When that happens, we are not solving problems. We are manufacturing new ones that future maintainers will curse our names over.
+Developers can fall into the same pattern. We learn a new technique or pattern or clever trick and then spend the next year pouring it into every beaker we can find. We are not always discovering better processes. Sometimes we are just repackaging the same product and calling it progress. When that happens, we are not solving problems. We are manufacturing new ones that future maintainers will curse our names over.
 
-A developer must be architect, engineer, mechanic, and driver all at once. It is fine to know how to fix a specific issue, but once that problem is solved, that knowledge should become a building block for solving the next one. If we keep returning to maintain the same solution day after day, then what we built was never a solution at all. It was a slow-burning maintenance burden that we misfiled under "done."
+A developer must be architect, engineer, mechanic, and driver all at once. It is fine to know how to fix a specific issue, but once that problem is solved, that knowledge should become a building block for solving the next one. If we keep returning to maintain the same solution day after day, then what we built was never a solution at all. It was a slow-burning maintenance burden that we misfiled as "done."
 
-Abstractions exist to reduce complexity, not to multiply it. Their purpose is to lighten the cognitive load, to lift the details off your desk so you can see the shape of the problem in front of you. Terse, repetitive, wire-on-the-floor code that looks like it tumbled out of a flickering green CRT from 1999 may impress the authors who have stared at machine code long enough to discern hair color from a data stream, but it does not serve the broader team or the system that outlives them. Abstractions only do their job when they are aligned with the actual problem being solved, and that brings us to the part many developers skip entirely: modeling your software after the problem you are solving.
+Abstractions exist to reduce complexity, not to multiply it. Their purpose is to lighten the cognitive load, to lift the details off your desk so you can see the shape of the problem in front of you. Terse, repetitive, wire-on-the-floor code that looks like it tumbled out of a [flickering green CRT from 1999 may impress the authors who have stared at machine code long enough to discern hair color from a data stream](https://youtu.be/MvEXkd3O2ow), but it does not serve the broader team or the system that outlives them. Abstractions only do their job when they are aligned with the actual problem being solved, and that brings us to the part many developers skip entirely: modeling your software after the problem you are solving.
 
 ## Seeing the Problem Before Solving It
 
 When you build a system, any system, even a disposable script, the first responsibility is understanding why it exists. What problem does it address. Has that problem been solved before. If so, what makes the existing solution insufficient for you now. Understanding that difference is the foundation that everything else must sit on.
 
-I learned this the hard way as a homeowner. My house is old enough to have grounded me if I talked back to it as a teenager. A couple of years ago we went through a near total remodel. We did some work before and after our daughter was born, but within a year new problems started surfacing. We brought in a structural engineer. The slab foundation was heaving. After some exploration we discovered the culprit: the original cast iron sewage line had split along both the top and bottom, creating pressure changes and settling issues throughout the house.
+I learned this the hard way as a homeowner. My house is old enough to have grounded me if I talked back to it as a teenager. A couple of years ago we went through a near-total remodel. We did some work before and shortly after our daughter was born, but within a year new problems started surfacing. We brought in a structural engineer. The slab foundation was heaving. After some exploration we discovered the culprit: the original cast iron sewage line had split along both the top and bottom, creating pressure changes and settling issues throughout the house.
 
-The fix was not small. We pulled up every inch of flooring. Replaced baseboards. Repaired drywall. Repainted entire sections. Redid trim. Installed piers. Pumped in foundation foam. Cashed in favors. Paid overtime. Lost weekends. And yet, even with all that, it still cost far less than buying an equivalent house in the current market at the current rates.
+The fix was not small. We pulled up every inch of flooring. Replaced baseboards. Repaired drywall. Fixed the broken lihe. Repainted entire sections. Redid trim. Installed piers. Pumped in foundation foam. Cashed in favors. Lost many weekends. And yet, even with all that, it still cost far less than buying an equivalent house in the current market at the current rates.
 
-The lesson is simple. Things are rarely a total loss. Even when a structure looks hopeless, even when someone has effectively set fire to best practices, even when regulations or markets or technologies have shifted dramatically, there are almost always assets worth salvaging inside the wreckage. You do not bulldoze unless you have truly exhausted the alternatives.
+The lesson is simple. Things are rarely a total loss. Even when a structure looks hopeless, even when someone has effectively set fire to best practices, even when regulations or markets or technologies have shifted dramatically, there are almost always assets worth salvaging inside the wreckage. You should not bulldoze unless you know you have truly exhausted the alternatives.
 
 Before throwing away any system and starting another from scratch, assess what you already have. Understand what is broken, what is sound, and what simply needs reinforcement. Software, like houses, tends to rot in specific places for specific reasons. Understanding those reasons is what separates renovation from reinvention.
 
 ## The Nightstand Problem
 
-The same principle applies at a smaller scale. You may already own a perfectly functional house full of perfectly functional furniture, yet still want a nightstand you do not currently possess. Your choices are straightforward. You can hope someone has discarded one that happens to meet your requirements. That is the open source gamble. You can buy one, constrained only by budget and whatever definition of quality the manufacturer is committed to this week. Or you can build one yourself, limited only by your skills, imagination, and tolerance for sawdust in your shoes.
+The same principle applies at a smaller scale. You may already own a perfectly functional house with perfectly functional furniture, yet still want a nightstand you do not currently possess. Your choices are straightforward. You can hope someone has decided to let go of one that happens to meet your criteria. That is the open source gamble. You can buy one, constrained only by budget and whatever definition of quality the manufacturer is committed to that week. Or you can build one yourself, limited only by your skills, imagination, and tolerance for sawdust.
 
-If your goal is personal satisfaction or experimentation, then by all means build the nightstand. But if your goal is to sell or support a product that helps make money, you are no longer hobby-carpenting. You are operating in the domain of enterprise software.
+If your goal is personal satisfaction or experimentation, then by all means build the nightstand. But if your goal is to sell or support a product that helps make money, you are no longer just hobby-carpenting. You are operating in the domain of enterprise software.
 
 And when you are building enterprise software, you must view the system from the top down while designing from the bottom up. From the top down, you think about every consumer of your system. In academic terms these are actors. Any system intended to be used, whether by humans or machines, is defined by the interactions between its actors and its responsibilities. Even an autonomous system is both an actor and the architected environment it operates within.
 
-This perspective matters because it forces your abstractions to model the real world rather than some internal taxonomy of clever class names. Good abstractions emerge from an understanding of the domain. Bad abstractions emerge from an understanding of a design pattern book.
+This perspective matters because it forces your abstractions to model the real world rather than some internal taxonomy of clever names. Good abstractions emerge from an understanding of the domain. Bad abstractions emerge from an understanding of a design pattern book.
 
-And if you want maintainability, clarity, and longevity, you always want the first and never the second.
+And if you want maintainability, clarity, and longevity, you always want the first.
 
 ## Building from Both Directions
 
@@ -89,15 +91,14 @@ Even something as small as a script must obey this reality.
 
 Consider a simple provisioning script. First it reads a certificate from the local filesystem so it can authenticate with a remote host. Next it opens an SFTP connection to a distribution server and retrieves a zip file. Then it extracts the archive to a temporary directory provided by the operating system. Finally it executes whatever installers or configuration commands the archive contains.
 
-On the surface this is straightforward, yet every step is shaped by the environment it operates in. Tools differ between platforms. Available executables change. File paths and separators vary. Temporary directory locations vary. Even the existence or reliability of SFTP clients varies. None of this means we must implement every possible alternative upfront, but it does mean we should acknowledge the existence of alternatives and avoid designing ourselves into a corner where adding support later requires rewriting the entire script.
+On the surface this is straightforward, yet every step is shaped by the environment in which it operates. Tools differ between platforms. Available executables change. File paths and separators vary. Temporary directory locations vary. Even the existence or reliability of SFTP clients varies. None of this means we must implement every possible alternative upfront, but it does mean we should acknowledge the existence of alternatives and avoid designing ourselves into a corner where adding support later requires rewriting the entire script.
 
 This principle scales upward. You may choose to place your application data inside a database, but scattering SQL statements across your codebase is an anti-pattern in nearly any architecture not explicitly about database engines or ORM internals. Unless you are writing an RDBMS, data access is rarely the star of the show. The real substance lives in the application logic that interprets, transforms, regulates, or composes that data. Mixing data access concerns directly into that logic creates friction. Separating them reduces friction, which improves maintainability, which improves confidence, which improves speed.
 
 The guiding question is always the same: does this choice help my system model the problem more clearly, or does it merely model my current implementation?
 If it is the former, great. If it is the latter, you are accumulating technical debt even if the code looks clean.
 
-Abstractions aligned with the domain allow your system to grow gracefully.
-Abstractions aligned with your tooling force your system to grow awkwardly.
+Abstractions aligned with the domain allow your system to grow gracefully. But abstractions aligned with your tooling force your system to grow awkwardly and inconsistently.
 
 This is the difference between designing from both directions and designing from just one.
 
@@ -109,23 +110,21 @@ The most reliable way to design a system, therefore, is to begin with its behavi
 
 From an architectural perspective, this shift in thinking is transformative. When we model the largest and most meaningful behaviors first and place an abstraction around them, we create an outer shell that defines the system at a conceptual level. From there, we move inward, breaking behaviors down iteratively into smaller and more specific responsibilities. Each division suggests a natural abstraction, but these abstractions are not arbitrary. They emerge directly from the behavior they represent. They are shaped not by the developer’s preferred patterns but by the needs of the domain itself. This recursive approach ensures that abstractions mirror intent rather than implementation details.
 
-Importantly, this recursion is not fractal. We are not attempting to subdivide reality endlessly. Rather, we refine behaviors only until they are sufficiently well understood to be implemented cleanly. Much as one does not explain quantum chromodynamics to teach someone how to scramble an egg, we do not decompose software beyond what clarity and correctness require. And while many languages encourage the use of interfaces as the primary mechanism for abstraction, the interface is not the abstraction itself. It is merely a convenient way to enforce a contract. The real abstraction is the conceptual boundary it represents. Whether that boundary is expressed as an interface, a type, a configuration object, or a module is irrelevant as long as the contract is clear and consistent.
+Importantly, this recursion is not fractal. We are not attempting to subdivide reality endlessly. Rather, we refine behaviors only until they are sufficiently well understood to be implemented cleanly. Much as one does not explain quantum chromodynamics to teach someone how to scramble an egg, we do not decompose software beyond what clarity and accuracy require. And while many languages encourage the use of interfaces as the primary mechanism for abstraction, the interface is not the abstraction itself. It is merely a convenient way to enforce a contract. The real abstraction is the conceptual boundary it represents. Whether that boundary is expressed as an interface, a type, a configuration object, or a module is irrelevant as long as the contract is clear and consistent.
 
 This is why starting with abstractions like an `IHost` that orchestrates an `IApplication` works so well. These constructs mirror the system’s highest-level behaviors. Once defined, they allow us to drill inward, step by step, carving out responsibilities until the domain takes shape as a set of interlocking, behavior-aligned components. When abstractions are created this way, they tend to be stable. They align with the problem domain rather than the transient needs of a particular implementation, and therefore they seldom need to change unless the underlying behavior changes.
 
 Frequent modification of an abstraction is a warning sign. A well-formed abstraction typically changes only under three conditions: the business behavior has evolved, an overlooked edge case has surfaced, or the original abstraction contained a conceptual flaw. Outside of those circumstances, the need to repeatedly modify an abstraction usually indicates that its boundaries were drawn incorrectly. When adjusting one behavior forces changes across multiple components, the issue is rarely "too many" or "too few" abstractions in an abstract sense. Instead, it is a failure of alignment. The abstraction does not adequately contain the concerns it is supposed to model, and complexity is leaking out of its container and into the rest of the codebase.
 
-Modern tooling makes this problem even more evident. With the availability of source generators, analyzers, expressive type systems, code scaffolding, and dynamic configuration pipelines, there is increasingly little justification for sprawling boilerplate or repetitive structural code. Boilerplate is not a mark of engineering rigor. It is simply untested and uninteresting glue repeated dozens of times because someone did not want to automate it. Good abstractions, by contrast, elevate meaning. They allow the domain to be expressed directly without forcing the developer to wade through noise.
+Modern tooling makes this problem even more evident. With the availability of source generators, analyzers, expressive type systems, code scaffolding, and dynamic configuration pipelines, there is increasingly little justification for sprawling boilerplate or repetitive structural code. Boilerplate is not a mark of engineering rigor. It is simply untested and uninteresting glue repeated dozens of times because someone did not take steps to automate it. Good abstractions, by contrast, elevate meaning. They allow the domain to be expressed directly without forcing the developer to wade through noise.
 
-This leads naturally to what I consider the ideal state of modern development: a system that is entirely automated from the moment code touches a repository until the moment it reaches a production-like environment. Compilation, testing, packaging, deployment, orchestration, and infrastructure provisioning should not require human involvement. The only manual step should be expressing intent in the form of new or updated behaviors. Every function that exists within the system should originate as a behavior-driven specification capable of running the entire application inside a controlled test environment, complete with containerized dependencies and UI automation tools such as Playwright. Those same tests should also be able to stub dependencies so the scenarios can run in isolation. When the system itself is treated as the first unit under test, orchestration becomes a first-class citizen rather than an afterthought.
+This leads naturally to what I consider the ideal state of modern development: a system that is entirely automated from the moment code touches a repository until the moment it reaches a production-like environment. Compilation, testing, packaging, deployment, orchestration, and infrastructure provisioning should not require human involvement. The only manual step should be expressing intent in the form of new or updated behaviors. Every function that exists within the system should originate as a behavior-driven specification capable of running the entire application inside a controlled test environment, complete with containerized dependencies and UI automation tools such as Playwright. Those same tests should also be able to stub dependencies so the scenarios can run in isolation. When the system itself is treated as the first unit under test, orchestration becomes a priority rather than an afterthought.
 
-Achieving this level of automation depends on stability, and stability depends on disciplined abstraction. Any element that may vary across environments, including configuration values, credentials, infrastructure, connection details, and policies, must be isolated behind settings and contracts that the application can consume without knowing anything about the environment it runs in. Once this encapsulation is in place, behavior-driven specifications can operate confidently, verifying the correctness of the system from the outside in even while its internal components remain free to evolve.
+Achieving this level of automation depends on stability, and that stability depends on disciplined abstraction. Any element that may vary across environments, including configuration values, credentials, infrastructure, connection details, and policies, must be isolated behind settings and contracts that the application can consume without knowing anything about the environment it runs in. Once this encapsulation is in place, behavior-driven specifications can operate confidently, verifying the correctness of the system from the outside in even while its internal components remain free to evolve.
 
 Finally, it is worth stating explicitly that hand-writing repetitive boilerplate code in a CRUD-heavy application, such as repositories, controllers, mappers, DTOs, validators, or entire edge-to-edge layers, is not admirable craftsmanship. It is busywork. If you have twenty entities with identical structural behavior and you are manually writing twenty sets of nearly identical files, the issue is not insufficient discipline. It is insufficient automation. Whether through source generators, templates, reflection-based pipelines, or dynamic modules, these problems can and should be solved generically. Engineers should focus their manual effort on the places where meaning lives: the domain, the behavior, and the boundaries.
 
-Good abstractions do not eliminate complexity; they contain it.
-Bad abstractions distribute it.
-And behavior-driven, problem-first design is how we tell the difference.
+Good abstractions do not eliminate complexity; they contain it. Bad abstractions distribute it. And behavior-driven, problem-first design is how we tell the difference.
 
 ## From Story to Spec: Describing Behavior First
 
@@ -139,7 +138,7 @@ If instead we begin with behavior, the specification sounds more like this:
 
 That is the contract. It does not mention classes, factories, or strategies. It talks about what the system must do from the outside.
 
-With something like TinyBDD, that kind of behavior becomes executable in a fairly direct way. Using the xUnit adapter, a scenario might look like this:
+With something like my project [TinyBDD](https://github.com/jerrettdavis/TinyBDD), that kind of behavior becomes executable in a fairly direct way. Using the xUnit adapter, a scenario might look like this:
 
 ```csharp
 using TinyBDD.Xunit;
@@ -299,8 +298,7 @@ Abstractions in this world are not ornamental. They are the scaffolding that hol
 
 Before closing, there is one more point worth addressing, because it tends to resurface in every conversation about abstraction: the role of design patterns. Patterns are often misunderstood in practice. For some teams they become a dictionary of shapes to copy. For others they become a superstition, something to be avoided because they "feel enterprise." In reality, design patterns are nothing more than reusable expressions of relationships that occur frequently in software. They only become harmful when applied without context.
 
-Used well, patterns are a form of declarative modeling. They describe how things relate, not how many classes must be introduced to satisfy a template. This distinction is one reason I created PatternKit
-[https://github.com/jerrettdavis/patternkit](https://github.com/jerrettdavis/patternkit)
+Used well, patterns are a form of declarative modeling. They describe how things relate, not how many classes must be introduced to satisfy a template. This distinction is one reason I created [PatternKit](https://github.com/jerrettdavis/patternkit)
 which contains fluent implementations of every GoF pattern. The aim is not to celebrate patterns for their own sake, but to show that they can be expressed clearly and idiomatically, without the ceremony that has accumulated around them over the past few decades. A fluent strategy or builder is readable because it conveys meaning, not because it adheres to a UML diagram. A properly shaped composite or decorator is useful because it matches the problem at hand, not because the catalog says "now is the time."
 
 Patterns at their best are accelerants for thought. They give structure to complex behavior. They reveal seams in the domain. They help us express intent without prescribing a particular class arrangement. When applied declaratively, patterns become lightweight tools that reinforce clarity rather than obstacles that obscure it.
@@ -311,9 +309,10 @@ Patterns should not be forced; they should emerge. If you find yourself retrofit
 
 ## Closing Thoughts
 
+
 At every scale, from a one-line helper to a distributed system with dozens of services, the same principles hold. Begin with behavior. Shape abstractions around the real problems rather than your implementation preferences. Allow patterns to emerge naturally when they clarify meaning. Lean on automation and declarative structures to eliminate noise. Let stability arise from good boundaries rather than rigid frameworks. And above all, keep re-examining the domain as it evolves. Systems live for years; code is rewritten many times. The only reliable compass is the domain itself.
 
 You do not hate abstractions. What you hate are the wrong ones: misplaced layers, premature hierarchies, needless ceremony, half-understood patterns applied because someone did not want to think. But abstractions that arise from behavior and domain, shaped carefully and used intentionally, are not burdens. They are the tools that let us build systems that last.
 
-If you keep those principles close—behavior first, domain always, patterns when meaningful—you will not need to fear abstraction. You will wield it.
+And if you stay anchored to this style of approach, you won’t end up navigating a small cavern system of strategies and factories and wondering how a middle initial turned into a guided tour of every pattern someone ever took a little too seriously. You won’t need to fear abstraction at all. Instead, you will wield it where it belongs.
 
