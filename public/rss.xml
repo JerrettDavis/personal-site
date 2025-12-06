@@ -4,7 +4,7 @@
         <title>Jerrett Davis | The Overengineer Blog Posts | RSS Feed</title>
         <link>https://jerrettdavis.com</link>
         <description>The Overengineer Blog. Anything worth doing is worth overdoing.</description>
-        <lastBuildDate>Tue, 12 Aug 2025 05:20:54 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 06 Dec 2025 19:44:50 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -14,11 +14,32 @@
         </image>
         <copyright>All rights reserved 2025, Jerrett Davis</copyright>
         <item>
+            <title><![CDATA[You Don't Hate Abstractions]]></title>
+            <link>https://jerrettdavis.com/blog/you-dont-hate-abstractions</link>
+            <guid>https://jerrettdavis.com/blog/you-dont-hate-abstractions</guid>
+            <pubDate>Fri, 05 Dec 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[A plea to developers to embrace abstractions. Carefully.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Announcing TinyBDD: Fluent, Executable Scenarios for .NET]]></title>
+            <link>https://jerrettdavis.com/blog/tinybdd</link>
+            <guid>https://jerrettdavis.com/blog/tinybdd</guid>
+            <pubDate>Wed, 17 Sep 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[BDD: Make the Business Write Your Tests]]></title>
+            <link>https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd</link>
+            <guid>https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd</guid>
+            <pubDate>Mon, 01 Sep 2025 00:00:00 GMT</pubDate>
+            <description><![CDATA[What if your business wrote the tests, and developers just made them pass?]]></description>
+        </item>
+        <item>
             <title><![CDATA[What is "Code"?]]></title>
             <link>https://jerrettdavis.com/blog/what-is-code</link>
             <guid>https://jerrettdavis.com/blog/what-is-code</guid>
             <pubDate>Mon, 11 Aug 2025 00:00:00 GMT</pubDate>
-            <description><![CDATA[A beginner-friendly exploration of what “code” really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.]]></description>
+            <description><![CDATA[A beginner-friendly exploration of what "code" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.]]></description>
         </item>
         <item>
             <title><![CDATA[Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker]]></title>
