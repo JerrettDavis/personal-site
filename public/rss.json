@@ -7,10 +7,31 @@
     "icon": "https://jerrettdavis.com/profile.png",
     "items": [
         {
+            "id": "https://jerrettdavis.com/blog/you-dont-hate-abstractions",
+            "url": "https://jerrettdavis.com/blog/you-dont-hate-abstractions",
+            "title": "You Don't Hate Abstractions",
+            "summary": "A plea to developers to embrace abstractions. Carefully.",
+            "date_modified": "2025-12-05T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/tinybdd",
+            "url": "https://jerrettdavis.com/blog/tinybdd",
+            "title": "Announcing TinyBDD: Fluent, Executable Scenarios for .NET",
+            "summary": "Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.",
+            "date_modified": "2025-09-17T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd",
+            "url": "https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd",
+            "title": "BDD: Make the Business Write Your Tests",
+            "summary": "What if your business wrote the tests, and developers just made them pass?",
+            "date_modified": "2025-09-01T00:00:00.000Z"
+        },
+        {
             "id": "https://jerrettdavis.com/blog/what-is-code",
             "url": "https://jerrettdavis.com/blog/what-is-code",
             "title": "What is \"Code\"?",
-            "summary": "A beginner-friendly exploration of what “code” really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
+            "summary": "A beginner-friendly exploration of what \"code\" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
             "date_modified": "2025-08-11T00:00:00.000Z"
         },
         {

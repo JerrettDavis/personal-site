@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jerrettdavis.com</id>
     <title>Jerrett Davis | The Overengineer Blog Posts | RSS Feed</title>
-    <updated>2025-08-12T05:20:54.234Z</updated>
+    <updated>2025-12-06T19:44:50.391Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://jerrettdavis.com"/>
     <link rel="self" href="https://jerrettdavis.com/atom.xml"/>
@@ -11,11 +11,32 @@
     <icon>https://jerrettdavis.com/favicon.png</icon>
     <rights>All rights reserved 2025, Jerrett Davis</rights>
     <entry>
+        <title type="html"><![CDATA[You Don't Hate Abstractions]]></title>
+        <id>https://jerrettdavis.com/blog/you-dont-hate-abstractions</id>
+        <link href="https://jerrettdavis.com/blog/you-dont-hate-abstractions"/>
+        <updated>2025-12-05T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[A plea to developers to embrace abstractions. Carefully.]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Announcing TinyBDD: Fluent, Executable Scenarios for .NET]]></title>
+        <id>https://jerrettdavis.com/blog/tinybdd</id>
+        <link href="https://jerrettdavis.com/blog/tinybdd"/>
+        <updated>2025-09-17T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.]]></summary>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[BDD: Make the Business Write Your Tests]]></title>
+        <id>https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd</id>
+        <link href="https://jerrettdavis.com/blog/making-the-business-write-your-tests-with-bdd"/>
+        <updated>2025-09-01T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[What if your business wrote the tests, and developers just made them pass?]]></summary>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[What is "Code"?]]></title>
         <id>https://jerrettdavis.com/blog/what-is-code</id>
         <link href="https://jerrettdavis.com/blog/what-is-code"/>
         <updated>2025-08-11T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[A beginner-friendly exploration of what “code” really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.]]></summary>
+        <summary type="html"><![CDATA[A beginner-friendly exploration of what "code" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker]]></title>
