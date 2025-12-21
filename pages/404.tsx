@@ -47,10 +47,12 @@ const GoHome = styled.a`
 `
 
 export default function Custom404() {
+    const description = "There doesn't appear to be anything here.";
     return (
         <Container>
             <Head>
                 <title>404 - Page Not Found!</title>
+                <meta name="description" content={description} />
             </Head>
             <Header>Well this is awkward...</Header>
             <SubText>There doesn't appear to be anything here!</SubText>

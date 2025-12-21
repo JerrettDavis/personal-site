@@ -1,27 +1,133 @@
 .container {
-    max-width: 48rem;
-    padding: 0 1rem;
-    margin: .5rem auto 6rem;
+    max-width: 70rem;
+    padding: 0 1.5rem;
+    margin: 0 auto 6rem;
 }
 
 @media screen and (min-width: 64rem) {
     .container {
-        max-width: 64rem;
-        padding: 4rem 1rem;
+        max-width: 72rem;
+        padding: 2.5rem 2rem 0;
     }
 }
 
-.topActions, .topActions a {
-    width: 100%;
-    padding: 4px 8px;
+.containerWide {
+    max-width: 90rem;
+}
+
+@media screen and (min-width: 64rem) {
+    .containerWide {
+        max-width: 90rem;
+    }
+}
+
+.siteHeader {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    background-image: radial-gradient(400px 200px at 10% -20%, var(--color-bg-glow-1), transparent);
+    backdrop-filter: blur(12px);
+}
+
+.siteHeaderInner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.brandLink {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
     color: var(--color-text-primary);
 }
 
-.topActions .buttonLink {
-    max-height: 32px;
-    max-width: 32px;
+.brandTag {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.navLinks {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.navLink {
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.navLink:hover {
+    text-decoration: none;
+    background: var(--color-surface);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -12px rgba(0, 0, 0, 0.6);
+}
+
+.actionRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.socialLink {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.socialLink:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.6);
+}
+
+@media screen and (max-width: 40rem) {
+    .siteHeaderInner {
+        align-items: flex-start;
+    }
+
+    .navLinks {
+        width: 100%;
+    }
+
+    .actionRow {
+        width: 100%;
+    }
 }
 
 
@@ -29,6 +135,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
+    padding-top: 2rem;
 }
 
 .backTo {
@@ -37,16 +145,19 @@
 
 .largeSocialRow {
     display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
 }
 
 .socialIcon {
     width: 3rem;
     height: 3rem;
     padding: .7rem;
-    border-radius: 2.5rem;
-    background-color: #ededed;
-    color: #333;
-    margin: 4px;
+    border-radius: 999px;
+    background-color: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    margin: 0;
 }
 
 .profileContainer {
@@ -61,6 +172,12 @@
     overflow: hidden !important;
 }
 
+.profilePic {
+    border: 2px solid var(--color-border);
+    box-shadow: 0 12px 24px -22px rgba(0, 0, 0, 0.6);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
 .socialIcon:hover {
     transition: all 0.3s;
     box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
@@ -69,4 +186,5 @@
 .profilePic:hover {
     transition: all 0.3s;
     box-shadow: 0 2px 12px -3px rgba(0,0,0,0.5);
+    transform: translateY(-2px);
 }

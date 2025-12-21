@@ -3,11 +3,12 @@ import styles from './layout.module.css'
 import utilStyles from '../styles/utils.module.css'
 import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faGithub, faLinkedin, faMastodon} from '@fortawesome/free-brands-svg-icons'
+import {faBluesky, faGithub, faLinkedin, faMastodon} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
 import React from "react";
-import {faBlog, faHome, faRss} from "@fortawesome/free-solid-svg-icons";
+import {faRss} from "@fortawesome/free-solid-svg-icons";
 import styled from "@emotion/styled";
+import {NAV_ITEMS} from "../data/nav";
 
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
@@ -50,13 +51,24 @@ const HiddenSpacer = styled.div`
   width: 8px;
 `
 
+const NAV_LINKS = NAV_ITEMS.filter((item) => item.showInNav !== false);
+
 export default function Layout({
                                    children,
-                                   pageType
+                                   pageType,
+                                   description,
+                                   containerVariant,
                                }: {
     children: React.ReactNode
     pageType?: PageType
+    description?: string
+    containerVariant?: 'default' | 'wide'
 }) {
+    const metaDescription = description
+        ?? 'A portal to my personal and professional work, musings, and general junk!';
+    const containerClassName = containerVariant === 'wide'
+        ? `${styles.container} ${styles.containerWide}`
+        : styles.container;
     return (
         <div>
             <Head>
@@ -68,10 +80,9 @@ export default function Layout({
                 <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2568ff"/>
                 <meta name="msapplication-TileColor" content="#2568ff"/>
                 <meta name="theme-color" content="#fdfdfd"/>
-                <meta
-                    name="description"
-                    content="A portal to my personal and professional work, musings, and general junk!"
-                />
+                <meta name="description" content={metaDescription}/>
+                <meta property="og:description" content={metaDescription}/>
+                <meta name="twitter:description" content={metaDescription}/>
                 <meta
                     property="og:image"
                     content={`https://og-image.vercel.app/${encodeURI(
@@ -81,59 +92,75 @@ export default function Layout({
                 <meta name="og:title" content={siteTitle}/>
                 <meta name="twitter:card" content="summary_large_image"/>
             </Head>
-            <div className={styles.topActions}>
-                <Link href="/"
-                      className={styles.buttonLink}
-                      aria-label="Go to the home page"
-                      title="Go to the home page"
-                >
-                    <FontAwesomeIcon icon={faHome}/>
-                </Link>
-                <Link href="/blog"
-                      className={styles.buttonLink}
-                      aria-label="Check out my blog"
-                      title="Check out my blog"
-                >
-                    <FontAwesomeIcon icon={faBlog}/>
-                </Link>
-                <a href="https://github.com/jerrettdavis"
-                   target="_blank"
-                   title="My Github page"
-                   aria-label="Go to my Github page"
-                   className={styles.buttonLink}
-                >
-                    <FontAwesomeIcon icon={faGithub}/>
-                </a>
-                <a href="https://mastodon.social/@JerrettDavis"
-                   target="_blank"
-                   title="My Mastodon.Social page"
-                   aria-label="Go to my Mastodon.Social page"
-                   className={styles.buttonLink}
-                >
-                    <FontAwesomeIcon icon={faMastodon}/>
-                </a>
-                <a href="https://www.linkedin.com/in/jddpro/"
-                   target="_blank"
-                   title="My LinkedIn page"
-                   aria-label="Go to my LinkedIn page"
-                   className={styles.buttonLink}
-                >
-                    <FontAwesomeIcon icon={faLinkedin}/>
-                </a>
-                <a href="/rss.xml"
-                   target="_blank"
-                   title="RSS Feed"
-                   aria-label="Go to my RSS Feed"
-                   className={styles.buttonLink}
-                >
-                    <FontAwesomeIcon icon={faRss}/>
-                </a>
-                <HiddenSpacer/>
-                <div className={utilStyles.marginLeft8}>
-                    <ThemeToggle/>
+            <header className={styles.siteHeader}>
+                <div className={styles.siteHeaderInner}>
+                    <div className={styles.brand}>
+                        <Link href="/" className={styles.brandLink}>
+                            Jerrett Davis
+                        </Link>
+                        <span className={styles.brandTag}>The Overengineer</span>
+                    </div>
+                    <nav className={styles.navLinks} aria-label="Primary">
+                        {NAV_LINKS.map((item) => (
+                            <Link href={item.href} className={styles.navLink} key={item.href}>
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+                    <div className={styles.actionRow}>
+                        <a href="https://github.com/jerrettdavis"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="My Github page"
+                           aria-label="Go to my Github page"
+                           className={styles.socialLink}
+                        >
+                            <FontAwesomeIcon icon={faGithub}/>
+                        </a>
+                        <a href="https://bsky.app/profile/jerrett.dev"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="My Bluesky profile"
+                           aria-label="Go to my Bluesky profile"
+                           className={styles.socialLink}
+                        >
+                            <FontAwesomeIcon icon={faBluesky}/>
+                        </a>
+                        <a href="https://mastodon.social/@JerrettDavis"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="My Mastodon.Social page"
+                           aria-label="Go to my Mastodon.Social page"
+                           className={styles.socialLink}
+                        >
+                            <FontAwesomeIcon icon={faMastodon}/>
+                        </a>
+                        <a href="https://www.linkedin.com/in/jddpro/"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="My LinkedIn page"
+                           aria-label="Go to my LinkedIn page"
+                           className={styles.socialLink}
+                        >
+                            <FontAwesomeIcon icon={faLinkedin}/>
+                        </a>
+                        <a href="/rss.xml"
+                           target="_blank"
+                           rel="noreferrer"
+                           title="RSS Feed"
+                           aria-label="Go to my RSS Feed"
+                           className={styles.socialLink}
+                        >
+                            <FontAwesomeIcon icon={faRss}/>
+                        </a>
+                        <HiddenSpacer/>
+                        <div className={utilStyles.marginLeft8}>
+                            <ThemeToggle/>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div className={styles.container}>
+            </header>
+            <div className={containerClassName}>
                 <main>{children}</main>
                 <GoBackToLink pageType={pageType}/>
             </div>

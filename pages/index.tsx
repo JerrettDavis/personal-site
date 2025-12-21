@@ -1,17 +1,16 @@
 import Head from 'next/head'
 import Layout, {PageType} from '../components/layout'
 import utilStyles from '../styles/utils.module.css'
-import {getSortedPostsData} from '../lib/posts'
 import Link from 'next/link'
-import {GetStaticProps} from 'next'
 import styles from "../components/layout.module.css";
 import Image from "next/image";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faGithub, faLinkedin, faMastodon} from "@fortawesome/free-brands-svg-icons";
+import {faBluesky, faGithub, faLinkedin, faMastodon} from "@fortawesome/free-brands-svg-icons";
 
 export default function Home() {
+    const introSentence = 'Hello! I\'m Jerrett, but everyone just calls me JD. I like to write code and occasionally ramble about stuff.';
     return (
-        <Layout pageType={PageType.Home}>
+        <Layout pageType={PageType.Home} description={introSentence}>
             <Head>
                 <title>Jerrett Davis - The Overengineer</title>
             </Head>
@@ -32,6 +31,7 @@ export default function Home() {
                 <div className={styles.largeSocialRow}>
                     <a href="https://github.com/jerrettdavis"
                        target="_blank"
+                       rel="noreferrer"
                        title="My Github page"
                        aria-label="Go to my Github page"
                     >
@@ -39,8 +39,19 @@ export default function Home() {
                             <FontAwesomeIcon icon={faGithub}/>
                         </div>
                     </a>
+                    <a href="https://bsky.app/profile/jerrett.dev"
+                       target="_blank"
+                       rel="noreferrer"
+                       title="My Bluesky profile"
+                       aria-label="Go to my Bluesky profile"
+                    >
+                        <div className={styles.socialIcon}>
+                            <FontAwesomeIcon icon={faBluesky}/>
+                        </div>
+                    </a>
                     <a href="https://mastodon.social/@JerrettDavis"
                        target="_blank"
+                       rel="noreferrer"
                        title="My Mastodon.Social page"
                        aria-label="Go to my Mastodon.Social page"
                     >
@@ -50,6 +61,7 @@ export default function Home() {
                     </a>
                     <a href="https://www.linkedin.com/in/jddpro/"
                        target="_blank"
+                       rel="noreferrer"
                        title="My LinkedIn page"
                        aria-label="Go to my LinkedIn page"
                     >
@@ -61,8 +73,7 @@ export default function Home() {
             </header>
             <section className={utilStyles.headingMd}>
                 <p>
-                    Hello! I'm Jerrett, but everyone just calls me JD. I like to write code and occasionally ramble
-                    about stuff.{' '}
+                    {introSentence}{' '}
                     You can read more <Link href="/about-me">about me here.</Link> I've also been working on a <Link
                     href="/blog">blog</Link>!
                 </p>
@@ -73,13 +84,4 @@ export default function Home() {
 
 export default interface BaseProps<TModel> {
     props: TModel
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-    const allPostsData = await getSortedPostsData()
-    return {
-        props: {
-            allPostsData
-        }
-    }
 }

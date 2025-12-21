@@ -1,0 +1,128 @@
+.hero {
+    padding: 3rem 0 2rem;
+}
+
+.kicker {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0 0 0.8rem;
+    font-size: 2.6rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--color-text-deemphasized);
+}
+
+.categoryGrid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+}
+
+.categoryCard {
+    padding: 1.4rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 32px -26px rgba(0, 0, 0, 0.6);
+}
+
+.categoryTitle {
+    margin: 0 0 0.4rem;
+    font-size: 1.3rem;
+}
+
+.categoryDescription {
+    margin: 0 0 1rem;
+    color: var(--color-text-deemphasized);
+}
+
+.toolList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+}
+
+.toolItem {
+    padding: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: linear-gradient(120deg, color-mix(in srgb, var(--color-surface-2) 80%, transparent), var(--color-surface-2));
+}
+
+.toolName {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.toolDescription {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.95rem;
+}
+
+.detailGroups {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 0.75rem;
+}
+
+.detailGroup {
+    display: grid;
+    grid-template-columns: minmax(110px, 140px) 1fr;
+    gap: 0.9rem;
+    align-items: start;
+}
+
+.detailLabel {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.detailList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.detailItem {
+    border-left: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+    padding-left: 0.65rem;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+}
+
+@media screen and (min-width: 48rem) {
+    .categoryGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media screen and (min-width: 80rem) {
+    .categoryGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media screen and (max-width: 48rem) {
+    .detailGroup {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+}

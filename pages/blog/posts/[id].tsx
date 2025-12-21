@@ -1,105 +1,122 @@
 import Layout, {PageType} from '../../../components/layout'
-import PostData, {getAllPostIds, getPostData} from '../../../lib/posts'
+import PostData, {getAllPostIds, getPostData, getSeriesDataForPost, SeriesData} from '../../../lib/posts'
 import Head from 'next/head'
 import Date from '../../../components/date'
-import utilStyles from '../../../styles/utils.module.css'
 import {GetStaticPaths, GetStaticProps} from 'next'
-import styled from "@emotion/styled";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {faClock} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Image from "next/image";
-
-const Tag = styled.div`
-  display: inline-block;
-  color: var(--color-text-deemphasized);
-  border-color: var(--color-border) !important;
-  border: 1px solid;
-  padding: 8px 16px;
-  margin: 0 8px;
-`;
-
-const TagContainer = styled.div`
-  margin-top: 3rem;
-`;
-
-const ArticleInfoContainer = styled.div`
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-  margin: 8px 0;
-  padding: 16px 0;
-  display:flex;
-  flex-direction: column;
-`;
-
-const AuthorName = styled.span`
-  font-weight: bold;
-`;
-
-const PublishedOnBox = styled.span`
-  font-size: .9em;
-`
-
-const BoldString = styled.span`
-  font-weight: bold;
-`
-const ReadingTimeRow = styled.div`
-  font-size:.9em;
-`
-
-const ReadingTime = (props) => {
-    const time = Math.round(props.wordCount / 200);
-    return (<>{time}</>);
-}
-
-const ReadingTimeDisplay = styled.span`
-  margin-left: 16px;
-`
+import styles from "../post.module.css";
 
 const author = 'Jerrett Davis';
 
+const getReadingTime = (wordCount?: number) => {
+    if (!wordCount || wordCount <= 0) return 1;
+    return Math.max(1, Math.round(wordCount / 200));
+};
+
 export default function Post({
-         postData
+         postData,
+         seriesData,
      }: {
     postData: PostData
+    seriesData: SeriesData | null
 }) {
-    console.log(postData);
+    const previousPost = seriesData?.posts[seriesData.currentIndex - 1];
+    const nextPost = seriesData?.posts[seriesData.currentIndex + 1];
+    const description = (postData.description && postData.description.trim().length > 0)
+        ? postData.description
+        : postData.stub;
+    const readingTime = getReadingTime(postData.wordCount);
     return (
-        <Layout pageType={PageType.BlogPost}>
+        <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
                 <title>{postData.title}</title>
             </Head>
-            <article>
-                <h1 className={utilStyles.headingXl}>{postData.title}</h1>
+            <article className={styles.page}>
+                <header className={styles.hero}>
+                    <p className={styles.kicker}>Blog post</p>
+                    <h1 className={styles.title}>{postData.title}</h1>
+                    <p className={styles.subtitle}>{description}</p>
+                    <div className={styles.heroActions}>
+                        <Link href="/blog" className={styles.primaryLink}>
+                            Back to blog
+                        </Link>
+                        <Link href="/search" className={styles.secondaryLink}>
+                            Search posts
+                        </Link>
+                    </div>
+                    <div className={styles.metaRow}>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaLabel}>Author</span>
+                            <span className={styles.metaValue}>{author}</span>
+                        </div>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaLabel}>Published</span>
+                            <span className={styles.metaValue}>
+                                <Date dateString={postData.date} />
+                            </span>
+                        </div>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaLabel}>Word count</span>
+                            <span className={styles.metaValue}>{postData.wordCount?.toLocaleString()}</span>
+                        </div>
+                        <div className={styles.metaItem}>
+                            <span className={styles.metaLabel}>Read time</span>
+                            <span className={`${styles.metaValue} ${styles.readTime}`}>
+                                <FontAwesomeIcon height={14} width={14} icon={faClock} />
+                                {readingTime} min
+                            </span>
+                        </div>
+                    </div>
+                </header>
                 {postData.featured && (
                     <Image
+                        className={styles.featuredImage}
                         width={940}
                         height={470}
                         src={postData.featured}
                         alt={postData.title}
                     />
                 )}
-                <ArticleInfoContainer>
-                    <AuthorName>{author}</AuthorName>
-                    <PublishedOnBox className={utilStyles.lightText}>
-                        Published on <BoldString><Date dateString={postData.date} /></BoldString>
-                    </PublishedOnBox>
-                    <ReadingTimeRow className={utilStyles.lightText}>
-                        <span>Word Count: <BoldString>{postData.wordCount?.toLocaleString()}</BoldString></span>
-                        <ReadingTimeDisplay>
-                            <FontAwesomeIcon height={14} width={14} icon={faClock} /> <ReadingTime wordCount={postData.wordCount} /> min read
-                        </ReadingTimeDisplay>
-                    </ReadingTimeRow>
-
-                </ArticleInfoContainer>
-                <div dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+                <div className={styles.content} dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+                {seriesData && (
+                    <section className={styles.seriesCard}>
+                        <div className={styles.seriesTitle}>
+                            Series: {seriesData.name} (Part {seriesData.currentIndex + 1} of {seriesData.posts.length})
+                        </div>
+                        <div className={styles.seriesNav}>
+                            {previousPost && (
+                                <Link href={`/blog/posts/${previousPost.id}`}>
+                                    Prev: {previousPost.title}
+                                </Link>
+                            )}
+                            {nextPost && (
+                                <Link href={`/blog/posts/${nextPost.id}`}>
+                                    Next: {nextPost.title}
+                                </Link>
+                            )}
+                        </div>
+                        <ol className={styles.seriesList}>
+                            {seriesData.posts.map((post, index) => (
+                                <li className={styles.seriesItem} key={post.id} data-active={index === seriesData.currentIndex}>
+                                    <Link href={`/blog/posts/${post.id}`}>
+                                        {index + 1}. {post.title}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ol>
+                    </section>
+                )}
                 {!!postData.tags && (
-                    <TagContainer>
-                        {postData.tags.map(t =>
-                            <Link href={`/blog/tags/${t}`} key={t}>
-                                <Tag>#{t}</Tag>
-                            </Link>)}
-                    </TagContainer>
+                    <div className={styles.tagRow}>
+                        {postData.tags.map(t => (
+                            <Link href={`/blog/tags/${t}`} key={t} className={styles.tagChip}>
+                                #{t}
+                            </Link>
+                        ))}
+                    </div>
                 )}
             </article>
         </Layout>
@@ -115,10 +132,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const postData = await getPostData(params.id as string)
+    const [postData, seriesData] = await Promise.all([
+        getPostData(params.id as string),
+        getSeriesDataForPost(params.id as string),
+    ])
     return {
         props: {
-            postData
+            postData,
+            seriesData: seriesData ?? null,
         }
     }
 }

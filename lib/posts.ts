@@ -19,10 +19,32 @@ import gherkin from 'highlight.js/lib/languages/gherkin'
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
+function parseSeriesOrder(value: unknown): number | null {
+    if (typeof value === 'number' && !Number.isNaN(value)) return value;
+    if (typeof value === 'string' && value.trim().length > 0) {
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+    return null;
+}
+
+function normalizeSeries(series: string) {
+    return series.trim().toLowerCase();
+}
+
+function buildStub(content: string) {
+    return remark()
+        .use(strip)
+        .processSync(content)
+        .toString()
+        .substring(0, 160) + '...';
+}
+
 export default interface PostData extends PostBase {
     useToc: boolean | undefined | null
     wordCount: number;
     contentHtml: string;
+    stub: string;
 }
 
 export interface PostSummary extends PostBase {
@@ -33,9 +55,12 @@ export interface PostSummary extends PostBase {
 interface PostBase {
     title: string;
     date: string;
+    description?: string | undefined | null;
     featured?: string | undefined | null;
     tags?: string[] | undefined | null;
     categories?: string[] | undefined | null;
+    series?: string | undefined | null;
+    seriesOrder?: number | undefined | null;
 }
 
 export async function getSortedPostsData(): Promise<PostSummary[]> {
@@ -47,17 +72,16 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
             const matterResult = matter(fileContents);
-            const content = remark()
-                .use(strip)
-                .processSync(matterResult.content)
-                .toString()
-                .substring(0, 160) + '...';
+            const content = buildStub(matterResult.content);
             const tags = formatTags(matterResult.data.tags);
+            const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
 
             return {
                 id,
                 stub: content,
-                ...(matterResult.data as { date: string; title: string }),
+                ...(matterResult.data as { date: string; title: string; description?: string | null }),
+                series: typeof matterResult.data.series === 'string' ? matterResult.data.series : null,
+                seriesOrder: seriesOrder,
                 tags: tags,
                 categories: matterResult.data.categories || null,
             };
@@ -102,6 +126,7 @@ export async function getPostData(id: string): Promise<PostData> {
     const wordCount = multiSplit(matterResult.content, [' ', '\n'])
         .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
         .length;
+    const stub = buildStub(matterResult.content);
 
     // Use remark to convert markdown into HTML string
     let builder = unified()
@@ -120,15 +145,51 @@ export async function getPostData(id: string): Promise<PostData> {
 
     const contentHtml = processedContent.toString();
     const tags = formatTags(matterResult.data.tags);
+    const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
 
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
     return {
         id: id,
         contentHtml: contentHtml,
-        ...(matterResult.data as { date: string; title: string, featured?: string | undefined | null }),
+        ...(matterResult.data as { date: string; title: string; description?: string | null; featured?: string | undefined | null }),
         wordCount: wordCount,
+        stub: stub,
         tags: tags,
         categories: matterResult.data.categories || null,
+        series: typeof matterResult.data.series === 'string' ? matterResult.data.series : null,
+        seriesOrder: seriesOrder,
     } as any as PostData;
+}
+
+export interface SeriesData {
+    name: string;
+    posts: PostSummary[];
+    currentIndex: number;
+}
+
+export async function getSeriesDataForPost(id: string): Promise<SeriesData | null> {
+    const allPosts = await getSortedPostsData();
+    const current = allPosts.find((post) => post.id === id);
+    if (!current?.series) return null;
+
+    const seriesName = current.series;
+    const normalized = normalizeSeries(seriesName);
+    const seriesPosts = allPosts
+        .filter((post) => post.series && normalizeSeries(post.series) === normalized)
+        .sort((a, b) => {
+            const aOrder = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+            const bOrder = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+            if (aOrder !== bOrder) return aOrder - bOrder;
+            return a.date < b.date ? -1 : 1;
+        });
+
+    const currentIndex = seriesPosts.findIndex((post) => post.id === id);
+    if (currentIndex === -1) return null;
+
+    return {
+        name: seriesName,
+        posts: seriesPosts,
+        currentIndex,
+    };
 }

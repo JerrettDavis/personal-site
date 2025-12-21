@@ -1,8 +1,243 @@
-.noTopMargin {
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+    padding-top: 1.5rem;
+}
+
+.hero {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+}
+
+@media screen and (min-width: 64rem) {
+    .hero {
+        grid-template-columns: 1.3fr 0.7fr;
+    }
+}
+
+.kicker {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.heroTitle {
+    margin: 0 0 0.6rem;
+    font-size: 3rem;
+}
+
+.heroSubtitle {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--color-text-deemphasized);
+    font-size: 1.1rem;
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+}
+
+.primaryLink,
+.secondaryLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.primaryLink {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.primaryLink:visited {
+    color: var(--color-bg-primary);
+}
+
+.secondaryLink {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+}
+
+.secondaryLink:visited {
+    color: var(--color-text-primary);
+}
+
+.heroCard {
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 18px 36px -28px rgba(0, 0, 0, 0.5);
+}
+
+.cardTitle {
     margin-top: 0;
 }
 
-h1.articlePad, h2.articlePad, h3.articlePad, h4.articlePad, h5.articlePad {
-    margin-top: 2rem;
-    margin-bottom: 0;
+.metaList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.metaList li {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.metaLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.tagRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+}
+
+.section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 2.5rem;
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+    margin: 0;
+}
+
+.sectionLead {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--color-text-deemphasized);
+}
+
+.sectionContent {
+    display: grid;
+    gap: 1rem;
+    max-width: 52rem;
+}
+
+.sectionNote {
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.cardGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.cardHeading {
+    margin-top: 0;
+}
+
+.interestColumns {
+    display: grid;
+    gap: 2rem;
+}
+
+@media screen and (min-width: 64rem) {
+    .interestColumns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.groupTitle {
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    color: var(--color-text-deemphasized);
+}
+
+.timeline {
+    border-left: 1px solid var(--color-border);
+    margin-left: 0.5rem;
+    padding-left: 1.5rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.timelineItem {
+    position: relative;
+}
+
+.timelineItem::before {
+    content: "";
+    position: absolute;
+    left: -2.05rem;
+    top: 1.2rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.timelineCard {
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.timelineHeader {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    align-items: baseline;
+    margin-bottom: 0.6rem;
+}
+
+.timelineRange {
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
 }
