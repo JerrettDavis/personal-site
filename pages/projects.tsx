@@ -7,7 +7,8 @@ import {GITHUB_USERNAME, PROJECT_ACTIVITY_DAYS, PROJECT_OVERRIDES} from "../data
 import type {ProjectLink, ProjectMeta} from "../data/projects";
 import Link from "next/link";
 import Date from "../components/date";
-import {getSortedPostsData, PostSummary} from "../lib/posts";
+import {getSortedPostsData} from "../lib/posts";
+import type {PostSummary} from "../lib/posts";
 import type {CSSProperties} from "react";
 
 interface ProjectCard {

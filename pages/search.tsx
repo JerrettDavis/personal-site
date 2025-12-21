@@ -3,7 +3,8 @@ import Layout from "../components/layout";
 import styles from "./search.module.css";
 import {useMemo, useState} from "react";
 import {GetStaticProps} from "next";
-import {getSortedPostsData, PostSummary} from "../lib/posts";
+import {getSortedPostsData} from "../lib/posts";
+import type {PostSummary} from "../lib/posts";
 import {NAV_ITEMS, NavItem} from "../data/nav";
 import Link from "next/link";
 

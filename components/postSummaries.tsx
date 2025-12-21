@@ -3,7 +3,7 @@ import Link from "next/link";
 import Date from "./date";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faImage} from "@fortawesome/free-solid-svg-icons";
-import {PostSummary} from "../lib/posts";
+import type {PostSummary} from "../lib/posts";
 import styled from "@emotion/styled";
 import Image from "next/image";
 
