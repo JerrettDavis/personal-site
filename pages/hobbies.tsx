@@ -5,7 +5,7 @@ import {GetStaticProps} from "next";
 import {HOBBIES} from "../data/hobbies";
 import type {HobbyBlurb} from "../data/hobbies";
 import {getPostsForTags} from "../lib/tags";
-import {PostSummary} from "../lib/posts";
+import type {PostSummary} from "../lib/posts";
 import PostSummaries from "../components/postSummaries";
 
 interface HobbiesProps {

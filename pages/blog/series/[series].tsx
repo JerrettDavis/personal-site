@@ -1,58 +1,59 @@
 import {GetStaticPaths, GetStaticProps} from "next";
-import type {PostSummary} from "../../../lib/posts";
-import Layout, {PageType} from "../../../components/layout";
 import Head from "next/head";
-import utilStyles from "../../../styles/utils.module.css";
 import Link from "next/link";
-import {Category, getAllCategories, getCategoryData, getPostsForCategory} from "../../../lib/categories";
+import Layout, {PageType} from "../../../components/layout";
+import utilStyles from "../../../styles/utils.module.css";
 import PostSummaries from "../../../components/postSummaries";
-import styles from "../listing.module.css";
+import {getAllSeriesSummaries, getSeriesDataBySlug} from "../../../lib/posts";
+import type {PostSummary} from "../../../lib/posts";
 import {getSortedTagsData, TagData} from "../../../lib/tags";
+import {Category, getAllCategories} from "../../../lib/categories";
+import styles from "../listing.module.css";
 
-export default function PostCategory(
-    {
-        categoryData,
-        postData,
-        tags,
-        categories,
-    }: {
-        categoryData: Category,
-        postData: PostSummary[]
-        tags: TagData[]
-        categories: Category[]
-    }) {
-    const shortName = categoryData.categoryName.split('/').pop();
-    const title = `Posts in ${shortName} - the overengineer. - Jerrett Davis`;
-    const description = `Most recent posts in the ${shortName} category on the overengineer blog.`;
+export default function SeriesDetail({
+    series,
+    tags,
+    categories,
+}: {
+    series: { name: string; posts: PostSummary[] }
+    tags: TagData[]
+    categories: Category[]
+}) {
+    const postCount = series.posts.length;
+    const description = `Posts in the ${series.name} series on the overengineer blog.`;
     return (
         <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
-                <title>{title}</title>
+                <title>{series.name} series - the overengineer. - Jerrett Davis</title>
             </Head>
             <section className={styles.hero}>
-                <p className={styles.kicker}>Category</p>
-                <h1 className={styles.title}>{shortName}</h1>
+                <p className={styles.kicker}>Series</p>
+                <h1 className={styles.title}>{series.name}</h1>
                 <p className={styles.lede}>
-                    Posts filed under <strong>{shortName}</strong>.
+                    {postCount} post{postCount === 1 ? '' : 's'} exploring a shared thread.
                 </p>
                 <div className={styles.heroActions}>
                     <Link href="/blog" className={styles.primaryLink}>
                         Back to blog
                     </Link>
-                    <Link href="/search" className={styles.secondaryLink}>
-                        Search posts
+                    <Link href="/blog/series" className={styles.secondaryLink}>
+                        All series
                     </Link>
+                </div>
+                <div className={styles.heroMeta}>
+                    <span className={styles.heroMetaLabel}>Posts</span>
+                    <span className={styles.heroBadge}>{postCount}</span>
                 </div>
             </section>
             <section className={styles.contentGrid}>
                 <section>
                     <div className={styles.sectionHeader}>
-                        <h2 className={utilStyles.headingLg}>Most recent posts</h2>
+                        <h2 className={utilStyles.headingLg}>Series posts</h2>
                         <p className={styles.sectionLead}>
-                            {postData.length} post{postData.length === 1 ? '' : 's'} in {shortName}.
+                            Start at the top and follow along.
                         </p>
                     </div>
-                    <PostSummaries postSummaries={postData}/>
+                    <PostSummaries postSummaries={series.posts}/>
                 </section>
                 <aside className={styles.sidebar}>
                     {categories && categories.length > 0 && (
@@ -85,39 +86,37 @@ export default function PostCategory(
                 </aside>
             </section>
         </Layout>
-    )
+    );
 }
-
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const paths = (await getAllCategories())
-        .map(p => {
-            return {
-                params: {
-                    category: p.categoryPath.split('/')
-                }
-            }
-        });
-
+    const series = await getAllSeriesSummaries();
     return {
-        paths,
+        paths: series.map((entry) => ({params: {series: entry.slug}})),
         fallback: false
-    }
-}
+    };
+};
 
 export const getStaticProps: GetStaticProps = async ({params}) => {
-    const [postData, categoryData, tags, categories] = await Promise.all([
-        getPostsForCategory((params.category as string[]).join('/')),
-        getCategoryData((params.category as string[]).join('/')),
+    const slugParam = Array.isArray(params?.series) ? params?.series[0] : params?.series;
+    if (!slugParam || typeof slugParam !== 'string') {
+        return {notFound: true};
+    }
+
+    const [series, tags, categories] = await Promise.all([
+        getSeriesDataBySlug(slugParam),
         getSortedTagsData(),
         getAllCategories(),
     ]);
+    if (!series) {
+        return {notFound: true};
+    }
+
     return {
         props: {
-            categoryData: categoryData,
-            postData: postData,
+            series,
             tags,
             categories,
         }
-    }
-}
+    };
+};

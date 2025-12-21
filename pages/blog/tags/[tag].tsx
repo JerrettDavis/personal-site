@@ -1,5 +1,5 @@
 import {GetStaticPaths, GetStaticProps} from "next";
-import {PostSummary} from "../../../lib/posts";
+import type {PostSummary} from "../../../lib/posts";
 import {getAllTagIds, getPostsForTag} from "../../../lib/tags";
 import Layout, {PageType} from "../../../components/layout";
 import Head from "next/head";

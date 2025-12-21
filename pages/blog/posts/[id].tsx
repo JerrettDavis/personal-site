@@ -1,5 +1,8 @@
 import Layout, {PageType} from '../../../components/layout'
-import PostData, {getAllPostIds, getPostData, getSeriesDataForPost, SeriesData} from '../../../lib/posts'
+import {getAllPostIds, getPostData, getSeriesDataForPost} from '../../../lib/posts'
+import type PostData from '../../../lib/posts'
+import type {SeriesData} from '../../../lib/posts'
+import {toSeriesSlug} from '../../../lib/blog-utils'
 import Head from 'next/head'
 import Date from '../../../components/date'
 import {GetStaticPaths, GetStaticProps} from 'next'
@@ -84,7 +87,11 @@ export default function Post({
                 {seriesData && (
                     <section className={styles.seriesCard}>
                         <div className={styles.seriesTitle}>
-                            Series: {seriesData.name} (Part {seriesData.currentIndex + 1} of {seriesData.posts.length})
+                            Series:{' '}
+                            <Link href={`/blog/series/${toSeriesSlug(seriesData.name)}`}>
+                                {seriesData.name}
+                            </Link>{' '}
+                            (Part {seriesData.currentIndex + 1} of {seriesData.posts.length})
                         </div>
                         <div className={styles.seriesNav}>
                             {previousPost && (

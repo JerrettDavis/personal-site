@@ -3,7 +3,9 @@ import Head from "next/head";
 import utilStyles from "../../styles/utils.module.css";
 import Link from "next/link";
 import {GetStaticProps} from "next";
-import {getSortedPostsData, PostSummary} from "../../lib/posts";
+import {getSortedPostsData} from "../../lib/posts";
+import type {PostSummary} from "../../lib/posts";
+import {POSTS_PER_PAGE} from "../../lib/blog-utils";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
@@ -11,22 +13,27 @@ import PostSummaries from "../../components/postSummaries";
 import generateRssFeed from "../../utils/generateRSSFeed";
 import styles from "./index.module.css";
 
+
 export default function Index(
     {
         postSummaries,
         tags,
-        categories
+        categories,
+        currentPage,
+        totalPages,
+        totalPosts,
     }: BlogIndexPropsModel) {
     const blogDescription = 'Developer blog exploring architecture, testing, and the occasional over-engineered experiment.';
+    const titleSuffix = currentPage > 1 ? ` (Page ${currentPage})` : '';
     const stats = [
-        {label: 'Posts', value: postSummaries.length},
+        {label: 'Posts', value: totalPosts},
         {label: 'Tags', value: tags?.length ?? 0},
         {label: 'Categories', value: categories?.length ?? 0},
     ];
     return (
         <Layout description={blogDescription}>
             <Head>
-                <title>the overengineer. - Jerrett Davis</title>
+                <title>the overengineer.{titleSuffix} - Jerrett Davis</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Blog</p>
@@ -47,6 +54,9 @@ export default function Index(
                     <a href="/rss.xml" className={styles.secondaryLink}>
                         RSS feed
                     </a>
+                    <Link href="/blog/series" className={styles.secondaryLink}>
+                        Series
+                    </Link>
                     <Link href="/projects" className={styles.secondaryLink}>
                         Projects
                     </Link>
@@ -70,6 +80,27 @@ export default function Index(
                         </p>
                     </div>
                     <PostSummaries postSummaries={postSummaries}/>
+                    {totalPages > 1 && (
+                        <nav className={styles.pagination} aria-label="Blog pagination">
+                            <div className={styles.pageList}>
+                                {Array.from({length: totalPages}).map((_, index) => {
+                                    const pageNumber = index + 1;
+                                    const isActive = pageNumber === currentPage;
+                                    const href = pageNumber === 1 ? '/blog' : `/blog/page/${pageNumber}`;
+                                    return (
+                                        <Link
+                                            key={pageNumber}
+                                            href={href}
+                                            className={`${styles.pageLink} ${isActive ? styles.pageLinkActive : ''}`}
+                                            aria-current={isActive ? 'page' : undefined}
+                                        >
+                                            {pageNumber}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </nav>
+                    )}
                 </section>
                 <aside className={styles.sidebar}>
                     {!!categories && createCategoriesIfPresent(categories)}
@@ -121,10 +152,13 @@ const createCategoriesIfPresent = (categories?: Category[] | null | undefined) =
     }
 }
 
-interface BlogIndexPropsModel {
+export interface BlogIndexPropsModel {
     postSummaries: PostSummary[],
     tags: TagData[],
     categories: Category[],
+    currentPage: number,
+    totalPages: number,
+    totalPosts: number,
 }
 
 interface BlogIndexProps extends BaseProps<BlogIndexPropsModel> {
@@ -132,15 +166,21 @@ interface BlogIndexProps extends BaseProps<BlogIndexPropsModel> {
 
 
 export const getStaticProps: GetStaticProps = async (): Promise<BlogIndexProps> => {
-    const postSummaries = await getSortedPostsData()
-    const tags = await getSortedTagsData()
+    const allPosts = await getSortedPostsData();
+    const tags = await getSortedTagsData();
     const categories = await getAllCategories();
+    const totalPosts = allPosts.length;
+    const totalPages = Math.max(1, Math.ceil(totalPosts / POSTS_PER_PAGE));
+    const postSummaries = allPosts.slice(0, POSTS_PER_PAGE);
     await generateRssFeed();
     return {
         props: {
-            postSummaries: postSummaries,
-            tags: tags,
-            categories: categories
+            postSummaries,
+            tags,
+            categories,
+            currentPage: 1,
+            totalPages,
+            totalPosts,
         }
     };
 }

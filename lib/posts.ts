@@ -16,6 +16,7 @@ import {formatTags} from "./tags";
 import {common} from "lowlight";
 import dockerfile from "highlight.js/lib/languages/dockerfile";
 import gherkin from 'highlight.js/lib/languages/gherkin'
+import {toSeriesSlug} from "./blog-utils";
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -168,6 +169,13 @@ export interface SeriesData {
     currentIndex: number;
 }
 
+export interface SeriesSummary {
+    name: string;
+    slug: string;
+    count: number;
+    latestDate: string;
+}
+
 export async function getSeriesDataForPost(id: string): Promise<SeriesData | null> {
     const allPosts = await getSortedPostsData();
     const current = allPosts.find((post) => post.id === id);
@@ -191,5 +199,50 @@ export async function getSeriesDataForPost(id: string): Promise<SeriesData | nul
         name: seriesName,
         posts: seriesPosts,
         currentIndex,
+    };
+}
+
+export async function getAllSeriesSummaries(): Promise<SeriesSummary[]> {
+    const allPosts = await getSortedPostsData();
+    const seriesMap = new Map<string, SeriesSummary>();
+
+    allPosts.forEach((post) => {
+        if (!post.series) return;
+        const slug = toSeriesSlug(post.series);
+        const existing = seriesMap.get(slug);
+        if (!existing) {
+            seriesMap.set(slug, {
+                name: post.series,
+                slug,
+                count: 1,
+                latestDate: post.date,
+            });
+            return;
+        }
+
+        existing.count += 1;
+        if (post.date > existing.latestDate) {
+            existing.latestDate = post.date;
+        }
+    });
+
+    return Array.from(seriesMap.values()).sort((a, b) =>
+        a.latestDate < b.latestDate ? 1 : -1
+    );
+}
+
+export async function getSeriesDataBySlug(slug: string): Promise<{ name: string; posts: PostSummary[] } | null> {
+    const allPosts = await getSortedPostsData();
+    const matchingPosts = allPosts.filter((post) => post.series && toSeriesSlug(post.series) === slug);
+    if (matchingPosts.length === 0) return null;
+    const seriesName = matchingPosts[0].series as string;
+    return {
+        name: seriesName,
+        posts: matchingPosts.sort((a, b) => {
+            const aOrder = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+            const bOrder = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+            if (aOrder !== bOrder) return aOrder - bOrder;
+            return a.date < b.date ? -1 : 1;
+        }),
     };
 }
