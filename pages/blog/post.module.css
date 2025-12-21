@@ -1,0 +1,180 @@
+.page {
+    display: grid;
+    gap: 2rem;
+    padding-top: 1.5rem;
+}
+
+.hero {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.kicker {
+    margin: 0 0 0.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 2.8rem;
+}
+
+.subtitle {
+    margin: 0;
+    max-width: 52rem;
+    color: var(--color-text-deemphasized);
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
+}
+
+.primaryLink,
+.secondaryLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.primaryLink {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.primaryLink:visited {
+    color: var(--color-bg-primary);
+}
+
+.secondaryLink {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+}
+
+.secondaryLink:visited {
+    color: var(--color-text-primary);
+}
+
+.metaRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 14px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.metaItem {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 120px;
+}
+
+.metaLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metaValue {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.readTime {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.featuredImage {
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 36px -28px rgba(0, 0, 0, 0.5);
+}
+
+.content {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.content :global(h2),
+.content :global(h3),
+.content :global(h4) {
+    margin-top: 2rem;
+}
+
+.seriesCard {
+    margin-top: 1rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.seriesTitle {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.seriesNav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.seriesList {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.seriesItem {
+    margin-bottom: 0.35rem;
+}
+
+.seriesItem[data-active="true"] {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.tagRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+}
+
+.tagChip {
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.tagChip:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+}
