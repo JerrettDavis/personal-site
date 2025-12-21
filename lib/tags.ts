@@ -37,3 +37,12 @@ export async function getPostsForTag(tag: string): Promise<PostSummary[]> {
     return (await getSortedPostsData())
         .filter((p: PostSummary) => p.tags?.includes(tag));
 }
+
+const normalizeTag = (tag: string) => tag.trim().toLowerCase();
+
+export async function getPostsForTags(tags: string[]): Promise<PostSummary[]> {
+    if (!tags || tags.length === 0) return [];
+    const normalizedTags = new Set(tags.map(normalizeTag));
+    return (await getSortedPostsData())
+        .filter((p: PostSummary) => p.tags?.some((tag: string) => normalizedTags.has(normalizeTag(tag))));
+}

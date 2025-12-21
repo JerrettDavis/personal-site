@@ -14,8 +14,9 @@ export default function PostTag({
     tag: string,
     postData: PostSummary[]
 }) {
+    const description = `Posts tagged with #${tag} on the overengineer blog.`;
     return (
-        <Layout pageType={PageType.BlogPost}>
+        <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
                 <title>Posts tagged with #{tag} - the overengineer. - Jerrett Davis</title>
             </Head>

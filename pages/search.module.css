@@ -1,0 +1,142 @@
+.hero {
+    padding: 3rem 0 1.5rem;
+}
+
+.kicker {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0 0 0.8rem;
+    font-size: 2.6rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--color-text-deemphasized);
+}
+
+.searchPanel {
+    margin-top: 1.5rem;
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 32px -28px rgba(0, 0, 0, 0.6);
+}
+
+.searchLabel {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    margin-bottom: 0.5rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+}
+
+.searchInput:focus {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+    outline-offset: 2px;
+}
+
+.searchMeta {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+}
+
+.emptyState {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+}
+
+.resultsGrid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 2rem;
+}
+
+.resultsSection {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 1.2rem;
+}
+
+.resultsTitle {
+    margin-top: 0;
+}
+
+.resultsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.resultCard {
+    padding: 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.resultLink {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-text-primary);
+}
+
+.resultLink:hover {
+    text-decoration: underline;
+}
+
+.resultSummary {
+    margin: 0.4rem 0 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.9rem;
+}
+
+.tagRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+}
+
+.tag {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-deemphasized);
+}
+
+.emptyResult {
+    color: var(--color-text-deemphasized);
+    font-size: 0.9rem;
+}

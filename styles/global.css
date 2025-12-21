@@ -1,50 +1,73 @@
 body,
 body[data-theme="light"] {
-    --color-primary: #00809d;
-    --color-text-primary: #27201a;
-    --color-text-secondary: #00809d;
-    --color-text-deemphasized: #555577;
-    --color-link: #8d1ab7;
-    --color-link-deemphasized: #9b7da7;
-    --color-bg-primary: #fff;
-    --color-bg-toggle: #00809d;
-    --color-bg-thumb: white;
-    --color-border: #ccccee;
-    --color-placeholder-bg-start: #f5f5f5;
-    --color-placeholder-bg-end: #e0e0e0;
+    --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+    --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --color-primary: #1c5f7a;
+    --color-text-primary: #0f1720;
+    --color-text-secondary: #144b63;
+    --color-text-deemphasized: #4b5565;
+    --color-link: #2a4db8;
+    --color-link-deemphasized: #4f66b3;
+    --color-bg-primary: #eef1f6;
+    --color-bg-toggle: #1c5f7a;
+    --color-bg-thumb: #ffffff;
+    --color-border: #c9d3e1;
+    --color-placeholder-bg-start: #e9eef7;
+    --color-placeholder-bg-end: #dde5f1;
+    --color-surface: #f7f9fc;
+    --color-surface-2: #e7ecf4;
+    --color-bg-glow-1: rgba(72, 182, 210, 0.22);
+    --color-bg-glow-2: rgba(108, 120, 200, 0.14);
 }
 
 body[data-theme="dark"] {
-    --color-primary: #7798AB;
-    --color-text-primary: #d8d8d8;
-    --color-text-secondary: #7798AB;
-    --color-text-deemphasized: #9ca6a9;
-    --color-link: #b899cd;
-    --color-link-deemphasized: #C4B7C7;
-    --color-bg-primary: #0d1b1e;
-    --color-bg-toggle: #2f3334;
-    --color-bg-thumb: #A879C7;
-    --color-border: #3c5358;
-    --color-placeholder-bg-start: #25383c;
-    --color-placeholder-bg-end: #061113;
+    --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+    --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --color-primary: #7cc9e4;
+    --color-text-primary: #e7edf7;
+    --color-text-secondary: #7cc9e4;
+    --color-text-deemphasized: #a3adbe;
+    --color-link: #9b90f1;
+    --color-link-deemphasized: #b5ace7;
+    --color-bg-primary: #0a0f18;
+    --color-bg-toggle: #1b2334;
+    --color-bg-thumb: #9b90f1;
+    --color-border: #2a3346;
+    --color-placeholder-bg-start: #131a2a;
+    --color-placeholder-bg-end: #0a0f17;
+    --color-surface: #111827;
+    --color-surface-2: #172235;
+    --color-bg-glow-1: rgba(82, 184, 212, 0.22);
+    --color-bg-glow-2: rgba(120, 118, 200, 0.16);
 }
 
-html,
+html {
+    height: 100%;
+}
+
 body {
     background: var(--color-bg-primary);
+    background-image: radial-gradient(1200px 600px at 12% -10%, var(--color-bg-glow-1), transparent),
+    radial-gradient(900px 500px at 100% 0%, var(--color-bg-glow-2), transparent);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
     color: var(--color-text-primary);
     padding: 0;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu,
-    Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    font-family: var(--font-body);
     line-height: 1.6;
     font-size: 18px;
     transition: background 0.25s ease-in-out;
-    height: 100%;
+    min-height: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-secondary);
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
 }
 
 * {
@@ -67,6 +90,10 @@ a:visited {
 img {
     max-width: 100%;
     display: block;
+}
+
+code, pre, kbd, samp {
+    font-family: var(--font-mono);
 }
 
 .hljs {

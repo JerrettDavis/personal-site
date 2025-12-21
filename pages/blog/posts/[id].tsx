@@ -1,5 +1,5 @@
 import Layout, {PageType} from '../../../components/layout'
-import PostData, {getAllPostIds, getPostData} from '../../../lib/posts'
+import PostData, {getAllPostIds, getPostData, getSeriesDataForPost, SeriesData} from '../../../lib/posts'
 import Head from 'next/head'
 import Date from '../../../components/date'
 import utilStyles from '../../../styles/utils.module.css'
@@ -56,16 +56,56 @@ const ReadingTimeDisplay = styled.span`
   margin-left: 16px;
 `
 
+const SeriesContainer = styled.div`
+  margin: 2.5rem 0 1.5rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+`;
+
+const SeriesTitle = styled.div`
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+`;
+
+const SeriesNav = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9em;
+`;
+
+const SeriesList = styled.ol`
+  margin: 0;
+  padding-left: 1.25rem;
+`;
+
+const SeriesItem = styled.li`
+  margin-bottom: 0.35rem;
+  &[data-active="true"] {
+    font-weight: bold;
+    color: var(--color-text-primary);
+  }
+`;
+
 const author = 'Jerrett Davis';
 
 export default function Post({
-         postData
+         postData,
+         seriesData,
      }: {
     postData: PostData
+    seriesData: SeriesData | null
 }) {
-    console.log(postData);
+    const previousPost = seriesData?.posts[seriesData.currentIndex - 1];
+    const nextPost = seriesData?.posts[seriesData.currentIndex + 1];
+    const description = (postData.description && postData.description.trim().length > 0)
+        ? postData.description
+        : postData.stub;
     return (
-        <Layout pageType={PageType.BlogPost}>
+        <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
                 <title>{postData.title}</title>
             </Head>
@@ -93,6 +133,34 @@ export default function Post({
 
                 </ArticleInfoContainer>
                 <div dangerouslySetInnerHTML={{ __html: postData.contentHtml }} />
+                {seriesData && (
+                    <SeriesContainer>
+                        <SeriesTitle>
+                            Series: {seriesData.name} (Part {seriesData.currentIndex + 1} of {seriesData.posts.length})
+                        </SeriesTitle>
+                        <SeriesNav>
+                            {previousPost && (
+                                <Link href={`/blog/posts/${previousPost.id}`}>
+                                    Prev: {previousPost.title}
+                                </Link>
+                            )}
+                            {nextPost && (
+                                <Link href={`/blog/posts/${nextPost.id}`}>
+                                    Next: {nextPost.title}
+                                </Link>
+                            )}
+                        </SeriesNav>
+                        <SeriesList>
+                            {seriesData.posts.map((post, index) => (
+                                <SeriesItem key={post.id} data-active={index === seriesData.currentIndex}>
+                                    <Link href={`/blog/posts/${post.id}`}>
+                                        {index + 1}. {post.title}
+                                    </Link>
+                                </SeriesItem>
+                            ))}
+                        </SeriesList>
+                    </SeriesContainer>
+                )}
                 {!!postData.tags && (
                     <TagContainer>
                         {postData.tags.map(t =>
@@ -115,10 +183,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const postData = await getPostData(params.id as string)
+    const [postData, seriesData] = await Promise.all([
+        getPostData(params.id as string),
+        getSeriesDataForPost(params.id as string),
+    ])
     return {
         props: {
-            postData
+            postData,
+            seriesData: seriesData ?? null,
         }
     }
 }

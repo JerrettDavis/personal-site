@@ -33,8 +33,9 @@ export default function Index(
         tags,
         categories
     }: BlogIndexPropsModel) {
+    const blogDescription = 'Developer blog exploring architecture, testing, and the occasional over-engineered experiment.';
     return (
-        <Layout>
+        <Layout description={blogDescription}>
             <Head>
                 <title>the overengineer. - Jerrett Davis</title>
             </Head>

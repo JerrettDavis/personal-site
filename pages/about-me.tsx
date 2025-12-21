@@ -3,8 +3,9 @@ import Layout from "../components/layout";
 import styles from './about-me.module.css';
 
 export default function AboutMe() {
+    const aboutDescription = 'Full-stack engineer based in Tulsa, focused on scalable systems, architecture, and a wide range of hobbies.';
     return (
-        <Layout>
+        <Layout description={aboutDescription}>
             <Head>
                 <title>About Me - Jerrett Davis</title>
             </Head>
@@ -23,7 +24,7 @@ export default function AboutMe() {
                             While I will discuss my professional experience here, I do not intend for this
                             to be a professional bio. I'm hoping to take a bit more of a casual, friendly tone here.{' '}
                             If you would like a more business-oriented biography, please take a look a my{' '}
-                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank">LinkedIn</a>.
+                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank" rel="noreferrer">LinkedIn</a>.
                         </p>
                     </div>
                 </section>
@@ -114,7 +115,7 @@ export default function AboutMe() {
                     <h2 className={styles.articlePad}>My Experience</h2>
                     <p>
                         I have listed my previous positions and roles of note below. For a more in depth look, check out{' '}
-                        my <a href="https://www.linkedin.com/in/jddpro/" target="_blank">LinkedIn</a>.
+                        my <a href="https://www.linkedin.com/in/jddpro/" target="_blank" rel="noreferrer">LinkedIn</a>.
                     </p>
                     <section>
                         <h3 className={styles.articlePad}>Enduro Pipeline Services</h3>

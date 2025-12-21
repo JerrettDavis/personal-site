@@ -1,0 +1,191 @@
+.hero {
+    padding: 3rem 0 2rem;
+}
+
+.kicker {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0 0 0.8rem;
+    font-size: 2.6rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--color-text-deemphasized);
+}
+
+.grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-top: 2rem;
+}
+
+.projectCard {
+    position: relative;
+    padding: 1.4rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+    box-shadow: 0 14px 30px -26px rgba(0, 0, 0, 0.6);
+}
+
+.projectCard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(240px 140px at 100% 0%, var(--accent), transparent 70%);
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.projectCardFeatured {
+    border-color: var(--accent);
+    box-shadow: 0 24px 40px -30px rgba(0, 0, 0, 0.6);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.cardTitle a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+.cardTitle a:hover {
+    text-decoration: underline;
+}
+
+.cardFlag {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-text-deemphasized);
+}
+
+.cardSummary {
+    margin: 0.6rem 0 0.8rem;
+}
+
+.badgeRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+}
+
+.badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-deemphasized);
+}
+
+.highlightList {
+    margin: 0 0 0.6rem;
+    padding-left: 1.2rem;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.statsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+    margin-top: 0.6rem;
+}
+
+.linksRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+}
+
+.linkButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.linkButton:hover {
+    text-decoration: none;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.relatedPosts {
+    margin-top: 0.9rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.8rem;
+}
+
+.relatedLabel {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-text-deemphasized);
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.relatedList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.relatedList li {
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+}
+
+.notice {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.notice h2 {
+    margin-top: 0;
+}
+
+.emptyState {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+}

@@ -28,8 +28,9 @@ export default function PostCategory(
     }) {
     const shortName = categoryData.categoryName.split('/').pop();
     const title = `Posts in ${shortName} - the overengineer. - Jerrett Davis`;
+    const description = `Most recent posts in the ${shortName} category on the overengineer blog.`;
     return (
-        <Layout pageType={PageType.BlogPost}>
+        <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
                 <title>{title}</title>
             </Head>
