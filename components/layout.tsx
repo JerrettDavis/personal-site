@@ -57,13 +57,18 @@ export default function Layout({
                                    children,
                                    pageType,
                                    description,
+                                   containerVariant,
                                }: {
     children: React.ReactNode
     pageType?: PageType
     description?: string
+    containerVariant?: 'default' | 'wide'
 }) {
     const metaDescription = description
         ?? 'A portal to my personal and professional work, musings, and general junk!';
+    const containerClassName = containerVariant === 'wide'
+        ? `${styles.container} ${styles.containerWide}`
+        : styles.container;
     return (
         <div>
             <Head>
@@ -155,7 +160,7 @@ export default function Layout({
                     </div>
                 </div>
             </header>
-            <div className={styles.container}>
+            <div className={containerClassName}>
                 <main>{children}</main>
                 <GoBackToLink pageType={pageType}/>
             </div>

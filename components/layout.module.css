@@ -11,6 +11,16 @@
     }
 }
 
+.containerWide {
+    max-width: 90rem;
+}
+
+@media screen and (min-width: 64rem) {
+    .containerWide {
+        max-width: 90rem;
+    }
+}
+
 .siteHeader {
     position: sticky;
     top: 0;
