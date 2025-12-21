@@ -13,5 +13,6 @@ Releases are fully automated on every merge to `main` via GitHub Actions and sem
 
 ## Notes
 - The changelog lives in GitHub Releases; no files are written back to `main`.
+- Breaking changes or `feat` commits drive major/minor bumps; everything else defaults to a patch so every merge releases.
 
 No manual release commands are required.
