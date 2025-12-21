@@ -4,6 +4,7 @@ import {POSTS_PER_PAGE} from "../lib/blog-utils";
 import {getSortedTagsData} from "../lib/tags";
 import {getAllCategories} from "../lib/categories";
 import {NAV_ITEMS} from "../data/nav";
+import {getAllDocSummaries} from "../lib/docs";
 
 type SitemapEntry = {
     loc: string;
@@ -42,11 +43,12 @@ const buildSitemap = (entries: SitemapEntry[]) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({res}) => {
-    const [posts, tags, categories, series] = await Promise.all([
+    const [posts, tags, categories, series, docs] = await Promise.all([
         getSortedPostsData(),
         getSortedTagsData(),
         getAllCategories(),
         getAllSeriesSummaries(),
+        getAllDocSummaries(),
     ]);
 
     const latestPostDate = posts[0]?.date;
@@ -82,6 +84,13 @@ export const getServerSideProps: GetServerSideProps = async ({res}) => {
         lastmod: toIsoDate(entry.latestDate),
     }));
 
+    const docEntries: SitemapEntry[] = docs
+        .filter((doc) => doc.slug.length > 0)
+        .map((doc) => ({
+            loc: buildUrl(doc.route),
+            lastmod: toIsoDate(doc.updated),
+        }));
+
     const paginationEntries: SitemapEntry[] = Array.from(
         {length: Math.max(0, totalPages - 1)},
         (_, index) => ({
@@ -96,6 +105,7 @@ export const getServerSideProps: GetServerSideProps = async ({res}) => {
         ...tagEntries,
         ...categoryEntries,
         ...seriesEntries,
+        ...docEntries,
     ]);
 
     res.setHeader('Content-Type', 'text/xml');

@@ -38,6 +38,12 @@ export const NAV_ITEMS: NavItem[] = [
         keywords: ['stack', 'gear'],
     },
     {
+        label: 'Docs',
+        href: '/docs',
+        description: 'Architecture notes, technical decisions, and platform details.',
+        keywords: ['documentation', 'architecture', 'decisions'],
+    },
+    {
         label: 'Search',
         href: '/search',
         description: 'Search posts and key pages.',
