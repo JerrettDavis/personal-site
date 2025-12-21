@@ -22,10 +22,9 @@
     "hoist-non-react-statics": "^3.3.2",
     "lowlight": "^3.1.0",
     "next": "^16.1.0",
-    "next-mdx-remote": "^4.4.1",
     "prop-types": "^15.8.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "reading-time": "^1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-format": "^4.0.1",
@@ -45,8 +44,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.17.1",
-    "@types/react": "^18.3.27",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@types/rss": "^0.0.32",
     "eslint": "^9.39.2",
     "typescript": "^5.3.3"
