@@ -19,6 +19,8 @@ body[data-theme="light"] {
     --color-surface-2: #e7ecf4;
     --color-bg-glow-1: rgba(72, 182, 210, 0.22);
     --color-bg-glow-2: rgba(108, 120, 200, 0.14);
+    --color-selection-bg: #1c5f7a;
+    --color-selection-text: #f7f9fc;
 }
 
 body[data-theme="dark"] {
@@ -41,6 +43,8 @@ body[data-theme="dark"] {
     --color-surface-2: #172235;
     --color-bg-glow-1: rgba(82, 184, 212, 0.22);
     --color-bg-glow-2: rgba(120, 118, 200, 0.16);
+    --color-selection-bg: #27465f;
+    --color-selection-text: #f0f4ff;
 }
 
 html {
@@ -85,6 +89,16 @@ a:hover {
 
 a:visited {
     color: var(--color-link);
+}
+
+::selection {
+    background: var(--color-selection-bg);
+    color: var(--color-selection-text);
+}
+
+::-moz-selection {
+    background: var(--color-selection-bg);
+    color: var(--color-selection-text);
 }
 
 img {

@@ -62,9 +62,17 @@
     border: 1px solid var(--color-primary);
 }
 
+.primaryLink:visited {
+    color: var(--color-bg-primary);
+}
+
 .secondaryLink {
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
+    color: var(--color-text-primary);
+}
+
+.secondaryLink:visited {
     color: var(--color-text-primary);
 }
 

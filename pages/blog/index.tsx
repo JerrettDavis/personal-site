@@ -4,28 +4,12 @@ import utilStyles from "../../styles/utils.module.css";
 import Link from "next/link";
 import {GetStaticProps} from "next";
 import {getSortedPostsData, PostSummary} from "../../lib/posts";
-import styled from "@emotion/styled";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
 import BaseProps from "../index";
 import PostSummaries from "../../components/postSummaries";
 import generateRssFeed from "../../utils/generateRSSFeed";
-
-const BlogContent = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const RightListContainer = styled.div`
-  margin-left: 32px;
-  font-size: 0.8em;
-  flex-grow: 1;
-`;
-
-const RightListItem = styled.li`
-  margin: 0 0 8px 0;
-  white-space: nowrap;
-`;
+import styles from "./index.module.css";
 
 export default function Index(
     {
@@ -34,48 +18,63 @@ export default function Index(
         categories
     }: BlogIndexPropsModel) {
     const blogDescription = 'Developer blog exploring architecture, testing, and the occasional over-engineered experiment.';
+    const stats = [
+        {label: 'Posts', value: postSummaries.length},
+        {label: 'Tags', value: tags?.length ?? 0},
+        {label: 'Categories', value: categories?.length ?? 0},
+    ];
     return (
         <Layout description={blogDescription}>
             <Head>
                 <title>the overengineer. - Jerrett Davis</title>
             </Head>
-            <section className={`${utilStyles.headingMd} ${utilStyles.padding1px}`}>
-                <h1>the overengineer.</h1>
-                <section>
-                    <p>
-                        I've been told I have a penchant for <em>occasionally</em> over-engineering solutions to certain
-                        problems.
-                        On my ever-present mission for improvement, my struggles sometimes breathe life into new,
-                        inventive ways to
-                        solve challenges. However, more often than not, I'm left with something many friends have
-                        affectionately
-                        described as <em>cursed</em>.
-                    </p>
-                    <p>
-                        As an exercise in self-reflection and as a digital manifestation of the idiom <em>"Misery loves
-                        company"</em>,
-                        I present my developer blog: <strong>the overengineer.</strong>
-                    </p>
-                    <p>
-                        I also publish my posts on <a href="https://hashnode.jerrettdavis.com">Hashnode</a>.
-                    </p>
+            <section className={styles.hero}>
+                <p className={styles.kicker}>Blog</p>
+                <h1 className={styles.title}>the overengineer.</h1>
+                <p className={styles.lede}>
+                    I've been told I have a penchant for <em>occasionally</em> over-engineering solutions. On my
+                    ever-present mission for improvement, that habit sometimes yields new and inventive ways to solve
+                    challenges. More often than not, the result is affectionately described as <em>cursed</em>.
+                </p>
+                <p className={styles.lede}>
+                    As a digital manifestation of "Misery loves company," this is where I document the experiments.
+                    I also publish on <a href="https://hashnode.jerrettdavis.com" target="_blank" rel="noreferrer">Hashnode</a>.
+                </p>
+                <div className={styles.heroActions}>
+                    <Link href="/search" className={styles.primaryLink}>
+                        Search posts
+                    </Link>
+                    <a href="/rss.xml" className={styles.secondaryLink}>
+                        RSS feed
+                    </a>
+                    <Link href="/projects" className={styles.secondaryLink}>
+                        Projects
+                    </Link>
+                </div>
+                <div className={styles.statsGrid}>
+                    {stats.map((stat) => (
+                        <div className={styles.statCard} key={stat.label}>
+                            <div className={styles.statValue}>{stat.value}</div>
+                            <div className={styles.statLabel}>{stat.label}</div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className={styles.contentGrid}>
+                <section className={styles.latest}>
+                    <div className={styles.sectionHeader}>
+                        <h2 className={utilStyles.headingLg}>Latest blog posts</h2>
+                        <p className={styles.sectionLead}>
+                            Recent writing, experiments, and lessons learned.
+                        </p>
+                    </div>
+                    <PostSummaries postSummaries={postSummaries}/>
                 </section>
-                <hr/>
-                <BlogContent>
-                    <section>
-                        <h2 className={utilStyles.headingLg}>Latest Blog Posts</h2>
-                        <PostSummaries postSummaries={postSummaries}/>
-                    </section>
-                    {!!tags || !!categories
-                        ?
-                        <RightListContainer>
-                            {createCategoriesIfPresent(categories)}
-                            <br/>
-                            {createTagsIfPresent(tags)}
-                        </RightListContainer>
-                        : <></>
-                    }
-                </BlogContent>
+                <aside className={styles.sidebar}>
+                    {!!categories && createCategoriesIfPresent(categories)}
+                    {!!tags && createTagsIfPresent(tags)}
+                </aside>
             </section>
         </Layout>
     )
@@ -84,17 +83,15 @@ export default function Index(
 const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
     if (!!tags) {
         return (
-            <div>
-                <h2 className={utilStyles.headingLg}>Tags</h2>
-                <ul className={utilStyles.list}>
+            <div className={styles.sideCard}>
+                <h2 className={styles.sideTitle}>Tags</h2>
+                <div className={styles.tagCloud}>
                     {tags.map((tag) => (
-                        <RightListItem className={utilStyles.listItem} key={tag.tagName}>
-                            <Link href={`/blog/tags/${tag.tagName}`}>
-                                #{tag.tagName}
-                            </Link>
-                        </RightListItem>
+                        <Link className={styles.tagChip} href={`/blog/tags/${tag.tagName}`} key={tag.tagName}>
+                            #{tag.tagName}
+                        </Link>
                     ))}
-                </ul>
+                </div>
             </div>
         );
     } else {
@@ -105,15 +102,16 @@ const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
 const createCategoriesIfPresent = (categories?: Category[] | null | undefined) => {
     if (!!categories) {
         return (
-            <div>
-                <h2 className={utilStyles.headingLg}>Categories</h2>
-                <ul className={utilStyles.list}>
+            <div className={styles.sideCard}>
+                <h2 className={styles.sideTitle}>Categories</h2>
+                <ul className={styles.categoryList}>
                     {categories.map((category) => (
-                        <RightListItem className={utilStyles.listItem} key={category.categoryName}>
-                            <Link href={`/blog/categories/${category.categoryPath}`}>
-                                {category.categoryName} ({category.count})
+                        <li className={styles.categoryItem} key={category.categoryName}>
+                            <Link href={`/blog/categories/${category.categoryPath}`} className={styles.categoryLink}>
+                                <span>{category.categoryName}</span>
+                                <span className={styles.categoryCount}>{category.count}</span>
                             </Link>
-                        </RightListItem>
+                        </li>
                     ))}
                 </ul>
             </div>
