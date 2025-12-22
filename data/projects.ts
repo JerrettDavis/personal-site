@@ -41,4 +41,21 @@ export const PROJECT_OVERRIDES: ProjectMeta[] = [
         tags: ['bdd', 'behavior-driven-development'],
         accent: '#1c5f7a',
     },
+    {
+        repo: 'JD.Efcpt.Build',
+        displayName: 'JD.Efcpt.Build',
+        summary: 'Build-time EF Core Power Tools automation that keeps database-first models aligned with schema changes.',
+        topics: ['EF Core', 'MSBuild', 'Database-first'],
+        highlights: [
+            'Fingerprints inputs to skip unnecessary regeneration.',
+            'Supports DACPAC and live connection modes.',
+            'Outputs generated models during build without manual steps.',
+        ],
+        primaryTag: 'jd-efcpt-build',
+        tags: ['ef-core', 'database-first', 'msbuild', 'code-generation'],
+        links: [
+            {label: 'NuGet', url: 'https://www.nuget.org/packages/JD.Efcpt.Build'},
+        ],
+        accent: '#2a6a87',
+    },
 ];

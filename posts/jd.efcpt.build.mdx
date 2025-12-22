@@ -1,0 +1,302 @@
+---
+title: 'JD.Efcpt.Build'
+date: '2025-12-21'
+author: 'Jerrett Davis'
+useToc: true
+tags: ['jd-efcpt-build', 'dotnet', 'ef-core', 'database-first', 'msbuild', 'code-generation', 'tooling', 'automation']
+categories: ['Programming', 'Programming/Tooling', 'Programming/Databases']
+description: 'JD.Efcpt.Build automates EF Core Power Tools scaffolding during the build, keeping database-first models in sync with schema changes without manual regeneration.'
+---
+
+
+# "Where Did Database First Go?"
+
+If you were using Entity Framework when EF Core first dropped, you probably remember the moment you went looking for database-first support and found... nothing.
+
+EF Core launched as a code-first framework. The Reverse Engineer tooling that EF6 developers relied on (the right-click, point at a database, generate your models workflow) wasn't there. Microsoft's position was essentially "migrations are the future, figure it out." And if your team had an existing database, or a DBA who actually owned the schema, or compliance requirements that meant the database was the source of truth... well, good luck with that.
+
+The community's response was immediate and loud. "Where did database first go?" became a recurring theme in GitHub issues, Stack Overflow questions, and the quiet frustration of developers who just wanted to talk to their database without hand-writing a hundred entity classes.
+
+Eventually, tooling caught up. EF Core Power Tools emerged as the community answer: a Visual Studio extension that brought back the reverse engineering workflow. You could point it at a database or a DACPAC, configure some options, and generate your models. Problem solved, mostly.
+
+But here's the thing about manual processes: they work fine right up until they don't.
+
+---
+
+## The Problem That Keeps Happening
+
+I've spent enough time in codebases with legacy data layers to recognize a pattern. It goes something like this:
+
+A project starts with good intentions. Someone sets up EF Core Power Tools, generates the initial models, commits everything, and documents the process. "When the schema changes, regenerate the models using this tool with these settings." Clear enough.
+
+Then time passes.
+
+The developer who set it up leaves. The documentation gets stale. Someone regenerates with slightly different settings and commits the result. Someone else forgets to regenerate entirely after a schema change. The models drift. The configuration drifts. Nobody's quite sure what the "correct" regeneration process is anymore, so people just... stop doing it consistently.
+
+This isn't a dramatic failure. It's a slow erosion. The kind of problem that doesn't announce itself until you're debugging a production issue and realize the entity class doesn't have a column that's been in the database for six months.
+
+If you've worked in a codebase long enough, you've probably seen some version of this. Maybe you've been the person who discovered the drift. Maybe you've been the person who caused it. (No judgment. We've all been there.)
+
+The frustrating part is that the fix is always the same: regenerate the models, commit the changes, remind everyone to regenerate after schema changes. And then six months later, you're having the same conversation again.
+
+---
+
+## Why Manual Regeneration Fails
+
+Let's be specific about what goes wrong, because understanding the failure modes is the first step toward fixing them.
+
+**The ownership problem.** Whose job is it to regenerate after a schema change? The person who changed the schema? The person who owns the data layer? The tech lead? Nobody has a clear answer, which means sometimes everyone does it (chaos) and sometimes nobody does it (drift).
+
+**The configuration problem.** EF Core Power Tools stores settings in JSON files. Namespaces, nullable reference types, navigation property generation, renaming rules. There are dozens of options. If developers regenerate with different configurations, you get inconsistent output. Same database, different generated code.
+
+**The tooling problem.** Regeneration requires Visual Studio with the extension installed. CI servers don't have Visual Studio. New developers might not have the extension. Remote development setups might not support it. The process that works on one machine doesn't necessarily work on another.
+
+**The noise problem.** Regeneration often produces massive diffs. Property reordering, whitespace changes, attribute additions. Stuff that doesn't represent actual schema changes but clutters up the commit. Developers learn to distrust regeneration diffs, which makes them reluctant to regenerate, which makes the problem worse.
+
+**The timing problem.** Even when everyone knows the process, there's no enforcement. You can commit code that references a column the models don't have, and the build might still pass if nothing actually uses that code path yet. The error surfaces later, in a different context, when the connection to the original schema change is long forgotten.
+
+None of these are individually catastrophic. Together, they add up to a process that works in theory but fails in practice.
+
+---
+
+## The Idea
+
+Here's the thought that eventually became this project: if model generation can be invoked from the command line (and it can, via EF Core Power Tools CLI), then model generation can be part of the build.
+
+Not a separate step you remember to run. Not a manual process with unclear ownership. Just part of what happens when you run `dotnet build`.
+
+The build already knows how to compile your code. It already knows how to restore packages, run analyzers, produce artifacts. Adding "generate EF Core models from the schema" to that list isn't conceptually different from any other build-time code generation.
+
+If the build handles it, the ownership question disappears. The build owns it. If the build handles it with consistent configuration, the drift disappears. Everyone gets the same output. If the build handles it on every machine, the tooling problem disappears. No special extensions required.
+
+This is JD.Efcpt.Build: an MSBuild integration that makes EF Core model generation automatic.
+
+---
+
+## How It Actually Works
+
+The package hooks into your build through MSBuild targets that run before compilation. When you build, it:
+
+1. **Finds your schema source.** Either a SQL Server Database Project (`.sqlproj`) that gets compiled to a DACPAC, or a connection string pointing to a live database.
+
+2. **Computes a fingerprint.** A hash of all the inputs: the DACPAC or schema metadata, the configuration file, the renaming rules, any custom templates. This fingerprint represents "the current state of everything that affects generation."
+
+3. **Compares to the previous fingerprint.** If they match, nothing changed, and generation is skipped. If they differ, something changed, and generation runs.
+
+4. **Generates models.** Using EF Core Power Tools CLI, same as you'd run manually, but automated. Output goes to `obj/efcpt/Generated/` with a `.g.cs` extension.
+
+5. **Adds generated files to compilation.** Automatically. You don't edit your project file or manage includes.
+
+The fingerprinting is what makes this practical. You don't want generation running on every build. That would be slow and developers would hate it. The fingerprint check is fast (XxHash64, designed for exactly this kind of content comparison), so incremental builds have essentially zero overhead. Generation only runs when inputs actually change.
+
+---
+
+## Two Ways to Get Your Schema
+
+Different teams manage database schemas differently, so the package supports two modes.
+
+**DACPAC Mode** is for teams with SQL Server Database Projects. You have a `.sqlproj` that defines your schema in version-controlled SQL files. The package builds this project to produce a DACPAC, then generates models from that DACPAC.
+
+```xml
+<PropertyGroup>
+  <EfcptSqlProj>..\Database\MyDatabase.sqlproj</EfcptSqlProj>
+</PropertyGroup>
+```
+
+This is nice because your schema is code. It lives in source control. Changes go through pull requests. The DACPAC is a build artifact, and models are derived from that artifact deterministically.
+
+**Connection String Mode** is for teams without database projects. Maybe you apply migrations to a dev database and want to scaffold from that. Maybe you're working against a cloud database. Maybe you just don't want to deal with DACPACs.
+
+```xml
+<PropertyGroup>
+  <EfcptConnectionString>$(DB_CONNECTION_STRING)</EfcptConnectionString>
+</PropertyGroup>
+```
+
+The package connects, queries system tables to understand the schema, and generates from that. The fingerprint is computed from the schema metadata, so incremental builds still work. If the schema hasn't changed, generation is skipped.
+
+Both modes use the same configuration files and produce the same kind of output. They just differ in where the schema comes from.
+
+---
+
+## Setting It Up
+
+The minimum setup is almost trivial:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="JD.Efcpt.Build" Version="1.0.0" />
+</ItemGroup>
+```
+
+If you have a `.sqlproj` in your solution and an `efcpt-config.json` in your project directory, that's it. Run `dotnet build` and models appear.
+
+For more control, you add configuration. The `efcpt-config.json` controls generation behavior:
+
+```json
+{
+  "names": {
+    "root-namespace": "MyApp.Data",
+    "dbcontext-name": "ApplicationDbContext"
+  },
+  "code-generation": {
+    "use-nullable-reference-types": true,
+    "enable-on-configuring": false
+  }
+}
+```
+
+The `enable-on-configuring: false` means your DbContext won't have a hardcoded connection string. You configure that in your DI container, where it belongs.
+
+If your database uses naming conventions that don't map cleanly to C#, you add renaming rules:
+
+```json
+[
+  {
+    "SchemaName": "dbo",
+    "Tables": [
+      {
+        "Name": "tbl_Users",
+        "NewName": "User",
+        "Columns": [
+          { "Name": "user_id", "NewName": "Id" }
+        ]
+      }
+    ]
+  }
+]
+```
+
+Now `tbl_Users.user_id` becomes `User.Id`. The database can keep its conventions, your C# code can have its conventions, and the mapping is explicit and version-controlled.
+
+---
+
+## What About Custom Code?
+
+A reasonable concern: "I have computed properties and validation methods on my entities. Won't regeneration overwrite those?"
+
+This is what partial classes are for.
+
+The generated entity is one half:
+
+```csharp
+// obj/efcpt/Generated/User.g.cs
+public partial class User
+{
+    public int Id { get; set; }
+    public string Email { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}
+```
+
+Your custom logic is the other half:
+
+```csharp
+// Models/User.cs
+public partial class User
+{
+    public string FullName => $"{FirstName} {LastName}";
+
+    public bool HasValidEmail => Email?.Contains("@") ?? false;
+}
+```
+
+Both compile into a single class. The generated half gets regenerated every build. Your custom half stays exactly as you wrote it.
+
+This separation is actually cleaner than mixing generated and custom code in the same file. You know at a glance what's generated (`.g.cs` in `obj/`) and what's yours (everything else).
+
+---
+
+## CI/CD Without Special Steps
+
+One of the pain points I mentioned earlier was CI/CD. Manual regeneration doesn't work in automated pipelines. You're stuck either committing generated code (merge conflicts) or maintaining custom regeneration scripts (fragile).
+
+With the build handling generation, CI just works:
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - name: Setup .NET
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: '10.0.x'
+
+  - name: Build
+    run: dotnet build --configuration Release
+    env:
+      DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+```
+
+No special steps for EF Core generation. The build handles it. On .NET 10+, the package uses `dotnet dnx` to execute the tool directly from the package feed without requiring installation. On older versions, it uses tool manifests or global tools.
+
+Pull requests that include schema changes automatically include the corresponding model changes, because both happen during the build. Schema and code are validated together.
+
+---
+
+## When Things Go Wrong
+
+Things will go wrong. Here's how you figure out what happened.
+
+**Enable verbose logging:**
+
+```xml
+<PropertyGroup>
+  <EfcptLogVerbosity>detailed</EfcptLogVerbosity>
+</PropertyGroup>
+```
+
+Build output now includes exactly what's happening: which inputs were found, what fingerprint was computed, whether generation ran or was skipped.
+
+**Check the resolved inputs:**
+
+After a build, look at `obj/efcpt/resolved-inputs.json`. This shows exactly what the package found for each input. If something's wrong, you'll see it here.
+
+**Inspect the fingerprint:**
+
+The fingerprint is stored at `obj/efcpt/fingerprint.txt`. If generation is running unexpectedly (or not running when it should), the fingerprint tells you whether inputs changed from the package's perspective.
+
+---
+
+## Who This Is For
+
+I want to be honest about fit.
+
+**This is probably for you if:**
+
+You're doing database-first development and you've experienced the regeneration coordination problem. The "did someone regenerate?" question has come up, and the answer wasn't always clear.
+
+Your schema changes regularly. If you're shipping schema changes weekly, manual regeneration becomes friction.
+
+You want builds that work identically everywhere. Local machines, CI servers, new developer laptops. Everyone should get the same generated code from the same inputs.
+
+**This probably isn't for you if:**
+
+Your schema is essentially static. If schema changes are rare, manual regeneration isn't that painful.
+
+You're using code-first migrations. If migrations are your source of truth, you're solving a different problem.
+
+You're not using EF Core Power Tools already. This package automates EF Core Power Tools; if you're using a different generation approach, this doesn't apply.
+
+---
+
+## The Groan, Addressed
+
+"Where did database first go?"
+
+It's been years since EF Core launched without reverse engineering, and the tooling has caught up. EF Core Power Tools exists. The CLI exists. The capability is there.
+
+But capability isn't the same as workflow. Having the tools isn't the same as having a process that works reliably across a team, across time, across environments.
+
+JD.Efcpt.Build is an attempt to close that gap. To take the capability that exists and make it automatic. To make the build the owner of model generation, so humans don't have to remember to do it.
+
+Your database schema is the source of truth. This package just makes sure your code reflects that truth, every time you build, without manual intervention.
+
+One less thing to coordinate. One less thing to forget. One less thing to go wrong in production because a manual step got skipped.
+
+That's the pitch. Give it a try if it fits your situation.
+
+---
+
+*JD.Efcpt.Build is [open source](https://github.com/JerrettDavis/JD.Efcpt.Build) and available on [NuGet](https://www.nuget.org/packages/JD.Efcpt.Build).*

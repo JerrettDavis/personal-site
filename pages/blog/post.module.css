@@ -111,7 +111,11 @@
 
 .content {
     display: grid;
-    gap: 1.5rem;
+    gap: 1.1rem;
+}
+
+.content :global(p) {
+    margin: 0;
 }
 
 .content :global(h2),
