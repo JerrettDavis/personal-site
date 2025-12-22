@@ -5,10 +5,10 @@ import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faBluesky, faGithub, faLinkedin, faMastodon} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import {faRss} from "@fortawesome/free-solid-svg-icons";
-import styled from "@emotion/styled";
 import {NAV_ITEMS} from "../data/nav";
+import CommandPalette from "./commandPalette";
 
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
@@ -19,6 +19,10 @@ export enum PageType {
 }
 
 const ThemeToggle = dynamic(() => import('../components/themeToggle'), {
+    ssr: false,
+});
+
+const SearchOverlay = dynamic(() => import('./searchOverlay'), {
     ssr: false,
 });
 
@@ -46,12 +50,9 @@ const GoBackToLink = (props) => {
     return (<HomeLink/>);
 };
 
-const HiddenSpacer = styled.div`
-  height: 32px;
-  width: 8px;
-`
-
-const NAV_LINKS = NAV_ITEMS.filter((item) => item.showInNav !== false);
+const NAV_LINKS = NAV_ITEMS.filter((item) => item.showInNav !== false && item.href !== '/search');
+const SEARCH_ITEM = NAV_ITEMS.find((item) => item.href === '/search');
+const FOOTER_LINKS = NAV_ITEMS.filter((item) => item.href !== '/search');
 
 export default function Layout({
                                    children,
@@ -69,6 +70,101 @@ export default function Layout({
     const containerClassName = containerVariant === 'wide'
         ? `${styles.container} ${styles.containerWide}`
         : styles.container;
+    const mainRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const main = mainRef.current;
+        if (!main) return;
+        const sections = Array.from(main.querySelectorAll('section'));
+        if (sections.length === 0) return;
+        const sectionClass = styles.gridSection;
+        const activeClass = styles.gridSectionActive;
+
+        sections.forEach((section) => {
+            section.classList.add(sectionClass);
+        });
+
+        if (typeof IntersectionObserver === 'undefined') {
+            return () => {
+                sections.forEach((section) => {
+                    section.classList.remove(sectionClass, activeClass);
+                });
+            };
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    entry.target.classList.toggle(activeClass, entry.isIntersecting);
+                });
+            },
+            {rootMargin: '0px 0px -55% 0px', threshold: 0.2}
+        );
+
+        sections.forEach((section) => observer.observe(section));
+
+        return () => {
+            observer.disconnect();
+            sections.forEach((section) => {
+                section.classList.remove(sectionClass, activeClass);
+            });
+        };
+    }, []);
+
+    useEffect(() => {
+        let rafId = 0;
+        let lastTarget: HTMLElement | null = null;
+        let latestEvent: PointerEvent | null = null;
+
+        const update = () => {
+            rafId = 0;
+            if (!latestEvent) return;
+            const target = (latestEvent.target as HTMLElement | null)?.closest('.glowable') as HTMLElement | null;
+            if (target) {
+                const rect = target.getBoundingClientRect();
+                const x = ((latestEvent.clientX - rect.left) / rect.width) * 100;
+                const y = ((latestEvent.clientY - rect.top) / rect.height) * 100;
+                target.style.setProperty('--glow-x', `${x}%`);
+                target.style.setProperty('--glow-y', `${y}%`);
+            }
+
+            if (lastTarget && lastTarget !== target) {
+                lastTarget.style.removeProperty('--glow-x');
+                lastTarget.style.removeProperty('--glow-y');
+            }
+
+            if (!target && lastTarget) {
+                lastTarget.style.removeProperty('--glow-x');
+                lastTarget.style.removeProperty('--glow-y');
+            }
+
+            lastTarget = target ?? null;
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+            latestEvent = event;
+            if (rafId) return;
+            rafId = window.requestAnimationFrame(update);
+        };
+
+        const clearGlow = () => {
+            if (lastTarget) {
+                lastTarget.style.removeProperty('--glow-x');
+                lastTarget.style.removeProperty('--glow-y');
+                lastTarget = null;
+            }
+        };
+
+        document.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('blur', clearGlow);
+
+        return () => {
+            document.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('blur', clearGlow);
+            if (rafId) window.cancelAnimationFrame(rafId);
+        };
+    }, []);
+
     return (
         <div>
             <Head>
@@ -99,61 +195,67 @@ export default function Layout({
                             Jerrett Davis
                         </Link>
                         <span className={styles.brandTag}>The Overengineer</span>
+                        <div className={styles.brandSocialRow}>
+                            <a href="https://github.com/jerrettdavis"
+                               target="_blank"
+                               rel="noreferrer"
+                               title="My Github page"
+                               aria-label="Go to my Github page"
+                               className={`${styles.socialLink} glowable`}
+                            >
+                                <FontAwesomeIcon icon={faGithub}/>
+                            </a>
+                            <a href="https://bsky.app/profile/jerrett.dev"
+                               target="_blank"
+                               rel="noreferrer"
+                               title="My Bluesky profile"
+                               aria-label="Go to my Bluesky profile"
+                               className={`${styles.socialLink} glowable`}
+                            >
+                                <FontAwesomeIcon icon={faBluesky}/>
+                            </a>
+                            <a href="https://mastodon.social/@JerrettDavis"
+                               target="_blank"
+                               rel="noreferrer"
+                               title="My Mastodon.Social page"
+                               aria-label="Go to my Mastodon.Social page"
+                               className={`${styles.socialLink} glowable`}
+                            >
+                                <FontAwesomeIcon icon={faMastodon}/>
+                            </a>
+                            <a href="https://www.linkedin.com/in/jddpro/"
+                               target="_blank"
+                               rel="noreferrer"
+                               title="My LinkedIn page"
+                               aria-label="Go to my LinkedIn page"
+                               className={`${styles.socialLink} glowable`}
+                            >
+                                <FontAwesomeIcon icon={faLinkedin}/>
+                            </a>
+                            <a href="/rss.xml"
+                               target="_blank"
+                               rel="noreferrer"
+                               title="RSS Feed"
+                               aria-label="Go to my RSS Feed"
+                               className={`${styles.socialLink} glowable`}
+                            >
+                                <FontAwesomeIcon icon={faRss}/>
+                            </a>
+                        </div>
                     </div>
                     <nav className={styles.navLinks} aria-label="Primary">
                         {NAV_LINKS.map((item) => (
-                            <Link href={item.href} className={styles.navLink} key={item.href}>
+                            <Link href={item.href} className={`${styles.navLink} glowable`} key={item.href}>
                                 {item.label}
                             </Link>
                         ))}
+                        <SearchOverlay
+                            className={`${styles.navButton} glowable`}
+                            label={SEARCH_ITEM?.label ?? 'Search'}
+                        />
                     </nav>
                     <div className={styles.actionRow}>
-                        <a href="https://github.com/jerrettdavis"
-                           target="_blank"
-                           rel="noreferrer"
-                           title="My Github page"
-                           aria-label="Go to my Github page"
-                           className={styles.socialLink}
-                        >
-                            <FontAwesomeIcon icon={faGithub}/>
-                        </a>
-                        <a href="https://bsky.app/profile/jerrett.dev"
-                           target="_blank"
-                           rel="noreferrer"
-                           title="My Bluesky profile"
-                           aria-label="Go to my Bluesky profile"
-                           className={styles.socialLink}
-                        >
-                            <FontAwesomeIcon icon={faBluesky}/>
-                        </a>
-                        <a href="https://mastodon.social/@JerrettDavis"
-                           target="_blank"
-                           rel="noreferrer"
-                           title="My Mastodon.Social page"
-                           aria-label="Go to my Mastodon.Social page"
-                           className={styles.socialLink}
-                        >
-                            <FontAwesomeIcon icon={faMastodon}/>
-                        </a>
-                        <a href="https://www.linkedin.com/in/jddpro/"
-                           target="_blank"
-                           rel="noreferrer"
-                           title="My LinkedIn page"
-                           aria-label="Go to my LinkedIn page"
-                           className={styles.socialLink}
-                        >
-                            <FontAwesomeIcon icon={faLinkedin}/>
-                        </a>
-                        <a href="/rss.xml"
-                           target="_blank"
-                           rel="noreferrer"
-                           title="RSS Feed"
-                           aria-label="Go to my RSS Feed"
-                           className={styles.socialLink}
-                        >
-                            <FontAwesomeIcon icon={faRss}/>
-                        </a>
-                        <HiddenSpacer/>
+                        <CommandPalette />
                         <div className={utilStyles.marginLeft8}>
                             <ThemeToggle/>
                         </div>
@@ -161,9 +263,66 @@ export default function Layout({
                 </div>
             </header>
             <div className={containerClassName}>
-                <main>{children}</main>
+                <main ref={mainRef}>{children}</main>
                 <GoBackToLink pageType={pageType}/>
             </div>
+            <footer className={styles.siteFooter}>
+                <div className={styles.footerInner}>
+                    <div className={styles.footerCol}>
+                        <div className={styles.footerTitle}>Jerrett Davis</div>
+                        <p className={styles.footerText}>
+                            Static-first engineering notes, systems, and writing.
+                        </p>
+                        <div className={styles.footerMeta}>
+                            © {new Date().getFullYear()} Jerrett Davis. All rights reserved.
+                        </div>
+                    </div>
+                    <div className={styles.footerCol}>
+                        <div className={styles.footerTitle}>Site</div>
+                        <div className={styles.footerLinks}>
+                            {FOOTER_LINKS.map((item) => (
+                                <Link href={item.href} key={item.href}>
+                                    {item.label}
+                                </Link>
+                            ))}
+                            <a href="/sitemap.xml" target="_blank" rel="noreferrer">
+                                Sitemap
+                            </a>
+                        </div>
+                    </div>
+                    <div className={styles.footerCol}>
+                        <div className={styles.footerTitle}>Elsewhere</div>
+                        <div className={styles.footerLinks}>
+                            <a href="https://github.com/jerrettdavis" target="_blank" rel="noreferrer">
+                                GitHub
+                            </a>
+                            <a href="https://bsky.app/profile/jerrett.dev" target="_blank" rel="noreferrer">
+                                Bluesky
+                            </a>
+                            <a href="https://mastodon.social/@JerrettDavis" target="_blank" rel="noreferrer">
+                                Mastodon
+                            </a>
+                            <a href="https://www.linkedin.com/in/jddpro/" target="_blank" rel="noreferrer">
+                                LinkedIn
+                            </a>
+                            <a href="/rss.xml" target="_blank" rel="noreferrer">
+                                RSS
+                            </a>
+                        </div>
+                    </div>
+                    <div className={styles.footerCol}>
+                        <div className={styles.footerTitle}>Extras</div>
+                        <div className={styles.footerLinks}>
+                            <Link href="/docs/architecture">Architecture map</Link>
+                            <Link href="/docs/content-pipeline">Content pipeline</Link>
+                            <Link href="/search">Search</Link>
+                        </div>
+                        <div className={styles.footerNote}>
+                            Tip: Press Cmd/Ctrl + K for the command palette.
+                        </div>
+                    </div>
+                </div>
+            </footer>
 
         </div>
     )

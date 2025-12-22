@@ -28,10 +28,10 @@ export default function DocPage({doc}: DocPageProps) {
                     <p className={styles.subtitle}>{doc.description}</p>
                 )}
                 <div className={styles.heroActions}>
-                    <Link href="/docs" className={styles.primaryLink}>
+                    <Link href="/docs" className={`${styles.primaryLink} glowable`}>
                         Back to docs
                     </Link>
-                    <Link href="/" className={styles.secondaryLink}>
+                    <Link href="/" className={`${styles.secondaryLink} glowable`}>
                         Home
                     </Link>
                 </div>

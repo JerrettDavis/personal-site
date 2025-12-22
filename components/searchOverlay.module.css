@@ -1,0 +1,219 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 1.5rem;
+    background: rgba(7, 12, 20, 0.55);
+    animation: overlayFade 0.18s ease;
+}
+
+.scrim {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: transparent;
+}
+
+.panel {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: 80vh;
+    max-height: 80dvh;
+    border-radius: 22px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.8);
+    padding: 1.6rem;
+    display: grid;
+    gap: 1.2rem;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    animation: panelPop 0.2s ease;
+}
+
+.headerRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.kicker {
+    margin: 0 0 0.3rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.closeButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.inputRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 0.6rem 0.8rem;
+}
+
+.inputIcon {
+    color: var(--color-text-deemphasized);
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    outline: none;
+}
+
+.results {
+    display: grid;
+    gap: 1.2rem;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+}
+
+.section {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.sectionTitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.sectionList {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.resultRow {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.resultRow:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.resultLabel {
+    font-weight: 600;
+}
+
+.resultDescription {
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+}
+
+.emptyState {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    text-align: center;
+}
+
+.emptyResult {
+    padding: 0.5rem 0.2rem;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.footerRow {
+    display: flex;
+    justify-content: flex-end;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.footerRow a {
+    color: var(--color-link);
+}
+
+@keyframes overlayFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes panelPop {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media screen and (max-width: 48rem) {
+    .overlay {
+        padding: 0;
+    }
+
+    .panel {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+        animation: panelSlide 0.2s ease;
+    }
+}
+
+@keyframes panelSlide {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .overlay,
+    .panel {
+        animation: none;
+    }
+}

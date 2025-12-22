@@ -4,7 +4,7 @@ import styles from './about-me.module.css';
 import Link from "next/link";
 
 export default function AboutMe() {
-    const aboutDescription = 'Full-stack engineer based in Tulsa, focused on scalable systems, architecture, and a wide range of hobbies.';
+    const aboutDescription = 'Full-stack software engineer based in Tulsa, focused on scalable systems, architecture, and a wide range of hobbies.';
     return (
         <Layout description={aboutDescription}>
             <Head>
@@ -16,7 +16,7 @@ export default function AboutMe() {
                         <p className={styles.kicker}>About</p>
                         <h1 className={styles.heroTitle}>Jerrett Davis</h1>
                         <p className={styles.heroSubtitle}>
-                            Full-stack engineer based in Tulsa, Oklahoma, focused on scalable systems, automation, and developer
+                            Full-stack software engineer based in Tulsa, Oklahoma, focused on scalable systems, automation, and developer
                             experience.
                         </p>
                         <div className={styles.heroActions}>
@@ -189,6 +189,43 @@ export default function AboutMe() {
                         </p>
                     </div>
                     <div className={styles.timeline}>
+                        <article className={styles.timelineItem}>
+                            <div className={styles.timelineCard}>
+                                <div className={styles.timelineHeader}>
+                                    <h3>QuikTrip</h3>
+                                    <span className={styles.timelineRange}>Aug 2025 - Present</span>
+                                </div>
+                                <p>
+                                    Software Engineer 2 focused on the point-of-sale and payments ecosystem that keeps the
+                                    business moving, from store operations to back-office workflows.
+                                </p>
+                                <p>
+                                    Build reusable architecture and automation to reduce tech debt, tighten reliability, and
+                                    enable extensible testing and behavior suites across teams that depend on the payments
+                                    pipeline.
+                                </p>
+                            </div>
+                        </article>
+                        <article className={styles.timelineItem}>
+                            <div className={styles.timelineCard}>
+                                <div className={styles.timelineHeader}>
+                                    <h3>IFS</h3>
+                                    <span className={styles.timelineRange}>Jan 2022 - Aug 2025</span>
+                                </div>
+                                <p>
+                                    Lead Technical Solution Manager guiding customer-facing technical projects from discovery
+                                    to delivery while keeping timelines, scope, and architecture aligned.
+                                </p>
+                                <p>
+                                    Built prototypes, production software, reusable libraries, and internal utilities used
+                                    across the organization to speed up delivery and enforce best practices.
+                                </p>
+                                <p>
+                                    Authored white papers, ran trainings, and served as a technical mentor and liaison between
+                                    teams and clients to resolve complex implementation needs.
+                                </p>
+                            </div>
+                        </article>
                         <article className={styles.timelineItem}>
                             <div className={styles.timelineCard}>
                                 <div className={styles.timelineHeader}>

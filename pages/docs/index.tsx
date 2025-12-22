@@ -45,7 +45,7 @@ export default function DocsIndex({intro, docs}: DocsIndexProps) {
                         {docs.map((doc) => (
                             <Link
                                 href={doc.route}
-                                className={styles.docCard}
+                                className={`${styles.docCard} glowable`}
                                 key={doc.route}
                             >
                                 <span className={styles.docTitle}>{doc.title}</span>

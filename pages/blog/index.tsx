@@ -8,7 +8,6 @@ import type {PostSummary} from "../../lib/posts";
 import {POSTS_PER_PAGE} from "../../lib/blog-utils";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
-import BaseProps from "../index";
 import PostSummaries from "../../components/postSummaries";
 import generateRssFeed from "../../utils/generateRSSFeed";
 import styles from "./index.module.css";
@@ -48,16 +47,16 @@ export default function Index(
                     I also publish on <a href="https://hashnode.jerrettdavis.com" target="_blank" rel="noreferrer">Hashnode</a>.
                 </p>
                 <div className={styles.heroActions}>
-                    <Link href="/search" className={styles.primaryLink}>
+                    <Link href="/search" className={`${styles.primaryLink} glowable`}>
                         Search posts
                     </Link>
-                    <a href="/rss.xml" className={styles.secondaryLink}>
+                    <a href="/rss.xml" className={`${styles.secondaryLink} glowable`}>
                         RSS feed
                     </a>
-                    <Link href="/blog/series" className={styles.secondaryLink}>
+                    <Link href="/blog/series" className={`${styles.secondaryLink} glowable`}>
                         Series
                     </Link>
-                    <Link href="/projects" className={styles.secondaryLink}>
+                    <Link href="/projects" className={`${styles.secondaryLink} glowable`}>
                         Projects
                     </Link>
                 </div>
@@ -91,7 +90,7 @@ export default function Index(
                                         <Link
                                             key={pageNumber}
                                             href={href}
-                                            className={`${styles.pageLink} ${isActive ? styles.pageLinkActive : ''}`}
+                                            className={`${styles.pageLink} ${isActive ? styles.pageLinkActive : ''} glowable`}
                                             aria-current={isActive ? 'page' : undefined}
                                         >
                                             {pageNumber}
@@ -118,7 +117,7 @@ const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
                 <h2 className={styles.sideTitle}>Tags</h2>
                 <div className={styles.tagCloud}>
                     {tags.map((tag) => (
-                        <Link className={styles.tagChip} href={`/blog/tags/${tag.tagName}`} key={tag.tagName}>
+                        <Link className={`${styles.tagChip} glowable`} href={`/blog/tags/${tag.tagName}`} key={tag.tagName}>
                             #{tag.tagName}
                         </Link>
                     ))}
@@ -138,7 +137,7 @@ const createCategoriesIfPresent = (categories?: Category[] | null | undefined) =
                 <ul className={styles.categoryList}>
                     {categories.map((category) => (
                         <li className={styles.categoryItem} key={category.categoryName}>
-                            <Link href={`/blog/categories/${category.categoryPath}`} className={styles.categoryLink}>
+                            <Link href={`/blog/categories/${category.categoryPath}`} className={`${styles.categoryLink} glowable`}>
                                 <span>{category.categoryName}</span>
                                 <span className={styles.categoryCount}>{category.count}</span>
                             </Link>
@@ -161,11 +160,10 @@ export interface BlogIndexPropsModel {
     totalPosts: number,
 }
 
-interface BlogIndexProps extends BaseProps<BlogIndexPropsModel> {
-}
+type BlogIndexProps = BlogIndexPropsModel;
 
 
-export const getStaticProps: GetStaticProps = async (): Promise<BlogIndexProps> => {
+export const getStaticProps: GetStaticProps<BlogIndexPropsModel> = async (): Promise<{ props: BlogIndexPropsModel }> => {
     const allPosts = await getSortedPostsData();
     const tags = await getSortedTagsData();
     const categories = await getAllCategories();

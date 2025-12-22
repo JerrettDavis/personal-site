@@ -1,5 +1,19 @@
 .hero {
     padding: 3rem 0 2rem;
+    display: grid;
+    gap: 2rem;
+}
+
+@media screen and (min-width: 64rem) {
+    .hero {
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+        align-items: center;
+    }
+}
+
+.heroCopy {
+    display: grid;
+    gap: 0.8rem;
 }
 
 .kicker {
@@ -21,6 +35,94 @@
     color: var(--color-text-deemphasized);
 }
 
+.heroCard {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 20px 36px -28px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.heroCard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(260px 160px at 100% 0%, var(--color-primary), transparent 70%);
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.heroCardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+}
+
+.heroCardKicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.heroCardTitle {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.statsGrid {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    position: relative;
+}
+
+.statCard {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.statValue {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.heroTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.heroTag {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
 .hobbyGrid {
     display: grid;
     gap: 1.2rem;
@@ -36,6 +138,20 @@
     background: var(--color-surface);
     box-shadow: 0 12px 24px -20px rgba(0, 0, 0, 0.6);
     overflow: hidden;
+}
+
+.hobbyHeader {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+}
+
+.hobbyIndex {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
 }
 
 .hobbyCard::before {
@@ -55,6 +171,32 @@
 .hobbySummary {
     margin: 0;
     color: var(--color-text-deemphasized);
+}
+
+.relatedPosts {
+    margin-top: 0.8rem;
+}
+
+.relatedSummary {
+    cursor: pointer;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    list-style: none;
+}
+
+.relatedSummary::-webkit-details-marker {
+    display: none;
+}
+
+.relatedList {
+    margin: 0.6rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+    display: grid;
+    gap: 0.35rem;
 }
 
 .postsSection {

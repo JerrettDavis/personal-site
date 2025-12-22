@@ -21,21 +21,66 @@
     color: var(--color-text-deemphasized);
 }
 
+.statsGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin-top: 1.6rem;
+}
+
+.statCard {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.statValue {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
 .grid {
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     margin-top: 2rem;
+    align-items: stretch;
 }
 
 .projectCard {
     position: relative;
+    display: flex;
+    flex-direction: column;
     padding: 1.4rem;
     border-radius: 16px;
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 14px 30px -26px rgba(0, 0, 0, 0.6);
+    min-height: 360px;
+    height: 100%;
+    z-index: 0;
+}
+
+.projectCard.glowable {
+    overflow: visible;
+}
+
+.projectCard:hover,
+.projectCard:focus-within {
+    z-index: 2;
 }
 
 .projectCard::before {
@@ -80,15 +125,30 @@
     color: var(--color-text-deemphasized);
 }
 
+.cardBody {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.cardFooter {
+    margin-top: auto;
+    display: grid;
+    gap: 0.8rem;
+}
+
 .cardSummary {
-    margin: 0.6rem 0 0.8rem;
+    margin: 0;
+}
+
+.badgeStack {
+    display: grid;
+    gap: 0.4rem;
 }
 
 .badgeRow {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-bottom: 0.6rem;
 }
 
 .badge {
@@ -100,10 +160,58 @@
     background: var(--color-surface-2);
     border: 1px solid var(--color-border);
     color: var(--color-text-deemphasized);
+    line-height: 1;
+}
+
+.badgeMore {
+    border-style: dashed;
+    cursor: pointer;
+    background: var(--color-surface-2);
+}
+
+.badgeMoreWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.badgeMoreWrap button {
+    appearance: none;
+    background: var(--color-surface-2);
+}
+
+.badgeMoreWrap:hover .badgePopover,
+.badgeMoreWrap:focus-within .badgePopover {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.badgePopover {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    min-width: 180px;
+    max-width: 260px;
+    padding: 0.6rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 14px 28px -20px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 3;
+}
+
+.badgePopoverInner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
 }
 
 .highlightList {
-    margin: 0 0 0.6rem;
+    margin: 0;
     padding-left: 1.2rem;
     color: var(--color-text-deemphasized);
     font-size: 0.85rem;
@@ -115,14 +223,12 @@
     gap: 0.8rem;
     font-size: 0.75rem;
     color: var(--color-text-deemphasized);
-    margin-top: 0.6rem;
 }
 
 .linksRow {
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    margin-top: 0.8rem;
 }
 
 .linkButton {
@@ -157,17 +263,32 @@
     color: var(--color-text-deemphasized);
     display: block;
     margin-bottom: 0.4rem;
+    cursor: pointer;
+}
+
+.relatedLabel::-webkit-details-marker {
+    display: none;
 }
 
 .relatedList {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: grid;
+    gap: 0.35rem;
 }
 
 .relatedList li {
     margin-bottom: 0.35rem;
     font-size: 0.85rem;
+}
+
+.postsSection {
+    margin-top: 2.5rem;
+}
+
+.postsTitle {
+    margin-bottom: 1rem;
 }
 
 .notice {
