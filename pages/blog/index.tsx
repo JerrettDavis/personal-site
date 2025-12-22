@@ -8,7 +8,6 @@ import type {PostSummary} from "../../lib/posts";
 import {POSTS_PER_PAGE} from "../../lib/blog-utils";
 import {getSortedTagsData, TagData} from "../../lib/tags";
 import {Category, getAllCategories} from "../../lib/categories";
-import BaseProps from "../index";
 import PostSummaries from "../../components/postSummaries";
 import generateRssFeed from "../../utils/generateRSSFeed";
 import styles from "./index.module.css";
@@ -161,11 +160,10 @@ export interface BlogIndexPropsModel {
     totalPosts: number,
 }
 
-interface BlogIndexProps extends BaseProps<BlogIndexPropsModel> {
-}
+type BlogIndexProps = BlogIndexPropsModel;
 
 
-export const getStaticProps: GetStaticProps = async (): Promise<BlogIndexProps> => {
+export const getStaticProps: GetStaticProps<BlogIndexPropsModel> = async (): Promise<{ props: BlogIndexPropsModel }> => {
     const allPosts = await getSortedPostsData();
     const tags = await getSortedTagsData();
     const categories = await getAllCategories();
