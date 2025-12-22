@@ -264,10 +264,49 @@
     display: block;
     margin-bottom: 0.4rem;
     cursor: pointer;
+    transition: color 0.2s ease;
 }
 
 .relatedLabel::-webkit-details-marker {
     display: none;
+}
+
+.relatedLabel::after {
+    content: "›";
+    display: inline-block;
+    margin-left: 0.4rem;
+    transform: rotate(90deg);
+    transition: transform 0.2s ease;
+}
+
+.relatedPosts[open] .relatedLabel::after {
+    transform: rotate(-90deg);
+}
+
+.relatedPosts[open] .relatedLabel {
+    color: var(--color-text-primary);
+}
+
+.relatedContent {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+}
+
+.relatedPosts[open] .relatedContent {
+    grid-template-rows: 1fr;
+}
+
+.relatedContentInner {
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.relatedPosts[open] .relatedContentInner {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .relatedList {

@@ -19,7 +19,6 @@
     gap: 1rem;
     position: relative;
     z-index: 1;
-    animation: heroReveal 0.6s ease both;
 }
 
 .avatarRow {
@@ -127,7 +126,6 @@
     overflow: hidden;
     box-shadow: 0 24px 40px -32px rgba(0, 0, 0, 0.7);
     z-index: 1;
-    animation: heroReveal 0.6s ease 0.1s both;
 }
 
 .heroCard::before {

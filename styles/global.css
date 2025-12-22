@@ -131,6 +131,21 @@ body::before {
     border-color: var(--color-glow-shadow);
 }
 
+html[data-reveal-ready="true"] [data-reveal="true"] {
+    opacity: var(--reveal-progress, 1);
+    transform: translateY(calc((1 - var(--reveal-progress, 1)) * 16px))
+        scale(calc(0.98 + (var(--reveal-progress, 1) * 0.02)));
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-reveal-ready="true"] [data-reveal="true"] {
+        transition: none;
+        transform: none;
+    }
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-secondary);
     font-family: var(--font-display);

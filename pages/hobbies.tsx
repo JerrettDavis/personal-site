@@ -83,15 +83,19 @@ export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: Hobb
                                 <summary className={styles.relatedSummary}>
                                     Related posts ({relatedPostsByHobby[hobby.title].length})
                                 </summary>
-                                <ul className={styles.relatedList}>
-                                    {relatedPostsByHobby[hobby.title].map((post) => (
-                                        <li key={post.id}>
-                                            <Link href={`/blog/posts/${post.id}`} className="glowable">
-                                                {post.title}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className={styles.relatedContent}>
+                                    <div className={styles.relatedContentInner}>
+                                        <ul className={styles.relatedList}>
+                                            {relatedPostsByHobby[hobby.title].map((post) => (
+                                                <li key={post.id}>
+                                                    <Link href={`/blog/posts/${post.id}`} className="glowable">
+                                                        {post.title}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
                             </details>
                         ) : null}
                     </article>

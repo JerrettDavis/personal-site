@@ -126,46 +126,61 @@
 .hobbyGrid {
     display: grid;
     gap: 1.2rem;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     margin-top: 2rem;
 }
 
 .hobbyCard {
     position: relative;
-    padding: 1.2rem;
-    border-radius: 14px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.4rem;
+    border-radius: 20px;
     border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    box-shadow: 0 12px 24px -20px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(140deg, var(--color-surface) 0%, var(--color-surface-2) 55%, var(--color-surface) 100%);
+    box-shadow: 0 18px 32px -26px rgba(0, 0, 0, 0.6);
     overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .hobbyHeader {
     display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    margin-bottom: 0.4rem;
+    align-items: center;
+    gap: 0.8rem;
 }
 
 .hobbyIndex {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 0.2rem 0.5rem;
 }
 
 .hobbyCard::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(120deg, var(--color-surface-2), transparent 60%);
-    opacity: 0.7;
+    background-image:
+        radial-gradient(220px 160px at 100% 0%, rgba(28, 95, 122, 0.12), transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='62' viewBox='0 0 72 62'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.04' stroke-width='1'%3E%3Cpath d='M36 1 L71 18 L71 44 L36 61 L1 44 L1 18 Z'/%3E%3Cpath d='M0 18 L35 35 L35 61 L0 44 Z'/%3E%3Cpath d='M72 18 L37 35 L37 61 L72 44 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: auto, 96px 84px;
+    background-position: top right, 0 0;
+    background-repeat: no-repeat, repeat;
     pointer-events: none;
 }
 
+.hobbyCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 36px -28px rgba(0, 0, 0, 0.55);
+}
+
 .hobbyTitle {
-    margin: 0 0 0.4rem;
-    font-size: 1.2rem;
+    margin: 0;
+    font-size: 1.3rem;
 }
 
 .hobbySummary {
@@ -175,6 +190,8 @@
 
 .relatedPosts {
     margin-top: 0.8rem;
+    border-top: 1px dashed var(--color-border);
+    padding-top: 0.8rem;
 }
 
 .relatedSummary {
@@ -184,10 +201,60 @@
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
     list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: color 0.2s ease;
 }
 
 .relatedSummary::-webkit-details-marker {
     display: none;
+}
+
+.relatedSummary::after {
+    content: "+";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    font-size: 0.7rem;
+    color: var(--color-text-deemphasized);
+    transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.relatedPosts[open] .relatedSummary {
+    color: var(--color-text-primary);
+}
+
+.relatedPosts[open] .relatedSummary::after {
+    transform: rotate(45deg);
+    color: var(--color-text-primary);
+    border-color: var(--color-primary);
+}
+
+.relatedContent {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+}
+
+.relatedPosts[open] .relatedContent {
+    grid-template-rows: 1fr;
+}
+
+.relatedContentInner {
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.relatedPosts[open] .relatedContentInner {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .relatedList {

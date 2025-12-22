@@ -78,6 +78,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         {label: 'Stars', value: totalStars},
         {label: 'Latest push', value: latestPushedAt ? <Date dateString={latestPushedAt} /> : '---'},
     ];
+
     return (
         <Layout description={lede}>
             <Head>
@@ -225,15 +226,19 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                             <summary className={styles.relatedLabel}>
                                                 Related posts ({relatedPosts.length})
                                             </summary>
-                                            <ul className={styles.relatedList}>
-                                                {relatedPosts.map((post) => (
-                                                    <li key={post.id}>
-                                                        <Link href={`/blog/posts/${post.id}`} className="glowable">
-                                                            {post.title}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <div className={styles.relatedContent}>
+                                                <div className={styles.relatedContentInner}>
+                                                    <ul className={styles.relatedList}>
+                                                        {relatedPosts.map((post) => (
+                                                            <li key={post.id}>
+                                                                <Link href={`/blog/posts/${post.id}`} className="glowable">
+                                                                    {post.title}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </details>
                                     )}
                                 </div>
