@@ -1,0 +1,174 @@
+.page {
+    display: grid;
+    gap: 2rem;
+    padding-top: 1.5rem;
+}
+
+.hero {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.kicker {
+    margin: 0 0 0.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 2.6rem;
+}
+
+.subtitle {
+    margin: 0;
+    max-width: 52rem;
+    color: var(--color-text-deemphasized);
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
+}
+
+.primaryLink,
+.secondaryLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.primaryLink {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.primaryLink:visited {
+    color: var(--color-bg-primary);
+}
+
+.secondaryLink {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+}
+
+.secondaryLink:visited {
+    color: var(--color-text-primary);
+}
+
+.metaRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 14px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.metaItem {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 120px;
+}
+
+.metaLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metaValue {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.content {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.content :global(h2),
+.content :global(h3),
+.content :global(h4) {
+    margin-top: 2rem;
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+}
+
+.sectionTitle {
+    margin: 0;
+}
+
+.sectionLead {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+}
+
+.docGrid {
+    display: grid;
+    gap: 1rem;
+}
+
+@media screen and (min-width: 48rem) {
+    .docGrid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+.docCard {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.docCard:visited {
+    color: var(--color-text-primary);
+}
+
+.docCard:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+}
+
+.docTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.docSummary {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.9rem;
+}
+
+.docMeta {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
