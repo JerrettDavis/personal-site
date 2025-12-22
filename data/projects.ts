@@ -12,6 +12,8 @@ export interface ProjectMeta {
     summary?: string;
     topics?: string[];
     highlights?: string[];
+    primaryTag?: string;
+    tags?: string[];
     relatedTags?: string[];
     relatedPosts?: string[];
     links?: ProjectLink[];
@@ -25,7 +27,18 @@ export const PROJECT_OVERRIDES: ProjectMeta[] = [
         displayName: 'Personal Site',
         summary: 'My Next.js and MDX powered home base, tuned for long-form writing and experiments.',
         topics: ['Next.js', 'MDX', 'Static generation'],
+        primaryTag: 'personal-site',
+        tags: ['architecture', 'static-generation'],
         accent: '#0a5568',
         featured: true,
+    },
+    {
+        repo: 'tinybdd',
+        displayName: 'TinyBDD',
+        summary: 'A lightweight behavior-driven testing toolkit aimed at fast feedback and readable test suites.',
+        topics: ['BDD', 'Testing', '.NET'],
+        primaryTag: 'tinybdd',
+        tags: ['bdd', 'behavior-driven-development'],
+        accent: '#1c5f7a',
     },
 ];

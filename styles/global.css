@@ -21,6 +21,11 @@ body[data-theme="light"] {
     --color-bg-glow-2: rgba(108, 120, 200, 0.14);
     --color-selection-bg: #1c5f7a;
     --color-selection-text: #f7f9fc;
+    --color-grid: rgba(28, 95, 122, 0.045);
+    --color-grid-strong: rgba(28, 95, 122, 0.07);
+    --color-hex-highlight: rgba(28, 95, 122, 0.16);
+    --color-glow: rgba(28, 95, 122, 0.35);
+    --color-glow-shadow: rgba(28, 95, 122, 0.25);
 }
 
 body[data-theme="dark"] {
@@ -45,6 +50,11 @@ body[data-theme="dark"] {
     --color-bg-glow-2: rgba(120, 118, 200, 0.16);
     --color-selection-bg: #27465f;
     --color-selection-text: #f0f4ff;
+    --color-grid: rgba(124, 201, 228, 0.045);
+    --color-grid-strong: rgba(124, 201, 228, 0.07);
+    --color-hex-highlight: rgba(124, 201, 228, 0.16);
+    --color-glow: rgba(124, 201, 228, 0.35);
+    --color-glow-shadow: rgba(124, 201, 228, 0.25);
 }
 
 html {
@@ -66,6 +76,59 @@ body {
     font-size: 18px;
     transition: background 0.25s ease-in-out;
     min-height: 100%;
+    position: relative;
+    isolation: isolate;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        repeating-linear-gradient(60deg, var(--color-grid-strong) 0 1px, transparent 1px 48px),
+        repeating-linear-gradient(120deg, var(--color-grid-strong) 0 1px, transparent 1px 48px),
+        repeating-linear-gradient(0deg, var(--color-grid) 0 1px, transparent 1px 48px);
+    opacity: 0.28;
+}
+
+#__next {
+    position: relative;
+    z-index: 1;
+}
+
+.glowable {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transition: border-color 0.35s ease;
+}
+
+.glowable::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: radial-gradient(120px 120px at var(--glow-x, 50%) var(--glow-y, 50%), var(--color-glow), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    transform: scale(0.98);
+}
+
+.glowable:hover::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.glowable:hover {
+    border-color: var(--color-glow-shadow);
 }
 
 h1, h2, h3, h4, h5, h6 {

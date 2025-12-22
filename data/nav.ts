@@ -30,18 +30,21 @@ export const NAV_ITEMS: NavItem[] = [
         href: '/hobbies',
         description: 'Off-hours interests and hobby-tagged posts.',
         keywords: ['interests', 'life'],
+        showInNav: false,
     },
     {
         label: 'Tools',
         href: '/tools',
         description: 'Hardware, software, and gadgets that power my workflow.',
         keywords: ['stack', 'gear'],
+        showInNav: false,
     },
     {
         label: 'Docs',
         href: '/docs',
         description: 'Architecture notes, technical decisions, and platform details.',
         keywords: ['documentation', 'architecture', 'decisions'],
+        showInNav: false,
     },
     {
         label: 'Search',

@@ -1,0 +1,510 @@
+.hero {
+    display: grid;
+    gap: 2rem;
+    padding: 3rem 0 1.5rem;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+@media screen and (min-width: 64rem) {
+    .hero {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        align-items: center;
+    }
+}
+
+.heroCopy {
+    display: grid;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+    animation: heroReveal 0.6s ease both;
+}
+
+.avatarRow {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.avatarWrap {
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.avatar {
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 12px 24px -22px rgba(0, 0, 0, 0.6);
+}
+
+.avatarMeta {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.avatarTitle {
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.avatarSubtitle {
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+}
+
+.kicker {
+    margin: 0 0 0.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 3rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--color-text-deemphasized);
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.6rem;
+}
+
+.primaryLink,
+.secondaryLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.primaryLink {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+    border: 1px solid var(--color-primary);
+}
+
+.primaryLink:visited {
+    color: var(--color-bg-primary);
+}
+
+.secondaryLink {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+}
+
+.secondaryLink:visited {
+    color: var(--color-text-primary);
+}
+
+.heroCard {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    padding: 1.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+    box-shadow: 0 24px 40px -32px rgba(0, 0, 0, 0.7);
+    z-index: 1;
+    animation: heroReveal 0.6s ease 0.1s both;
+}
+
+.heroCard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(240px 160px at 100% 0%, var(--color-primary), transparent 70%);
+    opacity: 0.16;
+    pointer-events: none;
+}
+
+.gridField {
+    position: absolute;
+    inset: -10% -10% 0;
+    z-index: 0;
+    pointer-events: none;
+    background: transparent;
+    transform: translateY(calc(var(--hero-parallax, 0px) * -0.2));
+    transition: transform 0.2s ease-out;
+}
+
+.gridField::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='62' viewBox='0 0 72 62'%3E%3Cg fill='none' stroke='%231c5f7a' stroke-opacity='0.25' stroke-width='1'%3E%3Cpath d='M36 1 L71 18 L71 44 L36 61 L1 44 L1 18 Z'/%3E%3Cpath d='M0 18 L35 35 L35 61 L0 44 Z'/%3E%3Cpath d='M72 18 L37 35 L37 61 L72 44 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 96px 84px;
+    opacity: 0.18;
+    mix-blend-mode: screen;
+    animation: hexDrift 22s linear infinite;
+}
+
+.heroCardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+}
+
+.heroCardKicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.heroCardTitle {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.heroCardLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.heroCardLink:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+}
+
+.statGrid {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    position: relative;
+}
+
+.statItem {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.statLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.statValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.commandHint {
+    position: relative;
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.commandKey {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.quickLinks {
+    position: relative;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.quickLinks a {
+    color: var(--color-link);
+    font-size: 0.9rem;
+}
+
+.section {
+    margin-top: 3rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.section:last-of-type {
+    padding-bottom: 2.5rem;
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.sectionKicker {
+    margin: 0;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.sectionLead {
+    margin: 0;
+    max-width: 48rem;
+    color: var(--color-text-deemphasized);
+}
+
+.cardGrid {
+    display: grid;
+    gap: 1rem;
+}
+
+@media screen and (min-width: 48rem) {
+    .cardGrid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}
+
+.card {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.1rem 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.card:visited {
+    color: var(--color-text-primary);
+}
+
+.card:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+}
+
+.cardTitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.cardSummary {
+    margin: 0.4rem 0 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.9rem;
+}
+
+.cardMeta {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.sectionActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.signalCard {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    padding: 1.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+    box-shadow: 0 24px 40px -32px rgba(0, 0, 0, 0.7);
+}
+
+.signalCard::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(280px 180px at 0% 0%, var(--color-primary), transparent 70%);
+    opacity: 0.14;
+    pointer-events: none;
+}
+
+.signalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+}
+
+.signalKicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.signalTitle {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.signalBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+}
+
+.signalBar {
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent 0%, var(--color-primary) 45%, transparent 90%);
+    background-size: 200% 100%;
+    animation: signalFlow 3.5s linear infinite;
+}
+
+.signalNodes {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    position: relative;
+}
+
+.signalNode {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.signalNodeTitle {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.signalNodeMeta {
+    font-size: 0.8rem;
+    color: var(--color-text-deemphasized);
+    font-family: var(--font-mono);
+}
+
+.signalFooter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.signalFooter a {
+    color: var(--color-link);
+}
+
+.signalNote {
+    font-family: var(--font-mono);
+}
+
+@keyframes signalFlow {
+    from {
+        background-position: 0% 50%;
+    }
+    to {
+        background-position: 200% 50%;
+    }
+}
+
+@keyframes heroReveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hexDrift {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 180px 180px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .signalBar {
+        animation: none;
+    }
+
+    .gridField::after {
+        animation: none;
+    }
+
+    .gridField {
+        transform: none;
+    }
+
+    .heroCopy,
+    .heroCard {
+        animation: none;
+    }
+}

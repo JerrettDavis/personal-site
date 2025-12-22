@@ -6,6 +6,7 @@ export interface GitHubRepo {
     html_url: string;
     homepage: string | null;
     language: string | null;
+    topics?: string[];
     stargazers_count: number;
     forks_count: number;
     archived: boolean;
@@ -40,7 +41,7 @@ export const getActiveRepos = async ({
                                      }: RepoFetchOptions): Promise<GitHubRepoFetchResult> => {
     const url = `https://api.github.com/users/${username}/repos?per_page=100&sort=updated&direction=desc`;
     const headers: Record<string, string> = {
-        Accept: 'application/vnd.github+json',
+        Accept: 'application/vnd.github+json, application/vnd.github.mercy-preview+json',
     };
 
     if (process.env.GITHUB_TOKEN) {

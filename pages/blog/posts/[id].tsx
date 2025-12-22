@@ -43,10 +43,10 @@ export default function Post({
                     <h1 className={styles.title}>{postData.title}</h1>
                     <p className={styles.subtitle}>{description}</p>
                     <div className={styles.heroActions}>
-                        <Link href="/blog" className={styles.primaryLink}>
+                        <Link href="/blog" className={`${styles.primaryLink} glowable`}>
                             Back to blog
                         </Link>
-                        <Link href="/search" className={styles.secondaryLink}>
+                        <Link href="/search" className={`${styles.secondaryLink} glowable`}>
                             Search posts
                         </Link>
                     </div>
@@ -88,19 +88,19 @@ export default function Post({
                     <section className={styles.seriesCard}>
                         <div className={styles.seriesTitle}>
                             Series:{' '}
-                            <Link href={`/blog/series/${toSeriesSlug(seriesData.name)}`}>
+                            <Link href={`/blog/series/${toSeriesSlug(seriesData.name)}`} className="glowable">
                                 {seriesData.name}
                             </Link>{' '}
                             (Part {seriesData.currentIndex + 1} of {seriesData.posts.length})
                         </div>
                         <div className={styles.seriesNav}>
                             {previousPost && (
-                                <Link href={`/blog/posts/${previousPost.id}`}>
+                                <Link href={`/blog/posts/${previousPost.id}`} className="glowable">
                                     Prev: {previousPost.title}
                                 </Link>
                             )}
                             {nextPost && (
-                                <Link href={`/blog/posts/${nextPost.id}`}>
+                                <Link href={`/blog/posts/${nextPost.id}`} className="glowable">
                                     Next: {nextPost.title}
                                 </Link>
                             )}
@@ -108,7 +108,7 @@ export default function Post({
                         <ol className={styles.seriesList}>
                             {seriesData.posts.map((post, index) => (
                                 <li className={styles.seriesItem} key={post.id} data-active={index === seriesData.currentIndex}>
-                                    <Link href={`/blog/posts/${post.id}`}>
+                                    <Link href={`/blog/posts/${post.id}`} className="glowable">
                                         {index + 1}. {post.title}
                                     </Link>
                                 </li>
@@ -119,7 +119,7 @@ export default function Post({
                 {!!postData.tags && (
                     <div className={styles.tagRow}>
                         {postData.tags.map(t => (
-                            <Link href={`/blog/tags/${t}`} key={t} className={styles.tagChip}>
+                            <Link href={`/blog/tags/${t}`} key={t} className={`${styles.tagChip} glowable`}>
                                 #{t}
                             </Link>
                         ))}
