@@ -24,6 +24,7 @@ const sortSeriesPosts = (posts: PostSummary[]) =>
     });
 
 export default interface PostData extends PostBase {
+    id: string;
     useToc: boolean | undefined | null
     wordCount: number;
     contentHtml: string;
