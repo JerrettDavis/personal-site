@@ -1,10 +1,11 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Link from 'next/link';
 import styles from './commandPalette.module.css';
 import {COMMAND_ITEMS, CommandItem} from '../data/commandPalette';
 import {shouldIgnoreKeyEvent} from '../lib/dom';
 import {useBodyScrollLock} from '../lib/hooks/useBodyScrollLock';
+import {useOverlayEscape} from '../lib/hooks/useOverlayEscape';
+import OverlayShell from './overlayShell';
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
@@ -24,12 +25,7 @@ export default function CommandPalette() {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [shortcutLabel, setShortcutLabel] = useState('Ctrl K');
-    const [mounted, setMounted] = useState(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     useEffect(() => {
         if (typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)) {
@@ -44,16 +40,19 @@ export default function CommandPalette() {
 
     useBodyScrollLock(isOpen);
 
+    const closePalette = useCallback(() => {
+        setIsOpen(false);
+        setQuery('');
+    }, []);
+
+    useOverlayEscape({isOpen, onClose: closePalette, ignoreInputs: true});
+
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {
             if (shouldIgnoreKeyEvent(event.target)) return;
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
                 setIsOpen((prev) => !prev);
-                return;
-            }
-            if (event.key === 'Escape') {
-                setIsOpen(false);
             }
         };
         document.addEventListener('keydown', handler);
@@ -78,20 +77,27 @@ export default function CommandPalette() {
         return Array.from(groups.entries());
     }, [filteredItems]);
 
-    const closePalette = () => {
-        setIsOpen(false);
-        setQuery('');
-    };
-
-    const overlay = isOpen ? (
-        <div className={styles.overlay} role="dialog" aria-modal="true">
+    return (
+        <>
             <button
                 type="button"
-                className={styles.scrim}
-                onClick={closePalette}
-                aria-label="Close command palette"
-            />
-            <div className={styles.panel}>
+                className={`${styles.commandButton} glowable`}
+                onClick={() => setIsOpen(true)}
+                aria-haspopup="dialog"
+                aria-expanded={isOpen}
+            >
+                Command
+                <span className={styles.shortcut}>{shortcutLabel}</span>
+            </button>
+            <OverlayShell
+                isOpen={isOpen}
+                onClose={closePalette}
+                ariaLabel="Command palette"
+                overlayClassName={styles.overlay}
+                scrimClassName={styles.scrim}
+                panelClassName={styles.panel}
+                scrimLabel="Close command palette"
+            >
                 <div className={styles.headerRow}>
                     <div className={styles.title}>Command palette</div>
                     <button
@@ -153,23 +159,7 @@ export default function CommandPalette() {
                 <div className={styles.footerRow}>
                     Tip: Press {shortcutLabel} to open from anywhere.
                 </div>
-            </div>
-        </div>
-    ) : null;
-
-    return (
-        <>
-            <button
-                type="button"
-                className={`${styles.commandButton} glowable`}
-                onClick={() => setIsOpen(true)}
-                aria-haspopup="dialog"
-                aria-expanded={isOpen}
-            >
-                Command
-                <span className={styles.shortcut}>{shortcutLabel}</span>
-            </button>
-            {mounted && overlay ? createPortal(overlay, document.body) : null}
+            </OverlayShell>
         </>
     );
 }

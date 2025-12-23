@@ -13,6 +13,7 @@ import type {DocSummary} from '../lib/docs';
 import {getSortedTagsData} from '../lib/tags';
 import {getAllCategories} from '../lib/categories';
 import {useParallax} from '../lib/hooks/useParallax';
+import StatGrid from '../components/statGrid';
 
 interface HomeProps {
     recentPosts: PostSummary[];
@@ -30,6 +31,13 @@ const introSentence = 'Software engineer, writer, and systems thinker building a
 
 export default function Home({recentPosts, docs, totals}: HomeProps) {
     const heroRef = useRef<HTMLElement | null>(null);
+    const telemetryStats = [
+        {id: 'posts', label: 'Posts', value: totals.posts},
+        {id: 'docs', label: 'Docs', value: totals.docs},
+        {id: 'tags', label: 'Tags', value: totals.tags},
+        {id: 'categories', label: 'Categories', value: totals.categories},
+        {id: 'series', label: 'Series', value: totals.series},
+    ];
 
     useParallax(heroRef, {max: 160, factor: 0.12, cssVar: '--hero-parallax'});
 
@@ -85,28 +93,13 @@ export default function Home({recentPosts, docs, totals}: HomeProps) {
                             Docs
                         </Link>
                     </div>
-                    <div className={styles.statGrid}>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Posts</span>
-                            <span className={styles.statValue}>{totals.posts}</span>
-                        </div>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Docs</span>
-                            <span className={styles.statValue}>{totals.docs}</span>
-                        </div>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Tags</span>
-                            <span className={styles.statValue}>{totals.tags}</span>
-                        </div>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Categories</span>
-                            <span className={styles.statValue}>{totals.categories}</span>
-                        </div>
-                        <div className={styles.statItem}>
-                            <span className={styles.statLabel}>Series</span>
-                            <span className={styles.statValue}>{totals.series}</span>
-                        </div>
-                    </div>
+                    <StatGrid
+                        items={telemetryStats}
+                        gridClassName={styles.statGrid}
+                        itemClassName={styles.statItem}
+                        valueClassName={styles.statValue}
+                        labelClassName={styles.statLabel}
+                    />
                     <div className={styles.commandHint}>
                         Tip: Press <span className={styles.commandKey}>Cmd</span>/<span className={styles.commandKey}>Ctrl</span> +{' '}
                         <span className={styles.commandKey}>K</span> to open the command palette.

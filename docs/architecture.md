@@ -13,6 +13,7 @@ order: 2
 ## Core layout
 - `components/layout.tsx` provides the global header, navigation, and page shell.
 - Theme switching is handled via a client-side toggle component.
+- Page-level effects (reveal, grid tracking, glow hotspots) live in `lib/hooks` and are wired by the layout.
 
 ## Content inputs
 - `posts/` stores markdown-based blog posts.

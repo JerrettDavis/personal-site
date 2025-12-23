@@ -13,19 +13,21 @@ const getAllRawCategories = async (): Promise<string[]> =>
         .filter(category => category && typeof category === 'string');
 
 export const getAllCategories = async (): Promise<Category[]> => {
-    const categoryCounts: any = (await getAllRawCategories())
-        .sort((a: string, b: string) => a.trim().toLowerCase().localeCompare(b.trim().toLowerCase()))
-        .reduce((acc: any, cur: string) => {
-            return ({...acc, [cur]: (acc[cur] || 0) + 1});
-        }, {});
-    const categories = Object.keys(categoryCounts);
-    return categories.map((categoryName: string) => {
-        return {
-            categoryName: categoryName,
-            categoryPath: getCategoryPath(categoryName),
-            count: categoryCounts[categoryName]
-        };
+    const normalized = (await getAllRawCategories())
+        .map((category) => category.trim())
+        .filter((category) => category.length > 0)
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+    const categoryCounts = new Map<string, number>();
+    normalized.forEach((category) => {
+        categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
     });
+
+    return Array.from(categoryCounts.entries()).map(([categoryName, count]) => ({
+        categoryName,
+        categoryPath: getCategoryPath(categoryName),
+        count,
+    }));
 }
 
 export const getCategoryData = async (categoryPath: string): Promise<Category> => {

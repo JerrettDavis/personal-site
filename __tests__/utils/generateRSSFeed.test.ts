@@ -1,10 +1,9 @@
 import fs from 'fs';
 import generateRssFeed from '../../utils/generateRSSFeed';
-import {getSortedPost} from '../../utils/mdx';
 import {Feed} from 'feed';
 
-jest.mock('../../utils/mdx', () => ({
-    getSortedPost: jest.fn(),
+jest.mock('../../lib/posts', () => ({
+    getSortedPostsData: jest.fn(),
 }));
 
 jest.mock('feed', () => ({
@@ -16,6 +15,8 @@ jest.mock('feed', () => ({
     })),
 }));
 
+import {getSortedPostsData} from '../../lib/posts';
+
 describe('generateRssFeed', () => {
     const writeSpy = jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
 
@@ -24,13 +25,16 @@ describe('generateRssFeed', () => {
     });
 
     it('writes feed outputs for all formats', async () => {
-        const mockedPosts = getSortedPost as jest.MockedFunction<typeof getSortedPost>;
+        const mockedPosts = getSortedPostsData as jest.MockedFunction<typeof getSortedPostsData>;
         mockedPosts.mockResolvedValue([
             {
+                id: 'post-one',
                 title: 'Post One',
                 description: 'First',
                 date: '2024-01-01',
-                slug: 'post-one',
+                stub: 'First',
+                tags: [],
+                categories: [],
             },
         ]);
 
@@ -41,7 +45,7 @@ describe('generateRssFeed', () => {
         expect(feedInstance.addItem).toHaveBeenCalledWith(
             expect.objectContaining({
                 title: 'Post One',
-                link: expect.stringContaining('/blog/post-one'),
+                link: expect.stringContaining('/blog/posts/post-one'),
             })
         );
 

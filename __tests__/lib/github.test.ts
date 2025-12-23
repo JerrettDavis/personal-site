@@ -1,6 +1,6 @@
-import {getActiveRepos} from '../../lib/github';
+import {getActiveRepos, type GitHubRepo} from '../../lib/github';
 
-const buildRepo = (overrides: Partial<any>) => ({
+const buildRepo = (overrides: Partial<GitHubRepo>) => ({
     id: Math.random(),
     name: 'repo',
     full_name: 'owner/repo',

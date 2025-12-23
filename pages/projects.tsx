@@ -5,13 +5,14 @@ import {GetStaticProps} from "next";
 import {getActiveRepos, GitHubRepo} from "../lib/github";
 import {GITHUB_USERNAME, PROJECT_ACTIVITY_DAYS, PROJECT_OVERRIDES} from "../data/projects";
 import type {ProjectLink, ProjectMeta} from "../data/projects";
-import Link from "next/link";
 import Date from "../components/date";
 import {getSortedPostsData} from "../lib/posts";
 import type {PostSummary} from "../lib/posts";
 import type {CSSProperties} from "react";
 import PostSummaries from "../components/postSummaries";
 import {matchPostsByTags} from "../lib/post-matching";
+import StatGrid from "../components/statGrid";
+import RelatedPosts from "../components/relatedPosts";
 
 interface ProjectCard {
     repo: GitHubRepo;
@@ -66,10 +67,10 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     const featuredCount = projects.filter((project) => project.meta?.featured).length;
     const latestPushedAt = projects[0]?.repo?.pushed_at;
     const stats = [
-        {label: 'Active repos', value: projects.length},
-        {label: 'Featured', value: featuredCount},
-        {label: 'Stars', value: totalStars},
-        {label: 'Latest push', value: latestPushedAt ? <Date dateString={latestPushedAt} /> : '---'},
+        {id: 'active', label: 'Active repos', value: projects.length},
+        {id: 'featured', label: 'Featured', value: featuredCount},
+        {id: 'stars', label: 'Stars', value: totalStars},
+        {id: 'latest', label: 'Latest push', value: latestPushedAt ? <Date dateString={latestPushedAt} /> : '---'},
     ];
 
     return (
@@ -83,14 +84,13 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                 <p className={styles.lede}>
                     {lede}
                 </p>
-                <div className={styles.statsGrid}>
-                    {stats.map((stat) => (
-                        <div className={`${styles.statCard} glowable`} key={stat.label}>
-                            <div className={styles.statValue}>{stat.value}</div>
-                            <div className={styles.statLabel}>{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
+                <StatGrid
+                    items={stats}
+                    gridClassName={styles.statsGrid}
+                    itemClassName={`${styles.statCard} glowable`}
+                    valueClassName={styles.statValue}
+                    labelClassName={styles.statLabel}
+                />
             </section>
             {githubError && (
                 <div className={styles.notice}>
@@ -214,26 +214,17 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                             </a>
                                         ))}
                                     </div>
-                                    {relatedPosts.length > 0 && (
-                                        <details className={styles.relatedPosts}>
-                                            <summary className={styles.relatedLabel}>
-                                                Related posts ({relatedPosts.length})
-                                            </summary>
-                                            <div className={styles.relatedContent}>
-                                                <div className={styles.relatedContentInner}>
-                                                    <ul className={styles.relatedList}>
-                                                        {relatedPosts.map((post) => (
-                                                            <li key={post.id}>
-                                                                <Link href={`/blog/posts/${post.id}`} className="glowable">
-                                                                    {post.title}
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </details>
-                                    )}
+                                    <RelatedPosts
+                                        posts={relatedPosts}
+                                        label="Related posts"
+                                        classes={{
+                                            details: styles.relatedPosts,
+                                            summary: styles.relatedLabel,
+                                            content: styles.relatedContent,
+                                            contentInner: styles.relatedContentInner,
+                                            list: styles.relatedList,
+                                        }}
+                                    />
                                 </div>
                             </article>
                         );
