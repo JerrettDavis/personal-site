@@ -19,6 +19,12 @@ order: 2
 - `docs/` stores markdown documentation that is published to the site.
 - `data/` holds structured content for projects, tools, navigation, and hobbies.
 
+## Consistency conventions
+- Prefer declarative, data-driven rendering from `data/` and `lib/` helpers.
+- Keep side effects in shared hooks (`lib/hooks`) instead of in-page ad hoc effects.
+- Normalize cross-cutting logic (tag matching, key handling, scroll lock) into reusable utilities.
+- Treat markdown pipelines and search index builders as pure functions with explicit inputs/outputs.
+
 ## Build output
 - `public/` serves static assets, RSS feeds, and the generated sitemap endpoint.
 - Next.js handles static generation for content pages and server-side rendering only where needed.

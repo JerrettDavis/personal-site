@@ -12,7 +12,7 @@ jest.mock('next/link', () => ({
 
 jest.mock('next/image', () => ({
     __esModule: true,
-    default: ({src, alt, ...props}) => {
+    default: ({src, alt, fill, ...props}) => {
         const resolvedSrc = typeof src === 'string' ? src : src?.src || '';
         return React.createElement('img', {src: resolvedSrc, alt, ...props});
     },

@@ -11,6 +11,7 @@ import {getSortedPostsData} from "../lib/posts";
 import type {PostSummary} from "../lib/posts";
 import type {CSSProperties} from "react";
 import PostSummaries from "../components/postSummaries";
+import {matchPostsByTags} from "../lib/post-matching";
 
 interface ProjectCard {
     repo: GitHubRepo;
@@ -23,14 +24,6 @@ interface ProjectsProps {
     githubError: string | null;
     projectPosts: PostSummary[];
 }
-
-const normalizeTag = (tag: string) => tag.trim().toLowerCase();
-
-const getPostsMatchingTags = (posts: PostSummary[], tags: string[]): PostSummary[] => {
-    const tagSet = new Set(tags.map(normalizeTag));
-    if (tagSet.size === 0) return [];
-    return posts.filter((post) => post.tags?.some((tag: string) => tagSet.has(normalizeTag(tag))));
-};
 
 const collectTags = (meta?: ProjectMeta | null, repoTopics: string[] = []): string[] => {
     if (!meta && repoTopics.length === 0) return [];
@@ -58,7 +51,7 @@ const getRelatedPosts = (
     }
 
     const tagSet = collectTags(meta, repoTopics);
-    getPostsMatchingTags(posts, tagSet).forEach((post) => {
+    matchPostsByTags(posts, tagSet).forEach((post) => {
         related.set(post.id, post);
     });
 
@@ -303,7 +296,7 @@ export const getStaticProps: GetStaticProps<ProjectsProps> = async () => {
 
     const projectPosts = projectPrimaryTags.length === 0
         ? []
-        : getPostsMatchingTags(allPosts, projectPrimaryTags);
+        : matchPostsByTags(allPosts, projectPrimaryTags);
 
     return {
         props: {

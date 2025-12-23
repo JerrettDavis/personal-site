@@ -5,6 +5,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faMagnifyingGlass, faXmark} from '@fortawesome/free-solid-svg-icons';
 import styles from './searchOverlay.module.css';
 import type {PageResult, PostResult} from '../lib/search';
+import {shouldIgnoreKeyEvent} from '../lib/dom';
+import {useBodyScrollLock} from '../lib/hooks/useBodyScrollLock';
 
 interface SearchIndexPayload {
     pages: PageResult[];
@@ -22,13 +24,6 @@ const matchesQuery = (query: string, fields: string[]) => {
     const normalizedQuery = normalize(query);
     if (!normalizedQuery) return false;
     return fields.some((field) => normalize(field).includes(normalizedQuery));
-};
-
-const shouldIgnoreKeyEvent = (target: EventTarget | null) => {
-    if (!target || !(target instanceof HTMLElement)) return false;
-    const tag = target.tagName.toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
-    return target.isContentEditable;
 };
 
 const getSearchIndexUrl = () => {
@@ -64,22 +59,7 @@ export default function SearchOverlay({className, label = 'Search'}: SearchOverl
         inputRef.current?.focus();
     }, [isOpen]);
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const originalOverflow = document.body.style.overflow;
-        const originalPadding = document.body.style.paddingRight;
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-        document.body.style.overflow = 'hidden';
-        if (scrollbarWidth > 0) {
-            document.body.style.paddingRight = `${scrollbarWidth}px`;
-        }
-
-        return () => {
-            document.body.style.overflow = originalOverflow;
-            document.body.style.paddingRight = originalPadding;
-        };
-    }, [isOpen]);
+    useBodyScrollLock(isOpen);
 
     useEffect(() => {
         if (!isOpen || data || fetchInFlight.current) return;

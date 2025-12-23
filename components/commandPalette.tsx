@@ -3,6 +3,8 @@ import {createPortal} from 'react-dom';
 import Link from 'next/link';
 import styles from './commandPalette.module.css';
 import {COMMAND_ITEMS, CommandItem} from '../data/commandPalette';
+import {shouldIgnoreKeyEvent} from '../lib/dom';
+import {useBodyScrollLock} from '../lib/hooks/useBodyScrollLock';
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
@@ -17,13 +19,6 @@ const buildSearchText = (item: CommandItem) =>
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
-
-const shouldIgnoreKeyEvent = (target: EventTarget | null) => {
-    if (!target || !(target instanceof HTMLElement)) return false;
-    const tag = target.tagName.toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
-    return target.isContentEditable;
-};
 
 export default function CommandPalette() {
     const [isOpen, setIsOpen] = useState(false);
@@ -46,6 +41,8 @@ export default function CommandPalette() {
         if (!isOpen) return;
         inputRef.current?.focus();
     }, [isOpen]);
+
+    useBodyScrollLock(isOpen);
 
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {

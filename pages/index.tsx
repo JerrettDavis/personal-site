@@ -3,7 +3,7 @@ import Layout, {PageType} from '../components/layout';
 import Link from 'next/link';
 import Image from 'next/image';
 import {GetStaticProps} from 'next';
-import {useEffect, useRef} from 'react';
+import {useRef} from 'react';
 import Date from '../components/date';
 import styles from './index.module.css';
 import {getSortedPostsData, getAllSeriesSummaries} from '../lib/posts';
@@ -12,6 +12,7 @@ import {getAllDocSummaries} from '../lib/docs';
 import type {DocSummary} from '../lib/docs';
 import {getSortedTagsData} from '../lib/tags';
 import {getAllCategories} from '../lib/categories';
+import {useParallax} from '../lib/hooks/useParallax';
 
 interface HomeProps {
     recentPosts: PostSummary[];
@@ -30,34 +31,7 @@ const introSentence = 'Software engineer, writer, and systems thinker building a
 export default function Home({recentPosts, docs, totals}: HomeProps) {
     const heroRef = useRef<HTMLElement | null>(null);
 
-    useEffect(() => {
-        const hero = heroRef.current;
-        if (!hero || typeof window === 'undefined') return;
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
-            hero.style.setProperty('--hero-parallax', '0px');
-            return;
-        }
-
-        let rafId = 0;
-        const update = () => {
-            rafId = 0;
-            const offset = Math.min(160, window.scrollY * 0.12);
-            hero.style.setProperty('--hero-parallax', `${offset}px`);
-        };
-
-        const onScroll = () => {
-            if (rafId) return;
-            rafId = window.requestAnimationFrame(update);
-        };
-
-        update();
-        window.addEventListener('scroll', onScroll, {passive: true});
-        return () => {
-            window.removeEventListener('scroll', onScroll);
-            if (rafId) window.cancelAnimationFrame(rafId);
-        };
-    }, []);
+    useParallax(heroRef, {max: 160, factor: 0.12, cssVar: '--hero-parallax'});
 
     return (
         <Layout pageType={PageType.Home} description={introSentence}>

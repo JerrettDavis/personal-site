@@ -9,20 +9,13 @@ import {getSortedPostsData} from "../lib/posts";
 import type {PostSummary} from "../lib/posts";
 import PostSummaries from "../components/postSummaries";
 import Date from "../components/date";
+import {matchPostsByTags} from "../lib/post-matching";
 
 interface HobbiesProps {
     hobbies: HobbyBlurb[];
     hobbyPosts: PostSummary[];
     relatedPostsByHobby: Record<string, PostSummary[]>;
 }
-
-const normalizeTag = (tag: string) => tag.trim().toLowerCase();
-
-const getPostsMatchingTags = (posts: PostSummary[], tags: string[]): PostSummary[] => {
-    const tagSet = new Set(tags.map(normalizeTag));
-    if (tagSet.size === 0) return [];
-    return posts.filter((post) => post.tags?.some((tag) => tagSet.has(normalizeTag(tag))));
-};
 
 export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: HobbiesProps) {
     const lede = 'When I am not building software, I am usually making something physical, experimental, or just strangely cozy.';
@@ -121,10 +114,10 @@ export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: Hobb
 export const getStaticProps: GetStaticProps<HobbiesProps> = async () => {
     const allPosts = await getSortedPostsData();
     const primaryTags = Array.from(new Set(HOBBIES.map((hobby) => hobby.primaryTag).filter(Boolean)));
-    const hobbyPosts = getPostsMatchingTags(allPosts, primaryTags);
+    const hobbyPosts = matchPostsByTags(allPosts, primaryTags);
     const relatedPostsByHobby = HOBBIES.reduce<Record<string, PostSummary[]>>((acc, hobby) => {
         const tagSet = Array.from(new Set([hobby.primaryTag, ...hobby.tags].filter(Boolean)));
-        const related = getPostsMatchingTags(allPosts, tagSet).slice(0, 3);
+        const related = matchPostsByTags(allPosts, tagSet).slice(0, 3);
         acc[hobby.title] = related;
         return acc;
     }, {});

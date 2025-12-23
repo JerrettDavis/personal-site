@@ -1,44 +1,14 @@
 import fs from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
-import {unified} from 'unified'
-import remarkCapitalize from 'remark-capitalize';
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import rehypeFormat from "rehype-format";
-import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from "rehype-slug";
-import rehypeStringify from 'rehype-stringify'
-import rehypeToc from '@jsdevtools/rehype-toc';
-import strip from 'strip-markdown'
-import {remark} from "remark";
 import {formatTags} from "./tags";
-import {common} from "lowlight";
-import dockerfile from "highlight.js/lib/languages/dockerfile";
-import gherkin from 'highlight.js/lib/languages/gherkin'
 import {toSeriesSlug} from "./blog-utils";
+import {buildSummary, parseOrderValue, renderMarkdown} from './markdown';
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
-function parseSeriesOrder(value: unknown): number | null {
-    if (typeof value === 'number' && !Number.isNaN(value)) return value;
-    if (typeof value === 'string' && value.trim().length > 0) {
-        const parsed = Number(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-    return null;
-}
-
 function normalizeSeries(series: string) {
     return series.trim().toLowerCase();
-}
-
-function buildStub(content: string) {
-    return remark()
-        .use(strip)
-        .processSync(content)
-        .toString()
-        .substring(0, 160) + '...';
 }
 
 export default interface PostData extends PostBase {
@@ -73,9 +43,9 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
             const matterResult = matter(fileContents);
-            const content = buildStub(matterResult.content);
+            const content = buildSummary(matterResult.content, {ensureSuffix: true});
             const tags = formatTags(matterResult.data.tags);
-            const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
+            const seriesOrder = parseOrderValue(matterResult.data.seriesOrder);
 
             return {
                 id,
@@ -127,26 +97,10 @@ export async function getPostData(id: string): Promise<PostData> {
     const wordCount = multiSplit(matterResult.content, [' ', '\n'])
         .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
         .length;
-    const stub = buildStub(matterResult.content);
-
-    // Use remark to convert markdown into HTML string
-    let builder = unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(remarkCapitalize)
-        .use(rehypeHighlight, {languages: {...common,dockerfile, gherkin}})
-        .use(rehypeSlug);
-
-    if (!!matterResult.data.useToc)
-        builder = builder.use(rehypeToc);
-
-    const processedContent = await builder.use(rehypeStringify)
-        .use(rehypeFormat)
-        .process(matterResult.content);
-
-    const contentHtml = processedContent.toString();
+    const stub = buildSummary(matterResult.content, {ensureSuffix: true});
+    const contentHtml = await renderMarkdown(matterResult.content, Boolean(matterResult.data.useToc));
     const tags = formatTags(matterResult.data.tags);
-    const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
+    const seriesOrder = parseOrderValue(matterResult.data.seriesOrder);
 
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
