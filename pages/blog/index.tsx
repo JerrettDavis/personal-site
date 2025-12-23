@@ -11,6 +11,7 @@ import {Category, getAllCategories} from "../../lib/categories";
 import PostSummaries from "../../components/postSummaries";
 import generateRssFeed from "../../utils/generateRSSFeed";
 import styles from "./index.module.css";
+import StatGrid from "../../components/statGrid";
 
 
 export default function Index(
@@ -25,9 +26,9 @@ export default function Index(
     const blogDescription = 'Developer blog exploring architecture, testing, and the occasional over-engineered experiment.';
     const titleSuffix = currentPage > 1 ? ` (Page ${currentPage})` : '';
     const stats = [
-        {label: 'Posts', value: totalPosts},
-        {label: 'Tags', value: tags?.length ?? 0},
-        {label: 'Categories', value: categories?.length ?? 0},
+        {id: 'posts', label: 'Posts', value: totalPosts},
+        {id: 'tags', label: 'Tags', value: tags?.length ?? 0},
+        {id: 'categories', label: 'Categories', value: categories?.length ?? 0},
     ];
     return (
         <Layout description={blogDescription}>
@@ -60,14 +61,13 @@ export default function Index(
                         Projects
                     </Link>
                 </div>
-                <div className={styles.statsGrid}>
-                    {stats.map((stat) => (
-                        <div className={styles.statCard} key={stat.label}>
-                            <div className={styles.statValue}>{stat.value}</div>
-                            <div className={styles.statLabel}>{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
+                <StatGrid
+                    items={stats}
+                    gridClassName={styles.statsGrid}
+                    itemClassName={styles.statCard}
+                    valueClassName={styles.statValue}
+                    labelClassName={styles.statLabel}
+                />
             </section>
 
             <section className={styles.contentGrid}>

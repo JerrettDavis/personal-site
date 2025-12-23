@@ -13,11 +13,18 @@ order: 2
 ## Core layout
 - `components/layout.tsx` provides the global header, navigation, and page shell.
 - Theme switching is handled via a client-side toggle component.
+- Page-level effects (reveal, grid tracking, glow hotspots) live in `lib/hooks` and are wired by the layout.
 
 ## Content inputs
 - `posts/` stores markdown-based blog posts.
 - `docs/` stores markdown documentation that is published to the site.
 - `data/` holds structured content for projects, tools, navigation, and hobbies.
+
+## Consistency conventions
+- Prefer declarative, data-driven rendering from `data/` and `lib/` helpers.
+- Keep side effects in shared hooks (`lib/hooks`) instead of in-page ad hoc effects.
+- Normalize cross-cutting logic (tag matching, key handling, scroll lock) into reusable utilities.
+- Treat markdown pipelines and search index builders as pure functions with explicit inputs/outputs.
 
 ## Build output
 - `public/` serves static assets, RSS feeds, and the generated sitemap endpoint.

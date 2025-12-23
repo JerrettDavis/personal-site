@@ -1,4 +1,5 @@
 import {getAllPostMetadata, getSortedPostsData, PostSummary} from "./posts";
+import {matchPostsByTags} from "./post-matching";
 
 export const formatTags = (tags: string[] | string | undefined | null): string[] => {
     if (tags === undefined || tags === null) return [];
@@ -33,16 +34,11 @@ export async function getAllTagIds() {
     })
 }
 
-export async function getPostsForTag(tag: string): Promise<PostSummary[]> {
-    return (await getSortedPostsData())
-        .filter((p: PostSummary) => p.tags?.includes(tag));
-}
-
-const normalizeTag = (tag: string) => tag.trim().toLowerCase();
-
 export async function getPostsForTags(tags: string[]): Promise<PostSummary[]> {
     if (!tags || tags.length === 0) return [];
-    const normalizedTags = new Set(tags.map(normalizeTag));
-    return (await getSortedPostsData())
-        .filter((p: PostSummary) => p.tags?.some((tag: string) => normalizedTags.has(normalizeTag(tag))));
+    return matchPostsByTags(await getSortedPostsData(), tags);
+}
+
+export async function getPostsForTag(tag: string): Promise<PostSummary[]> {
+    return matchPostsByTags(await getSortedPostsData(), [tag]);
 }

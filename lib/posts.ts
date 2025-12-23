@@ -1,47 +1,30 @@
 import fs from 'fs/promises'
 import path from 'path'
 import matter from 'gray-matter'
-import {unified} from 'unified'
-import remarkCapitalize from 'remark-capitalize';
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import rehypeFormat from "rehype-format";
-import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from "rehype-slug";
-import rehypeStringify from 'rehype-stringify'
-import rehypeToc from '@jsdevtools/rehype-toc';
-import strip from 'strip-markdown'
-import {remark} from "remark";
 import {formatTags} from "./tags";
-import {common} from "lowlight";
-import dockerfile from "highlight.js/lib/languages/dockerfile";
-import gherkin from 'highlight.js/lib/languages/gherkin'
 import {toSeriesSlug} from "./blog-utils";
+import {buildSummary} from './markdown-summary';
+import {renderMarkdown} from './markdown-render';
+import {parseOrderValue} from './frontmatter';
 
 const postsDirectory = path.join(process.cwd(), 'posts')
-
-function parseSeriesOrder(value: unknown): number | null {
-    if (typeof value === 'number' && !Number.isNaN(value)) return value;
-    if (typeof value === 'string' && value.trim().length > 0) {
-        const parsed = Number(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-    return null;
-}
 
 function normalizeSeries(series: string) {
     return series.trim().toLowerCase();
 }
 
-function buildStub(content: string) {
-    return remark()
-        .use(strip)
-        .processSync(content)
-        .toString()
-        .substring(0, 160) + '...';
-}
+const readPostFileNames = async () => fs.readdir(postsDirectory);
+
+const sortSeriesPosts = (posts: PostSummary[]) =>
+    posts.slice().sort((a, b) => {
+        const aOrder = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+        const bOrder = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        return a.date < b.date ? -1 : 1;
+    });
 
 export default interface PostData extends PostBase {
+    id: string;
     useToc: boolean | undefined | null
     wordCount: number;
     contentHtml: string;
@@ -64,27 +47,57 @@ interface PostBase {
     seriesOrder?: number | undefined | null;
 }
 
+interface PostFrontmatter {
+    title?: string;
+    date?: string;
+    description?: string | null;
+    featured?: string | null;
+    tags?: string[] | string | null;
+    categories?: string[] | string | null;
+    series?: string | null;
+    seriesOrder?: number | string | null;
+    useToc?: boolean;
+}
+
+interface NormalizedPostFrontmatter extends PostBase {
+    useToc: boolean;
+}
+
+const normalizePostFrontmatter = (data: PostFrontmatter): NormalizedPostFrontmatter => {
+    const categories = Array.isArray(data.categories)
+        ? data.categories
+        : (typeof data.categories === 'string' ? [data.categories] : null);
+
+    return {
+        title: data.title ?? 'Untitled',
+        date: data.date ?? '',
+        description: data.description ?? null,
+        featured: data.featured ?? null,
+        tags: formatTags(data.tags),
+        categories,
+        series: typeof data.series === 'string' ? data.series : null,
+        seriesOrder: parseOrderValue(data.seriesOrder),
+        useToc: Boolean(data.useToc),
+    };
+};
+
 export async function getSortedPostsData(): Promise<PostSummary[]> {
     // Get file names under /posts
-    const fileNames: string[] = await fs.readdir(postsDirectory)
+    const fileNames: string[] = await readPostFileNames();
     const allPostsData: PostSummary[] = await Promise.all(
         fileNames.map(async (fileName) => {
             const id = fileName.replace(/\.mdx$/, '');
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
             const matterResult = matter(fileContents);
-            const content = buildStub(matterResult.content);
-            const tags = formatTags(matterResult.data.tags);
-            const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
+            const summary = buildSummary(matterResult.content, {ensureSuffix: true});
+            const normalized = normalizePostFrontmatter(matterResult.data as PostFrontmatter);
+            const {useToc, ...postBase} = normalized;
 
             return {
                 id,
-                stub: content,
-                ...(matterResult.data as { date: string; title: string; description?: string | null }),
-                series: typeof matterResult.data.series === 'string' ? matterResult.data.series : null,
-                seriesOrder: seriesOrder,
-                tags: tags,
-                categories: matterResult.data.categories || null,
+                stub: summary,
+                ...postBase,
             };
         })
     );
@@ -93,7 +106,7 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
 }
 
 export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
-    return (await fs.readdir(postsDirectory))
+    return (await readPostFileNames())
         .map(fileName => {
         return {
             params: {
@@ -105,15 +118,15 @@ export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
 
 export const getAllPostMetadata = async () : Promise<matter.GrayMatterFile<string>[]> =>
     await Promise.all(
-        (await fs.readdir(postsDirectory))
+        (await readPostFileNames())
             .map(async (fileName: string) => {
                 const fullPath: string = path.join(postsDirectory, fileName);
                 const fileContents: string = await fs.readFile(fullPath, 'utf8');
                 return matter(fileContents);
             }));
 
-function multiSplit(str, seps) {
-    return seps.reduce((seg, sep) => seg.reduce(
+function multiSplit(str: string, seps: string[]) {
+    return seps.reduce((seg: string[], sep) => seg.reduce(
         (out, seg) => out.concat(seg.split(sep)), []
     ), [str]).filter(x => x);
 }
@@ -127,40 +140,19 @@ export async function getPostData(id: string): Promise<PostData> {
     const wordCount = multiSplit(matterResult.content, [' ', '\n'])
         .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
         .length;
-    const stub = buildStub(matterResult.content);
-
-    // Use remark to convert markdown into HTML string
-    let builder = unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(remarkCapitalize)
-        .use(rehypeHighlight, {languages: {...common,dockerfile, gherkin}})
-        .use(rehypeSlug);
-
-    if (!!matterResult.data.useToc)
-        builder = builder.use(rehypeToc);
-
-    const processedContent = await builder.use(rehypeStringify)
-        .use(rehypeFormat)
-        .process(matterResult.content);
-
-    const contentHtml = processedContent.toString();
-    const tags = formatTags(matterResult.data.tags);
-    const seriesOrder = parseSeriesOrder(matterResult.data.seriesOrder);
+    const stub = buildSummary(matterResult.content, {ensureSuffix: true});
+    const normalized = normalizePostFrontmatter(matterResult.data as PostFrontmatter);
+    const contentHtml = await renderMarkdown(matterResult.content, normalized.useToc);
 
     // Combine the data with the id and contentHtml
     // noinspection CommaExpressionJS
     return {
-        id: id,
-        contentHtml: contentHtml,
-        ...(matterResult.data as { date: string; title: string; description?: string | null; featured?: string | undefined | null }),
-        wordCount: wordCount,
-        stub: stub,
-        tags: tags,
-        categories: matterResult.data.categories || null,
-        series: typeof matterResult.data.series === 'string' ? matterResult.data.series : null,
-        seriesOrder: seriesOrder,
-    } as any as PostData;
+        id,
+        contentHtml,
+        wordCount,
+        stub,
+        ...normalized,
+    };
 }
 
 export interface SeriesData {
@@ -183,14 +175,9 @@ export async function getSeriesDataForPost(id: string): Promise<SeriesData | nul
 
     const seriesName = current.series;
     const normalized = normalizeSeries(seriesName);
-    const seriesPosts = allPosts
-        .filter((post) => post.series && normalizeSeries(post.series) === normalized)
-        .sort((a, b) => {
-            const aOrder = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-            const bOrder = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-            if (aOrder !== bOrder) return aOrder - bOrder;
-            return a.date < b.date ? -1 : 1;
-        });
+    const seriesPosts = sortSeriesPosts(
+        allPosts.filter((post) => post.series && normalizeSeries(post.series) === normalized)
+    );
 
     const currentIndex = seriesPosts.findIndex((post) => post.id === id);
     if (currentIndex === -1) return null;
@@ -238,11 +225,6 @@ export async function getSeriesDataBySlug(slug: string): Promise<{ name: string;
     const seriesName = matchingPosts[0].series as string;
     return {
         name: seriesName,
-        posts: matchingPosts.sort((a, b) => {
-            const aOrder = a.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-            const bOrder = b.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-            if (aOrder !== bOrder) return aOrder - bOrder;
-            return a.date < b.date ? -1 : 1;
-        }),
+        posts: sortSeriesPosts(matchingPosts),
     };
 }

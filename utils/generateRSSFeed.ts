@@ -1,11 +1,11 @@
-import {getSortedPost} from "./mdx";
+import {getSortedPostsData} from "../lib/posts";
 import fs from "fs";
 import {Feed} from "feed";
 
 export default async function generateRssFeed() : Promise<void> {
     const production = process.env.NODE_ENV === 'production';
     const site_url = production ? 'https://jerrettdavis.com' : 'http://localhost:3000';
-    const allPosts = await getSortedPost();
+    const allPosts = await getSortedPostsData();
     const feedOptions = {
         title: 'Jerrett Davis | The Overengineer Blog Posts | RSS Feed',
         description: 'The Overengineer Blog. Anything worth doing is worth overdoing.',
@@ -27,9 +27,9 @@ export default async function generateRssFeed() : Promise<void> {
     allPosts.forEach((post) => {
         feed.addItem({
             title: post.title,
-            id: `${site_url}/blog/${post.slug}`,
-            link: `${site_url}/blog/${post.slug}`,
-            description: post.description,
+            id: `${site_url}/blog/posts/${post.id}`,
+            link: `${site_url}/blog/posts/${post.id}`,
+            description: post.description ?? post.stub,
             date: new Date(post.date),
         });
     });

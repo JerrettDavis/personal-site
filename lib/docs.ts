@@ -1,20 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
-import {unified} from 'unified';
-import remarkCapitalize from 'remark-capitalize';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeFormat from 'rehype-format';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeSlug from 'rehype-slug';
-import rehypeStringify from 'rehype-stringify';
-import rehypeToc from '@jsdevtools/rehype-toc';
-import strip from 'strip-markdown';
-import {remark} from 'remark';
-import {common} from 'lowlight';
-import dockerfile from 'highlight.js/lib/languages/dockerfile';
-import gherkin from 'highlight.js/lib/languages/gherkin';
+import {buildSummary} from './markdown-summary';
+import {renderMarkdown} from './markdown-render';
+import {parseOrderValue} from './frontmatter';
 
 const docsDirectory = path.join(process.cwd(), 'docs');
 
@@ -54,28 +43,8 @@ const toTitleCase = (value: string) =>
         .replace(/-/g, ' ')
         .replace(/\b[a-z]/g, (char) => char.toUpperCase());
 
-const parseOrder = (value: unknown): number | null => {
-    if (typeof value === 'number' && !Number.isNaN(value)) return value;
-    if (typeof value === 'string' && value.trim().length > 0) {
-        const parsed = Number(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-    return null;
-};
-
 const buildRoute = (slug: string[]) =>
     slug.length === 0 ? '/docs' : `/docs/${slug.join('/')}`;
-
-const buildSummary = (content: string) => {
-    const summary = remark()
-        .use(strip)
-        .processSync(content)
-        .toString()
-        .replace(/\s+/g, ' ')
-        .trim();
-    if (!summary) return '';
-    return summary.length > 160 ? `${summary.substring(0, 160)}...` : summary;
-};
 
 const toSlugParts = (filePath: string) => {
     const relativePath = path.relative(docsDirectory, filePath);
@@ -93,7 +62,7 @@ const normalizeFrontmatter = (data: DocFrontmatter, slug: string[], content: str
     const description = data.description && data.description.trim().length > 0
         ? data.description.trim()
         : buildSummary(content);
-    const order = parseOrder(data.order);
+    const order = parseOrderValue(data.order);
     const updated = data.updated && data.updated.trim().length > 0 ? data.updated.trim() : null;
     const useToc = Boolean(data.useToc);
 
@@ -123,25 +92,6 @@ const walkDocs = async (dir: string): Promise<string[]> => {
         })
     );
     return nested.flat();
-};
-
-const renderMarkdown = async (content: string, useToc: boolean) => {
-    let builder = unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(remarkCapitalize)
-        .use(rehypeHighlight, {languages: {...common, dockerfile, gherkin}})
-        .use(rehypeSlug);
-
-    if (useToc) {
-        builder = builder.use(rehypeToc);
-    }
-
-    const processed = await builder
-        .use(rehypeStringify)
-        .use(rehypeFormat)
-        .process(content);
-    return processed.toString();
 };
 
 const resolveDocFile = async (slug: string[]) => {

@@ -1,10 +1,12 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Link from 'next/link';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faMagnifyingGlass, faXmark} from '@fortawesome/free-solid-svg-icons';
 import styles from './searchOverlay.module.css';
 import type {PageResult, PostResult} from '../lib/search';
+import {useBodyScrollLock} from '../lib/hooks/useBodyScrollLock';
+import {useOverlayEscape} from '../lib/hooks/useOverlayEscape';
+import OverlayShell from './overlayShell';
 
 interface SearchIndexPayload {
     pages: PageResult[];
@@ -22,13 +24,6 @@ const matchesQuery = (query: string, fields: string[]) => {
     const normalizedQuery = normalize(query);
     if (!normalizedQuery) return false;
     return fields.some((field) => normalize(field).includes(normalizedQuery));
-};
-
-const shouldIgnoreKeyEvent = (target: EventTarget | null) => {
-    if (!target || !(target instanceof HTMLElement)) return false;
-    const tag = target.tagName.toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
-    return target.isContentEditable;
 };
 
 const getSearchIndexUrl = () => {
@@ -51,35 +46,22 @@ export default function SearchOverlay({className, label = 'Search'}: SearchOverl
     const [data, setData] = useState<SearchIndexPayload | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const [mounted, setMounted] = useState(false);
     const fetchInFlight = useRef(false);
     const inputRef = useRef<HTMLInputElement | null>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
         inputRef.current?.focus();
     }, [isOpen]);
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const originalOverflow = document.body.style.overflow;
-        const originalPadding = document.body.style.paddingRight;
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    useBodyScrollLock(isOpen);
 
-        document.body.style.overflow = 'hidden';
-        if (scrollbarWidth > 0) {
-            document.body.style.paddingRight = `${scrollbarWidth}px`;
-        }
+    const closeOverlay = useCallback(() => {
+        setIsOpen(false);
+        setQuery('');
+    }, []);
 
-        return () => {
-            document.body.style.overflow = originalOverflow;
-            document.body.style.paddingRight = originalPadding;
-        };
-    }, [isOpen]);
+    useOverlayEscape({isOpen, onClose: closeOverlay, ignoreInputs: true});
 
     useEffect(() => {
         if (!isOpen || data || fetchInFlight.current) return;
@@ -126,17 +108,6 @@ export default function SearchOverlay({className, label = 'Search'}: SearchOverl
         };
     }, [isOpen, data]);
 
-    useEffect(() => {
-        const handler = (event: KeyboardEvent) => {
-            if (shouldIgnoreKeyEvent(event.target)) return;
-            if (event.key === 'Escape') {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('keydown', handler);
-        return () => document.removeEventListener('keydown', handler);
-    }, []);
-
     const pageResults = useMemo(() => {
         if (!data || !query.trim()) return [];
         return data.pages.filter((page) =>
@@ -156,20 +127,28 @@ export default function SearchOverlay({className, label = 'Search'}: SearchOverl
         );
     }, [data, query]);
 
-    const closeOverlay = () => {
-        setIsOpen(false);
-        setQuery('');
-    };
-
-    const overlay = isOpen ? (
-        <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Search">
+    return (
+        <>
             <button
                 type="button"
-                className={styles.scrim}
-                onClick={closeOverlay}
-                aria-label="Close search"
-            />
-            <div className={styles.panel}>
+                className={className}
+                onClick={() => setIsOpen(true)}
+                aria-haspopup="dialog"
+                aria-expanded={isOpen}
+                aria-label={label}
+                title={label}
+            >
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+            </button>
+            <OverlayShell
+                isOpen={isOpen}
+                onClose={closeOverlay}
+                ariaLabel="Search"
+                overlayClassName={styles.overlay}
+                scrimClassName={styles.scrim}
+                panelClassName={styles.panel}
+                scrimLabel="Close search"
+            >
                 <div className={styles.headerRow}>
                     <div>
                         <p className={styles.kicker}>Search</p>
@@ -257,24 +236,7 @@ export default function SearchOverlay({className, label = 'Search'}: SearchOverl
                         Open full search page
                     </Link>
                 </div>
-            </div>
-        </div>
-    ) : null;
-
-    return (
-        <>
-            <button
-                type="button"
-                className={className}
-                onClick={() => setIsOpen(true)}
-                aria-haspopup="dialog"
-                aria-expanded={isOpen}
-                aria-label={label}
-                title={label}
-            >
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </button>
-            {mounted && overlay ? createPortal(overlay, document.body) : null}
+            </OverlayShell>
         </>
     );
 }

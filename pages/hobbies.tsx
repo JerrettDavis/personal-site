@@ -2,13 +2,15 @@ import Head from "next/head";
 import Layout from "../components/layout";
 import styles from "./hobbies.module.css";
 import {GetStaticProps} from "next";
-import Link from "next/link";
 import {HOBBIES} from "../data/hobbies";
 import type {HobbyBlurb} from "../data/hobbies";
 import {getSortedPostsData} from "../lib/posts";
 import type {PostSummary} from "../lib/posts";
 import PostSummaries from "../components/postSummaries";
 import Date from "../components/date";
+import {matchPostsByTags} from "../lib/post-matching";
+import StatGrid from "../components/statGrid";
+import RelatedPosts from "../components/relatedPosts";
 
 interface HobbiesProps {
     hobbies: HobbyBlurb[];
@@ -16,17 +18,14 @@ interface HobbiesProps {
     relatedPostsByHobby: Record<string, PostSummary[]>;
 }
 
-const normalizeTag = (tag: string) => tag.trim().toLowerCase();
-
-const getPostsMatchingTags = (posts: PostSummary[], tags: string[]): PostSummary[] => {
-    const tagSet = new Set(tags.map(normalizeTag));
-    if (tagSet.size === 0) return [];
-    return posts.filter((post) => post.tags?.some((tag) => tagSet.has(normalizeTag(tag))));
-};
-
 export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: HobbiesProps) {
     const lede = 'When I am not building software, I am usually making something physical, experimental, or just strangely cozy.';
     const latestPostDate = hobbyPosts[0]?.date;
+    const stats = [
+        {id: 'count', label: 'Hobbies', value: hobbies.length},
+        {id: 'posts', label: 'Tagged posts', value: hobbyPosts.length},
+        {id: 'latest', label: 'Latest post', value: latestPostDate ? <Date dateString={latestPostDate} /> : 'None yet'},
+    ];
     return (
         <Layout description={lede}>
             <Head>
@@ -47,22 +46,13 @@ export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: Hobb
                             <h2 className={styles.heroCardTitle}>After-hours telemetry</h2>
                         </div>
                     </div>
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{hobbies.length}</span>
-                            <span className={styles.statLabel}>Hobbies</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>{hobbyPosts.length}</span>
-                            <span className={styles.statLabel}>Tagged posts</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statValue}>
-                                {latestPostDate ? <Date dateString={latestPostDate} /> : 'None yet'}
-                            </span>
-                            <span className={styles.statLabel}>Latest post</span>
-                        </div>
-                    </div>
+                    <StatGrid
+                        items={stats}
+                        gridClassName={styles.statsGrid}
+                        itemClassName={styles.statCard}
+                        valueClassName={styles.statValue}
+                        labelClassName={styles.statLabel}
+                    />
                     <div className={styles.heroTags}>
                         <span className={styles.heroTag}>Hands-on</span>
                         <span className={styles.heroTag}>Creative</span>
@@ -78,26 +68,17 @@ export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: Hobb
                             <h2 className={styles.hobbyTitle}>{hobby.title}</h2>
                         </div>
                         <p className={styles.hobbySummary}>{hobby.summary}</p>
-                        {relatedPostsByHobby[hobby.title]?.length ? (
-                            <details className={styles.relatedPosts}>
-                                <summary className={styles.relatedSummary}>
-                                    Related posts ({relatedPostsByHobby[hobby.title].length})
-                                </summary>
-                                <div className={styles.relatedContent}>
-                                    <div className={styles.relatedContentInner}>
-                                        <ul className={styles.relatedList}>
-                                            {relatedPostsByHobby[hobby.title].map((post) => (
-                                                <li key={post.id}>
-                                                    <Link href={`/blog/posts/${post.id}`} className="glowable">
-                                                        {post.title}
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </details>
-                        ) : null}
+                        <RelatedPosts
+                            posts={relatedPostsByHobby[hobby.title] ?? []}
+                            label="Related posts"
+                            classes={{
+                                details: styles.relatedPosts,
+                                summary: styles.relatedSummary,
+                                content: styles.relatedContent,
+                                contentInner: styles.relatedContentInner,
+                                list: styles.relatedList,
+                            }}
+                        />
                     </article>
                 ))}
             </section>
@@ -121,10 +102,10 @@ export default function Hobbies({hobbies, hobbyPosts, relatedPostsByHobby}: Hobb
 export const getStaticProps: GetStaticProps<HobbiesProps> = async () => {
     const allPosts = await getSortedPostsData();
     const primaryTags = Array.from(new Set(HOBBIES.map((hobby) => hobby.primaryTag).filter(Boolean)));
-    const hobbyPosts = getPostsMatchingTags(allPosts, primaryTags);
+    const hobbyPosts = matchPostsByTags(allPosts, primaryTags);
     const relatedPostsByHobby = HOBBIES.reduce<Record<string, PostSummary[]>>((acc, hobby) => {
         const tagSet = Array.from(new Set([hobby.primaryTag, ...hobby.tags].filter(Boolean)));
-        const related = getPostsMatchingTags(allPosts, tagSet).slice(0, 3);
+        const related = matchPostsByTags(allPosts, tagSet).slice(0, 3);
         acc[hobby.title] = related;
         return acc;
     }, {});
