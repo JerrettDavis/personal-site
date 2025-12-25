@@ -1,0 +1,196 @@
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-text-deemphasized);
+    box-shadow: 0 0 0 0 rgba(227, 179, 65, 0);
+}
+
+.dotActive {
+    background: #e3b341;
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+.label {
+    font-weight: 600;
+}
+
+.status {
+    color: var(--color-text-deemphasized);
+    letter-spacing: 0.12em;
+}
+
+.previewCount {
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+}
+
+.cached {
+    font-size: 0.55rem;
+    color: var(--color-text-deemphasized);
+}
+
+.badge[data-variant="header"] {
+    padding: 0.25rem 0.35rem;
+    gap: 0.3rem;
+}
+
+.badge[data-variant="header"] .label,
+.badge[data-variant="header"] .status,
+.badge[data-variant="header"] .previewCount,
+.badge[data-variant="header"] .cached {
+    display: none;
+}
+
+.badge[data-variant="header"] .dot {
+    width: 9px;
+    height: 9px;
+}
+
+.toast {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: min(360px, calc(100vw - 3rem));
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 18px 40px -26px rgba(0, 0, 0, 0.6);
+    z-index: 30;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.toastHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.toastTitle {
+    font-size: 0.85rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.toastText {
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+    margin-top: 0.35rem;
+}
+
+.toastActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.toastLink {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.toastClose {
+    border: none;
+    background: transparent;
+    color: var(--color-text-deemphasized);
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(227, 179, 65, 0.45);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(227, 179, 65, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(227, 179, 65, 0);
+    }
+}
+
+@media screen and (max-width: 48rem) {
+    .badge {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .badge[data-variant="header"] {
+        width: auto;
+        justify-content: flex-start;
+    }
+}
+
+@media screen and (max-width: 67.5rem) {
+    .badge[data-variant="header"] {
+        padding: 0.25rem 0.35rem;
+        gap: 0.3rem;
+    }
+
+    .badge[data-variant="header"] .label,
+    .badge[data-variant="header"] .status,
+    .badge[data-variant="header"] .previewCount,
+    .badge[data-variant="header"] .cached {
+        display: none;
+    }
+
+    .badge[data-variant="header"] .dot {
+        width: 9px;
+        height: 9px;
+    }
+
+    .badge[data-variant="menu"] {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+    }
+
+    .badge[data-variant="menu"] .status,
+    .badge[data-variant="menu"] .cached {
+        display: none;
+    }
+
+    .badge[data-variant="menu"] .previewCount {
+        font-size: 0.55rem;
+        letter-spacing: 0.14em;
+        padding: 0.15rem 0.35rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dotActive {
+        animation: none;
+    }
+}

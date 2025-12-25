@@ -19,7 +19,7 @@ export default function DocPage({doc}: DocPageProps) {
     return (
         <Layout description={description}>
             <Head>
-                <title>{doc.title} - Jerrett Davis</title>
+                <title>{`${doc.title} - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Docs</p>

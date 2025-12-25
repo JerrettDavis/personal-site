@@ -6,7 +6,7 @@ order: 2
 
 ## Routing
 - The site uses the Next.js pages router under `pages/`.
-- Static pages live at routes like `/about-me`, `/projects`, `/tools`, and `/hobbies`.
+- Static pages live at routes like `/about-me`, `/projects`, `/tools`, `/hobbies`, `/pipelines`, and `/work-in-progress`.
 - Blog content is rendered from dynamic routes under `/blog`, including tags, categories, and series.
 - Documentation renders from `/docs` and `/docs/[...slug]` using markdown in the `docs/` folder.
 
@@ -14,6 +14,12 @@ order: 2
 - `components/layout.tsx` provides the global header, navigation, and page shell.
 - Theme switching is handled via a client-side toggle component.
 - Page-level effects (reveal, grid tracking, glow hotspots) live in `lib/hooks` and are wired by the layout.
+
+## Telemetry and data
+- Telemetry APIs live under `pages/api`: `/api/site-build-status`, `/api/pipeline-status`, and `/api/project-details`.
+- `lib/cacheStore.ts` centralizes API caching, inflight dedupe, and rate limit tracking.
+- `lib/telemetryStore.ts` coordinates client-side polling and shared cache usage.
+- Project detail panels on `/projects` fetch data on demand and hydrate into the expanded card view.
 
 ## Content inputs
 - `posts/` stores markdown-based blog posts.

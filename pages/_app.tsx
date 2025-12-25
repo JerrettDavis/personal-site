@@ -1,5 +1,6 @@
 import '../styles/global.css'
 import 'highlight.js/styles/atom-one-dark-reasonable.css'
+import 'reactflow/dist/style.css'
 import { AppProps } from 'next/app'
 import { Analytics } from '@vercel/analytics/react';
 import Script from "next/script";

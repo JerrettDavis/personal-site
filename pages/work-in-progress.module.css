@@ -1,0 +1,308 @@
+.hero {
+    display: grid;
+    gap: 1rem;
+    padding: 2.5rem 0 1.5rem;
+}
+
+.kicker {
+    margin: 0;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 2.6rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 46rem;
+    color: var(--color-text-deemphasized);
+}
+
+.statsGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.statCard {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.statValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metaRow {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+    flex-wrap: wrap;
+}
+
+.metaLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.metaValue time {
+    font-family: var(--font-mono);
+}
+
+.metaCache {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.refreshButton {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.refreshButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.productionCard {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.productionKicker {
+    margin: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.productionTitle {
+    margin: 0.15rem 0 0;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+}
+
+.productionMeta {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.productionMeta a {
+    color: var(--color-link);
+}
+
+.productionTime time {
+    font-family: var(--font-mono);
+}
+
+.notice {
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.previewSection {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.2rem;
+}
+
+.sectionHeader {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.sectionLead {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+}
+
+.previewGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.previewCard {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.previewCard[data-pr="true"] {
+    border-color: rgba(45, 164, 78, 0.4);
+    box-shadow: 0 0 0 1px rgba(45, 164, 78, 0.18), 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.previewHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+}
+
+.previewBranch {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
+
+.previewHost {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    background: var(--color-surface-2);
+    flex-shrink: 0;
+}
+
+.statusBadge[data-status="building"] {
+    border-color: rgba(227, 179, 65, 0.6);
+    color: #e3b341;
+}
+
+.statusBadge[data-status="queued"] {
+    border-color: rgba(108, 120, 200, 0.6);
+    color: #6c78c8;
+}
+
+.statusBadge[data-status="ready"] {
+    border-color: rgba(45, 164, 78, 0.6);
+    color: #2da44e;
+}
+
+.statusBadge[data-status="error"] {
+    border-color: rgba(209, 36, 47, 0.6);
+    color: #d1242f;
+}
+
+.previewMessage {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.previewMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--color-text-deemphasized);
+}
+
+.previewTime time {
+    font-family: var(--font-mono);
+}
+
+.previewLink {
+    color: var(--color-link);
+}
+
+.previewAuthor {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.previewActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.actionLink {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+span.actionLink {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.emptyState {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}

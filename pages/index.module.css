@@ -7,6 +7,32 @@
     isolation: isolate;
 }
 
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10% 0;
+    background:
+        radial-gradient(320px 240px at 12% 20%, var(--color-bg-glow-1), transparent 70%),
+        radial-gradient(380px 260px at 88% 0%, var(--color-bg-glow-2), transparent 70%),
+        radial-gradient(280px 240px at 65% 80%, rgba(124, 201, 228, 0.12), transparent 75%);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+    animation: auroraDrift 18s ease-in-out infinite;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    opacity: 0.08;
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+    z-index: 0;
+}
+
 @media screen and (min-width: 64rem) {
     .hero {
         grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
@@ -20,6 +46,17 @@
     position: relative;
     z-index: 1;
 }
+
+.heroCopy > * {
+    animation: heroReveal 0.7s ease both;
+    animation-delay: calc(var(--hero-stagger, 0) * 90ms);
+}
+
+.heroCopy > *:nth-child(1) { --hero-stagger: 0; }
+.heroCopy > *:nth-child(2) { --hero-stagger: 1; }
+.heroCopy > *:nth-child(3) { --hero-stagger: 2; }
+.heroCopy > *:nth-child(4) { --hero-stagger: 3; }
+.heroCopy > *:nth-child(5) { --hero-stagger: 4; }
 
 .avatarRow {
     display: flex;
@@ -128,6 +165,17 @@
     z-index: 1;
 }
 
+.heroCard > * {
+    animation: heroReveal 0.7s ease both;
+    animation-delay: calc(var(--hero-stagger, 0) * 90ms);
+}
+
+.heroCard > *:nth-child(1) { --hero-stagger: 1; }
+.heroCard > *:nth-child(2) { --hero-stagger: 2; }
+.heroCard > *:nth-child(3) { --hero-stagger: 3; }
+.heroCard > *:nth-child(4) { --hero-stagger: 4; }
+.heroCard > *:nth-child(5) { --hero-stagger: 5; }
+
 .heroCard::before {
     content: "";
     position: absolute;
@@ -235,6 +283,176 @@
     background: var(--color-surface-2);
     color: var(--color-text-deemphasized);
     font-size: 0.85rem;
+}
+
+.heartbeat {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.heartbeatKicker {
+    margin: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.heartbeatStats {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.heartbeatStat {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.heartbeatValue {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.heartbeatValue time {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.heartbeatLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.tickerSection {
+    margin-top: 2.5rem;
+    padding: 1rem 1.2rem;
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    display: grid;
+    gap: 0.9rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.tickerSection::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(300px 180px at 0% 0%, var(--color-primary), transparent 70%);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.tickerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+}
+
+.tickerKicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.tickerTitle {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.tickerMeta {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.ticker {
+    position: relative;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+
+.tickerTrack {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: max-content;
+    animation: tickerScroll 43s linear infinite;
+}
+
+.tickerSection:hover .tickerTrack {
+    animation-play-state: paused;
+}
+
+.tickerItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.tickerItem:visited {
+    color: var(--color-text-primary);
+}
+
+.tickerItem:hover {
+    text-decoration: none;
+    border-color: var(--color-primary);
+}
+
+.tickerType {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.tickerItem[data-type="Tag"] .tickerType {
+    color: var(--color-primary);
+}
+
+.tickerItem[data-type="Category"] .tickerType {
+    color: var(--color-link);
+}
+
+.tickerItem[data-type="Series"] .tickerType {
+    color: var(--color-text-secondary);
+}
+
+.tickerLabel {
+    font-size: 0.65rem;
+    color: var(--color-text-primary);
+}
+
+@media screen and (max-width: 48rem) {
+    .tickerHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 .commandKey {
@@ -393,62 +611,190 @@
     font-size: 1.35rem;
 }
 
-.signalBadge {
+.signalControls {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.signalControlButton {
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.7rem;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
     border-radius: 999px;
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
+    color: var(--color-text-primary);
     font-size: 0.7rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--color-text-primary);
+    cursor: pointer;
 }
 
-.signalBar {
-    height: 3px;
+.signalStepBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
     border-radius: 999px;
-    background: linear-gradient(90deg, transparent 0%, var(--color-primary) 45%, transparent 90%);
-    background-size: 200% 100%;
-    animation: signalFlow 3.5s linear infinite;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
 }
 
-.signalNodes {
-    display: grid;
-    gap: 0.8rem;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    position: relative;
-}
 
-.signalNode {
+.signalSummary {
     display: grid;
-    gap: 0.35rem;
-    padding: 0.75rem 0.9rem;
-    border-radius: 14px;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
 }
 
-.signalNodeTitle {
-    font-weight: 600;
-    font-size: 0.95rem;
+.signalSummaryHeader {
+    display: grid;
+    gap: 0.3rem;
 }
 
-.signalNodeMeta {
-    font-size: 0.8rem;
+.signalSummaryKicker {
+    margin: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.signalSummaryTitle {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.signalSummaryText {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+}
+
+.signalSummaryMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.signalMetaChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.signalFlow {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.signalTimelineRow {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.signalTimelineTrack {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-border);
+    overflow: hidden;
+}
+
+.signalTimelineProgress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-link));
+    transition: width 0.4s ease;
+}
+
+.signalTimeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.signalTimelineItem {
+    position: relative;
+}
+
+.signalTimelineButton {
+    width: 100%;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    text-align: left;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.signalTimelineButton:hover {
+    border-color: var(--color-primary);
+}
+
+.signalTimelineItem[data-active="true"] .signalTimelineButton {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px rgba(37, 104, 255, 0.3);
+    background: var(--color-surface-2);
+}
+
+.signalTimelineIndex {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
     color: var(--color-text-deemphasized);
     font-family: var(--font-mono);
 }
 
+.signalTimelineLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.signalTimelineTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
 .signalFooter {
+    display: grid;
+    gap: 0.7rem;
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.signalFooterRow {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 0.8rem;
-    color: var(--color-text-deemphasized);
-    font-size: 0.85rem;
 }
 
 .signalFooter a {
@@ -459,12 +805,48 @@
     font-family: var(--font-mono);
 }
 
-@keyframes signalFlow {
+.signalLegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.signalLegendItem {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+@media screen and (max-width: 56rem) {
+    .signalHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .signalControls {
+        flex-wrap: wrap;
+    }
+}
+
+@media screen and (max-width: 48rem) {
+    .signalTimeline {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes tickerScroll {
     from {
-        background-position: 0% 50%;
+        transform: translateX(0);
     }
     to {
-        background-position: 200% 50%;
+        transform: translateX(-50%);
     }
 }
 
@@ -488,9 +870,21 @@
     }
 }
 
+@keyframes auroraDrift {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(-3%, 2%, 0) scale(1.05);
+    }
+    100% {
+        transform: translate3d(2%, -2%, 0) scale(1.02);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .signalBar {
-        animation: none;
+    .signalTimelineProgress {
+        transition: none;
     }
 
     .gridField::after {
@@ -501,8 +895,13 @@
         transform: none;
     }
 
-    .heroCopy,
-    .heroCard {
+    .hero::before {
+        animation: none;
+    }
+
+    .heroCopy > *,
+    .heroCard > *,
+    .tickerTrack {
         animation: none;
     }
 }

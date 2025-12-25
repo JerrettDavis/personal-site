@@ -22,5 +22,10 @@ order: 1
 
 ## Delivery and metadata
 - Vercel Analytics for privacy-focused site metrics.
+- GitHub + Vercel APIs for build telemetry and on-demand project detail snapshots.
 - RSS/Atom/JSON feeds generated during the build.
 - Sitemap generation to expose blog, taxonomy, and documentation routes.
+
+## Testing
+- Jest for unit and component tests.
+- Playwright for browser-based end-to-end coverage.

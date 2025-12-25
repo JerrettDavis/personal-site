@@ -17,3 +17,5 @@ infrastructure.
 - Content pipeline and frontmatter conventions
 - Decisions and tradeoffs
 - Deployment and operational notes
+- Telemetry, caching, and API integrations
+- Testing and QA

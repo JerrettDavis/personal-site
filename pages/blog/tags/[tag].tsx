@@ -26,7 +26,7 @@ export default function PostTag({
     return (
         <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
-                <title>Posts tagged with #{tag} - the overengineer. - Jerrett Davis</title>
+                <title>{`Posts tagged with #${tag} - the overengineer. - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Tag</p>

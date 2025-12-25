@@ -33,7 +33,7 @@ export default function Index(
     return (
         <Layout description={blogDescription}>
             <Head>
-                <title>the overengineer.{titleSuffix} - Jerrett Davis</title>
+                <title>{`the overengineer.${titleSuffix} - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Blog</p>

@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export interface GitHubRepo {
     id: number;
     name: string;
@@ -25,6 +28,7 @@ interface RepoFetchOptions {
     lookbackDays?: number;
     includeForks?: boolean;
     includeArchived?: boolean;
+    onRateLimit?: (until: number) => void;
 }
 
 const getLookbackDate = (lookbackDays: number) => {
@@ -33,11 +37,29 @@ const getLookbackDate = (lookbackDays: number) => {
     return cutoff;
 };
 
+const loadMockRepos = () => {
+    const mockPath = process.env.MOCK_GITHUB_DATA_PATH;
+    if (!mockPath) return null;
+    try {
+        const resolved = path.isAbsolute(mockPath)
+            ? mockPath
+            : path.join(process.cwd(), mockPath);
+        const raw = fs.readFileSync(resolved, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return null;
+        return parsed as GitHubRepo[];
+    } catch (error) {
+        console.warn(`Failed to load mock GitHub repos: ${error}`);
+        return null;
+    }
+};
+
 export const getActiveRepos = async ({
                                          username,
                                          lookbackDays = 365,
                                          includeForks = false,
                                          includeArchived = false,
+                                         onRateLimit,
                                      }: RepoFetchOptions): Promise<GitHubRepoFetchResult> => {
     const url = `https://api.github.com/users/${username}/repos?per_page=100&sort=updated&direction=desc`;
     const headers: Record<string, string> = {
@@ -48,8 +70,30 @@ export const getActiveRepos = async ({
         headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
 
+    const mockRepos = loadMockRepos();
+    if (mockRepos) {
+        const cutoff = getLookbackDate(lookbackDays);
+        return {
+            repos: mockRepos
+                .filter((repo) => (includeForks ? true : !repo.fork))
+                .filter((repo) => (includeArchived ? true : !repo.archived))
+                .filter((repo) => new Date(repo.pushed_at) >= cutoff)
+                .sort((a, b) => (a.pushed_at < b.pushed_at ? 1 : -1)),
+            error: null,
+        };
+    }
+
     try {
         const response = await fetch(url, {headers});
+        if (response.status === 403) {
+            const remaining = Number(response.headers.get('x-ratelimit-remaining') ?? '1');
+            if (!Number.isNaN(remaining) && remaining <= 0) {
+                const reset = Number(response.headers.get('x-ratelimit-reset') ?? '0');
+                if (!Number.isNaN(reset) && reset > 0) {
+                    onRateLimit?.(reset * 1000);
+                }
+            }
+        }
         if (!response.ok) {
             const errorMessage = `GitHub repo fetch failed: ${response.status} ${response.statusText}`;
             console.warn(errorMessage);

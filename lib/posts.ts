@@ -131,15 +131,31 @@ function multiSplit(str: string, seps: string[]) {
     ), [str]).filter(x => x);
 }
 
+const countWords = (content: string) =>
+    multiSplit(content, [' ', '\n'])
+        .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
+        .length;
+
+export async function getTotalPostWordCount(): Promise<number> {
+    const fileNames: string[] = await readPostFileNames();
+    const counts = await Promise.all(
+        fileNames.map(async (fileName) => {
+            const fullPath = path.join(postsDirectory, fileName);
+            const fileContents = await fs.readFile(fullPath, 'utf8');
+            const matterResult = matter(fileContents);
+            return countWords(matterResult.content);
+        })
+    );
+    return counts.reduce((sum, count) => sum + count, 0);
+}
+
 export async function getPostData(id: string): Promise<PostData> {
     const fullPath = path.join(postsDirectory, `${id}.mdx`)
     const fileContents = await fs.readFile(fullPath, 'utf8')
 
     // Use gray-matter to parse the post metadata section
     const matterResult = matter(fileContents)
-    const wordCount = multiSplit(matterResult.content, [' ', '\n'])
-        .filter(x => !x.match(/^[^a-zA-Z0-9]+$/))
-        .length;
+    const wordCount = countWords(matterResult.content);
     const stub = buildSummary(matterResult.content, {ensureSuffix: true});
     const normalized = normalizePostFrontmatter(matterResult.data as PostFrontmatter);
     const contentHtml = await renderMarkdown(matterResult.content, normalized.useToc);

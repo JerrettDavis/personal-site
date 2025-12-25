@@ -1,0 +1,241 @@
+.hero {
+    display: grid;
+    gap: 1rem;
+    padding: 2.5rem 0 1.5rem;
+}
+
+.kicker {
+    margin: 0;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.title {
+    margin: 0;
+    font-size: 2.6rem;
+}
+
+.lede {
+    margin: 0;
+    max-width: 46rem;
+    color: var(--color-text-deemphasized);
+}
+
+.statsGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.statCard {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.statValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metaRow {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+    flex-wrap: wrap;
+}
+
+.metaLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.metaValue time {
+    font-family: var(--font-mono);
+}
+
+.metaCache {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.refreshButton {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.refreshButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.notice {
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.repoSection {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.2rem;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.repoGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.repoCard {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.repoHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: nowrap;
+}
+
+.repoTitle {
+    margin: 0;
+    font-size: 1.05rem;
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.repoTitle a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.repoTitle a:hover {
+    text-decoration: underline;
+}
+
+.repoMeta {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--color-text-deemphasized);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    background: var(--color-surface-2);
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    justify-content: center;
+    padding: 0;
+}
+
+.statusBadge svg {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
+.statusBadge[data-status="running"] {
+    border-color: rgba(227, 179, 65, 0.6);
+    color: #e3b341;
+}
+
+.statusBadge[data-status="passing"] {
+    border-color: rgba(45, 164, 78, 0.6);
+    color: #2da44e;
+}
+
+.statusBadge[data-status="failing"] {
+    border-color: rgba(209, 36, 47, 0.6);
+    color: #d1242f;
+}
+
+.repoDetails {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.runLink {
+    color: var(--color-link);
+    overflow-wrap: anywhere;
+}
+
+.runPlaceholder {
+    color: var(--color-text-deemphasized);
+}
+
+.runTime time {
+    font-family: var(--font-mono);
+}
+
+.repoNote {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+}
+
+.emptyState {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
