@@ -69,13 +69,33 @@ const fileStore = {
     },
 };
 
+const hasPostgresUrl = () =>
+    Boolean(
+        process.env.METRICS_PG_URL ||
+            process.env.POSTGRES_URL ||
+            process.env.POSTGRES_URL_NON_POOLING ||
+            process.env.POSTGRES_PRISMA_URL ||
+            process.env.DATABASE_URL ||
+            process.env.PG_CONNECTION_STRING,
+    );
+
 const resolveAdapterPath = () => {
     const mode = process.env.METRICS_STORE;
     if (mode === 'file') return null;
     const explicitAdapter = process.env.METRICS_STORE_ADAPTER;
     if (explicitAdapter) return explicitAdapter;
     if (mode) return null;
-    if (process.env.NODE_ENV === 'production') return null;
+    if (process.env.NODE_ENV === 'production') {
+        if (hasPostgresUrl()) {
+            return path.join(
+                process.cwd(),
+                'scripts',
+                'metricsStoreAdapters',
+                'postgres.js',
+            );
+        }
+        return null;
+    }
     return path.join(process.cwd(), 'scripts', 'metricsStoreAdapters', 'sqlite.js');
 };
 

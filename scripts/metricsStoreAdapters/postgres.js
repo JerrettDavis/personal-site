@@ -8,13 +8,16 @@ const METRICS_PG_SCHEMA = process.env.METRICS_PG_SCHEMA || 'public';
 const METRICS_PG_KEY = process.env.METRICS_PG_KEY || 'default';
 const CONNECTION_STRING =
     process.env.METRICS_PG_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    process.env.POSTGRES_PRISMA_URL ||
     process.env.DATABASE_URL ||
     process.env.PG_CONNECTION_STRING;
 
 const ensureConnectionString = () => {
     if (!CONNECTION_STRING) {
         throw new Error(
-            'Missing Postgres connection string. Set METRICS_PG_URL or DATABASE_URL.',
+            'Missing Postgres connection string. Set METRICS_PG_URL or POSTGRES_URL.',
         );
     }
 };

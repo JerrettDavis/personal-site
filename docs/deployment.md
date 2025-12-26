@@ -83,8 +83,17 @@ order: 5
   <ul>
     <li>Set <code>METRICS_STORE=custom</code>.</li>
     <li>Set <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
-    <li>Set <code>METRICS_PG_URL=postgres://...</code> (or <code>DATABASE_URL</code>).</li>
+    <li>Set <code>METRICS_PG_URL=postgres://...</code> (or <code>POSTGRES_URL</code> / <code>DATABASE_URL</code>).</li>
     <li>Optional: <code>METRICS_PG_SCHEMA</code>, <code>METRICS_PG_HISTORY_TABLE</code>, <code>METRICS_PG_LOCK_TABLE</code>, <code>METRICS_PG_KEY</code>.</li>
+  </ul>
+</details>
+
+<details class="doc-accordion">
+  <summary>Vercel Postgres (free tier)</summary>
+  <ul>
+    <li>Create a Vercel Postgres database (Hobby tier is free).</li>
+    <li>Set <code>METRICS_STORE=custom</code> and <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
+    <li>Vercel provides <code>POSTGRES_URL</code> automatically, no extra config needed.</li>
   </ul>
 </details>
 
@@ -103,6 +112,13 @@ order: 5
     When running locally without <code>METRICS_STORE</code> or <code>METRICS_STORE_ADAPTER</code>,
     the metrics store defaults to the SQLite adapter in <code>scripts/metricsStoreAdapters/sqlite.js</code>.
     Set <code>METRICS_STORE=file</code> to force JSON storage.
+  </div>
+</div>
+<div class="doc-callout">
+  <div class="doc-callout-title">Production default</div>
+  <div class="doc-callout-body">
+    In production, if <code>POSTGRES_URL</code> (or other Postgres connection envs) is present and no
+    metrics override is set, the metrics store automatically uses the Postgres adapter.
   </div>
 </div>
 
@@ -157,6 +173,11 @@ order: 5
     <tr>
       <td>METRICS_PG_URL</td>
       <td>Postgres connection string for the adapter</td>
+      <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>POSTGRES_URL</td>
+      <td>Vercel Postgres connection string</td>
       <td>GitHub metrics history</td>
     </tr>
     <tr>
