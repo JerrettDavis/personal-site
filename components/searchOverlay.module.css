@@ -8,6 +8,7 @@
     padding: 6vh 1.5rem;
     background: rgba(7, 12, 20, 0.55);
     animation: overlayFade 0.18s ease;
+    pointer-events: auto;
 }
 
 .scrim {

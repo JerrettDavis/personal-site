@@ -37,6 +37,7 @@
     justify-content: center;
     padding: 6vh 1.5rem;
     overflow-y: auto;
+    pointer-events: auto;
 }
 
 .scrim {

@@ -63,6 +63,11 @@ html {
 
 nextjs-portal {
     display: contents;
+    pointer-events: none;
+}
+
+nextjs-portal > * {
+    pointer-events: auto;
 }
 
 body {

@@ -435,6 +435,12 @@ export default function PipelineFlow({
                 zoomOnScroll={false}
                 panOnScroll={false}
                 panOnDrag
+                disableKeyboardA11y
+                deleteKeyCode={null}
+                selectionKeyCode={null}
+                multiSelectionKeyCode={null}
+                panActivationKeyCode={null}
+                zoomActivationKeyCode={null}
                 minZoom={0.65}
                 maxZoom={1.1}
                 onNodeClick={handleNodeClick}

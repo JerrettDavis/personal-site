@@ -1,5 +1,4 @@
-import {useEffect, useState, type ReactNode} from 'react';
-import {createPortal} from 'react-dom';
+import {type ReactNode} from 'react';
 
 interface OverlayShellProps {
     isOpen: boolean;
@@ -22,12 +21,6 @@ export default function OverlayShell({
     scrimLabel = 'Close dialog',
     children,
 }: OverlayShellProps) {
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
     if (!isOpen) return null;
 
     const overlay = (
@@ -44,5 +37,5 @@ export default function OverlayShell({
         </div>
     );
 
-    return mounted ? createPortal(overlay, document.body) : null;
+    return overlay;
 }
