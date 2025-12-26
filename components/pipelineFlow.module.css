@@ -1,5 +1,5 @@
 .flowWrap {
-    height: 720px;
+    height: clamp(420px, 55vh, 600px);
     max-height: 80vh;
     max-height: 80svh;
     max-height: 80dvh;
@@ -156,12 +156,12 @@
 
 @media screen and (max-width: 64rem) {
     .flowWrap {
-        height: 600px;
+        height: clamp(360px, 55vh, 520px);
     }
 }
 
 @media screen and (max-width: 48rem) {
     .flowWrap {
-        height: 520px;
+        height: clamp(320px, 60vh, 480px);
     }
 }

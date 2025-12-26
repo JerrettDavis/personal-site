@@ -31,3 +31,7 @@ yarn-error.log*
 .env.production.local
 .vercel
 .env*.local
+
+# local metrics artifacts
+data/.githubMetrics.lock
+data/githubMetricsHistory.json.tmp

@@ -18,6 +18,8 @@ import RelatedPosts from "../components/relatedPosts";
 import {usePipelineStatus} from "../lib/hooks/usePipelineStatus";
 import type {PipelineRepoStatus, PipelineState} from "../lib/pipelines";
 import type {ProjectDetailResponse} from "../lib/projectDetails";
+import {useGithubMetrics} from "../lib/hooks/useGithubMetrics";
+import type {GithubRepoMetricSummary} from "../lib/githubMetricsTypes";
 
 interface ProjectCard {
     repo: GitHubRepo;
@@ -64,6 +66,11 @@ const getRelatedPosts = (
     return Array.from(related.values()).slice(0, 3);
 };
 
+const formatNumber = (value: number) => value.toLocaleString();
+
+const formatDelta = (additions: number, deletions: number) =>
+    `${additions >= 0 ? '+' : ''}${additions.toLocaleString()} / -${deletions.toLocaleString()}`;
+
 export default function Projects({projects, githubError, projectPosts}: ProjectsProps) {
     const isDev = process.env.NODE_ENV === 'development';
     const errorSummary = isDev ? githubError : 'GitHub data is temporarily unavailable.';
@@ -78,7 +85,35 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         {id: 'latest', label: 'Latest push', value: latestPushedAt ? <DateStamp dateString={latestPushedAt} /> : '---'},
     ];
     const {data: pipelineData} = usePipelineStatus();
+    const {data: metricsData} = useGithubMetrics();
     const pipelineSummary = pipelineData?.summary;
+    const metricsSummary = metricsData?.summary;
+    const metricsUpdate = metricsData?.update;
+    const metricsStats = [
+        {
+            id: 'metrics-commits-week',
+            label: 'Commits 7d',
+            value: formatNumber(metricsSummary?.commits.week ?? 0),
+        },
+        {
+            id: 'metrics-commits-month',
+            label: 'Commits 30d',
+            value: formatNumber(metricsSummary?.commits.month ?? 0),
+        },
+        {
+            id: 'metrics-lines-month',
+            label: 'Lines 30d',
+            value: formatDelta(
+                metricsSummary?.additions.month ?? 0,
+                metricsSummary?.deletions.month ?? 0,
+            ),
+        },
+        {
+            id: 'metrics-stars',
+            label: 'Stars',
+            value: formatNumber(metricsSummary?.stars ?? totalStars),
+        },
+    ];
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [detailData, setDetailData] = useState<Record<number, ProjectDetailResponse | null>>({});
     const [detailState, setDetailState] = useState<Record<number, 'idle' | 'loading' | 'ready' | 'error'>>({});
@@ -95,6 +130,13 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         });
         return map;
     }, [pipelineData?.repos]);
+    const metricsMap = useMemo(() => {
+        const map = new Map<string, GithubRepoMetricSummary>();
+        metricsData?.repos?.forEach((repo) => {
+            map.set(repo.fullName.toLowerCase(), repo);
+        });
+        return map;
+    }, [metricsData?.repos]);
 
     const statusLabel = (status?: PipelineState) => {
         switch (status) {
@@ -247,6 +289,44 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                         </Link>
                     </div>
                 )}
+                <div className={styles.metricsCallout}>
+                    <div className={styles.metricsHeader}>
+                        <div>
+                            <p className={styles.metricsKicker}>GitHub metrics</p>
+                            <h2 className={styles.metricsTitle}>Commits, stars, and LOC</h2>
+                            <p className={styles.metricsText}>
+                                Weekly activity trends tied to my contributions.
+                            </p>
+                        </div>
+                        <div className={styles.metricsMeta}>
+                            <span className={styles.metricsMetaLabel}>Snapshot</span>
+                            <span className={styles.metricsMetaValue}>
+                                {metricsData?.historyUpdatedAt ? (
+                                    <DateStamp dateString={metricsData.historyUpdatedAt} />
+                                ) : metricsUpdate?.inProgress ? (
+                                    'Updating'
+                                ) : (
+                                    'Pending'
+                                )}
+                            </span>
+                            {metricsUpdate?.inProgress && metricsUpdate.totalRepos > 0 && (
+                                <span className={styles.metricsMetaBadge}>
+                                    {metricsUpdate.processedRepos}/{metricsUpdate.totalRepos} repos
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <StatGrid
+                        items={metricsStats}
+                        gridClassName={styles.metricsGrid}
+                        itemClassName={`${styles.statCard} glowable`}
+                        valueClassName={styles.statValue}
+                        labelClassName={styles.statLabel}
+                    />
+                    <Link href="/pipelines" className={`${styles.metricsLink} glowable`}>
+                        View full metrics
+                    </Link>
+                </div>
             </section>
             {githubError && (
                 <div className={styles.notice}>
@@ -288,6 +368,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                         );
                         const popoverId = `project-tags-${repo.id}`;
                         const pipelineStatus = pipelineMap.get(repo.name.toLowerCase());
+                        const metrics = metricsMap.get(repo.full_name.toLowerCase());
                         const pipelineState = pipelineStatus?.status ?? 'unknown';
                         const pipelineLabel = statusLabel(pipelineState);
                         const pipelineClassName = pipelineState === 'running'
@@ -323,6 +404,10 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                         const repoPullsUrl = `${repo.html_url}/pulls`;
                         const repoReleasesUrl = `${repo.html_url}/releases`;
                         const repoReadmeUrl = readme?.url ?? `${repo.html_url}#readme`;
+                        const commitMetric = metrics?.commits.week ?? null;
+                        const linesMetric = metrics
+                            ? formatDelta(metrics.additions.month, metrics.deletions.month)
+                            : null;
 
                         const cardStyle = {
                             '--accent': meta?.accent ?? 'var(--color-primary)',
@@ -505,6 +590,22 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                                         </span>
                                                     </div>
                                                     <div className={styles.detailItem}>
+                                                        <span className={styles.detailLabel}>Metrics</span>
+                                                        <span className={styles.detailValue}>
+                                                            {metrics
+                                                                ? `${formatNumber(metrics.commits.week)} commits (7d)`
+                                                                : 'Loading metrics'}
+                                                        </span>
+                                                        <span className={styles.detailMeta}>
+                                                            {metrics
+                                                                ? `${formatDelta(
+                                                                      metrics.additions.month,
+                                                                      metrics.deletions.month,
+                                                                  )} 30d`
+                                                                : 'Snapshot pending'}
+                                                        </span>
+                                                    </div>
+                                                    <div className={styles.detailItem}>
                                                         <span className={styles.detailLabel}>Activity</span>
                                                         <span className={styles.detailValue}>
                                                             Last push <DateStamp dateString={repo.pushed_at} />
@@ -627,6 +728,19 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                             <span className={styles.pipelineDot} data-state={pipelineState} />
                                             {pipelineLabel}
                                         </span>
+                                    </div>
+                                    <div className={styles.metricsRow}>
+                                        <span>
+                                            {commitMetric !== null
+                                                ? `${formatNumber(commitMetric)} commits (7d)`
+                                                : 'Metrics pending'}
+                                        </span>
+                                        {linesMetric && <span>{linesMetric} 30d</span>}
+                                        {metrics?.metricsUpdatedAt && (
+                                            <span>
+                                                Updated <DateStamp dateString={metrics.metricsUpdatedAt} />
+                                            </span>
+                                        )}
                                     </div>
                                     <div className={styles.linksRow}>
                                         {links.map((link) => (

@@ -239,3 +239,228 @@
     color: var(--color-text-deemphasized);
     font-size: 0.85rem;
 }
+
+.metricsSection {
+    margin-top: 2.5rem;
+    display: grid;
+    gap: 1.4rem;
+}
+
+.metricsHeader {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.metricsLead {
+    margin: 0;
+    max-width: 52rem;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.metricsRepoGrid {
+    display: grid;
+    gap: 1rem;
+}
+
+.metricsRepoCard {
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+    box-shadow: 0 18px 32px -28px rgba(0, 0, 0, 0.5);
+}
+
+.metricsRepoSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.metricsRepoSummary::-webkit-details-marker {
+    display: none;
+}
+
+.metricsRepoTitle {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.metricsRepoName {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.metricsRepoMeta {
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.metricsRepoHighlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: flex-end;
+}
+
+.metricsPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    white-space: nowrap;
+}
+
+.metricsRepoDetails {
+    display: grid;
+    gap: 1rem;
+    padding: 0.2rem 1.1rem 1.1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.metricsTrendGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.metricsTrend {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.metricsTrendLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsTrendBars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.25rem;
+    height: 76px;
+    padding: 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.metricsTrendBar {
+    width: 8px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    opacity: 0.85;
+}
+
+.metricsTrendBar[data-variant="lines"] {
+    background: #2a6a87;
+}
+
+.metricsTrendEmpty {
+    padding: 0.75rem 0.9rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    color: var(--color-text-deemphasized);
+    font-size: 0.75rem;
+}
+
+.metricsRepoInfo {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.metricsInfoRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.metricsInfoLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsInfoValue {
+    color: var(--color-text-primary);
+}
+
+.metricsRepoLink {
+    color: var(--color-link);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.metricsRepoLink:hover {
+    text-decoration: underline;
+}
+
+.metricsRepoActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.metricsRefreshButton {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.metricsRefreshButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.metricsRefreshStatus {
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+}
+
+@media screen and (max-width: 48rem) {
+    .metricsRepoSummary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .metricsRepoHighlights {
+        justify-content: flex-start;
+    }
+
+    .metricsInfoRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

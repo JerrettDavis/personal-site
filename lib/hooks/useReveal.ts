@@ -47,6 +47,9 @@ export const useReveal = (containerRef: RefObject<HTMLElement | null>, deps: Dep
         const root = document.documentElement;
 
         const prefersCoarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isSmallViewport = window.matchMedia('(max-width: 56rem)').matches;
+        const shouldDisableReveal = prefersCoarsePointer || isSmallViewport;
         const getViewportHeight = () => {
             const height = window.visualViewport?.height
                 ?? window.innerHeight
@@ -92,21 +95,7 @@ export const useReveal = (containerRef: RefObject<HTMLElement | null>, deps: Dep
         });
         root.dataset.revealReady = 'true';
 
-        if (prefersCoarsePointer) {
-            revealTargets.forEach((element) => {
-                element.style.setProperty('--reveal-progress', '1');
-            });
-            return () => {
-                revealTargets.forEach((element) => {
-                    element.removeAttribute('data-reveal');
-                    element.style.removeProperty('--reveal-progress');
-                });
-                delete root.dataset.revealReady;
-            };
-        }
-
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
+        if (shouldDisableReveal || prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
             revealTargets.forEach((element) => setProgress(element, 1, 0, 1));
             return () => {
                 revealTargets.forEach((element) => {

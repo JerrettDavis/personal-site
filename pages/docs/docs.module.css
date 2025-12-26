@@ -106,6 +106,169 @@
     margin: 0;
 }
 
+.content :global(.doc-callout) {
+    display: grid;
+    gap: 0.6rem;
+    padding: 1rem 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.content :global(.doc-callout-title) {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.content :global(.doc-callout-body) {
+    color: var(--color-text-deemphasized);
+}
+
+.content :global(.doc-badge-row) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.content :global(.doc-badge) {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.content :global(.doc-grid) {
+    display: grid;
+    gap: 1rem;
+}
+
+.content :global(.doc-card) {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+}
+
+.content :global(.doc-card-kicker) {
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.content :global(.doc-card-title) {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.content :global(.doc-card-text) {
+    color: var(--color-text-deemphasized);
+    margin: 0;
+}
+
+.content :global(.doc-steps) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.content :global(.doc-step) {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.content :global(.doc-step-title) {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.content :global(.doc-step-meta) {
+    color: var(--color-text-deemphasized);
+    font-size: 0.85rem;
+}
+
+.content :global(.doc-diagram) {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    padding: 1rem;
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: linear-gradient(140deg, rgba(37, 104, 255, 0.08), transparent 70%);
+}
+
+.content :global(.doc-diagram-node) {
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.content :global(details.doc-accordion) {
+    padding: 0.8rem 0.9rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.content :global(details.doc-accordion summary) {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.content :global(.doc-table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.content :global(.doc-table th),
+.content :global(.doc-table td) {
+    border: 1px solid var(--color-border);
+    padding: 0.6rem 0.7rem;
+    text-align: left;
+}
+
+.content :global(.doc-table th) {
+    background: var(--color-surface-2);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.65rem;
+    color: var(--color-text-deemphasized);
+}
+
+.content :global(.doc-split) {
+    display: grid;
+    gap: 1rem;
+}
+
 .content :global(h2),
 .content :global(h3),
 .content :global(h4) {
@@ -125,6 +288,154 @@
 .sectionLead {
     margin: 0;
     color: var(--color-text-deemphasized);
+}
+
+.pipelineSection {
+    display: grid;
+    gap: 1rem;
+    padding: 1.6rem;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 20px 36px -30px rgba(0, 0, 0, 0.55);
+}
+
+.pipelineHeader {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.pipelineMeta {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.pipelineMetaLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.pipelineMetaValue {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.pipelineCard {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.pipelineControls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.pipelineControlButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.pipelineStepBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.pipelineTimeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.pipelineTimelineItem {
+    position: relative;
+}
+
+.pipelineTimelineButton {
+    width: 100%;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    text-align: left;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.pipelineTimelineButton:hover {
+    border-color: var(--color-primary);
+}
+
+.pipelineTimelineItem[data-active="true"] .pipelineTimelineButton {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px rgba(37, 104, 255, 0.3);
+    background: var(--color-surface-2);
+}
+
+.pipelineTimelineIndex {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+    font-family: var(--font-mono);
+}
+
+.pipelineTimelineLabel {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.pipelineTimelineTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.pipelineNote {
+    font-size: 0.85rem;
+    color: var(--color-text-deemphasized);
+}
+
+@media screen and (max-width: 48rem) {
+    .pipelineTimeline {
+        grid-template-columns: 1fr;
+    }
 }
 
 .docGrid {

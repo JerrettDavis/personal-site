@@ -3,13 +3,104 @@ title: Documentation
 description: Engineering notes that explain how the personal site is built and why.
 order: 0
 ---
-
 This folder documents the technical structure of the site, the content model, and the decisions that
 shape the build. The material is written to be readable in the repository and rendered at `/docs`
 when the site is built.
 
-Use these pages as a companion to the source code when making changes to routing, content, or
-infrastructure.
+<div class="doc-callout">
+  <div class="doc-callout-title">Read this like a walkthrough</div>
+  <div class="doc-callout-body">
+    Each page is a focused slice of the system. Start with architecture, follow the content
+    pipeline, and then explore deployment and testing to understand how everything stays fast
+    and observable.
+  </div>
+  <div class="doc-badge-row">
+    <span class="doc-badge">Static first</span>
+    <span class="doc-badge">Data driven</span>
+    <span class="doc-badge">Telemetry aware</span>
+    <span class="doc-badge">Cache conscious</span>
+  </div>
+</div>
+
+## Start here
+<div class="doc-grid">
+  <a class="doc-card" href="/docs/architecture">
+    <span class="doc-card-kicker">System map</span>
+    <span class="doc-card-title">Architecture</span>
+    <p class="doc-card-text">See the major layers, routes, and shared layout decisions.</p>
+  </a>
+  <a class="doc-card" href="/docs/content-pipeline">
+    <span class="doc-card-kicker">Content flow</span>
+    <span class="doc-card-title">Content pipeline</span>
+    <p class="doc-card-text">Follow how markdown becomes pages, feeds, and search metadata.</p>
+  </a>
+  <a class="doc-card" href="/docs/deployment">
+    <span class="doc-card-kicker">Ship it</span>
+    <span class="doc-card-title">Deployment</span>
+    <p class="doc-card-text">Learn how builds, previews, and telemetry connect end to end.</p>
+  </a>
+</div>
+
+## Live demos
+<div class="doc-grid">
+  <a class="doc-card" href="/pipelines">
+    <span class="doc-card-kicker">Telemetry</span>
+    <span class="doc-card-title">Pipeline status</span>
+    <p class="doc-card-text">See live build and repo activity signals.</p>
+  </a>
+  <a class="doc-card" href="/work-in-progress">
+    <span class="doc-card-kicker">Previews</span>
+    <span class="doc-card-title">Work in progress</span>
+    <p class="doc-card-text">Preview deployments and active branches.</p>
+  </a>
+  <a class="doc-card" href="/projects">
+    <span class="doc-card-kicker">Interactive</span>
+    <span class="doc-card-title">Project detail views</span>
+    <p class="doc-card-text">Expand cards and load markdown snapshots.</p>
+  </a>
+</div>
+
+## Explore the stack
+<div class="doc-grid">
+  <a class="doc-card" href="/docs/tech-stack">
+    <span class="doc-card-kicker">Technology</span>
+    <span class="doc-card-title">Tech stack</span>
+    <p class="doc-card-text">Frameworks, libraries, and services in use.</p>
+  </a>
+  <a class="doc-card" href="/tools">
+    <span class="doc-card-kicker">Tooling</span>
+    <span class="doc-card-title">Tools library</span>
+    <p class="doc-card-text">Categories of software and services we lean on.</p>
+  </a>
+  <a class="doc-card" href="/projects">
+    <span class="doc-card-kicker">Projects</span>
+    <span class="doc-card-title">Live examples</span>
+    <p class="doc-card-text">Where the stack and tools show up in practice.</p>
+  </a>
+</div>
+
+## How the docs fit together
+<ul class="doc-steps">
+  <li class="doc-step">
+    <div class="doc-step-title">01. Foundation</div>
+    <div class="doc-step-meta">Tech stack and architecture set the ground rules.</div>
+  </li>
+  <li class="doc-step">
+    <div class="doc-step-title">02. Content systems</div>
+    <div class="doc-step-meta">Pipeline and docs explain how content becomes pages.</div>
+  </li>
+  <li class="doc-step">
+    <div class="doc-step-title">03. Operations</div>
+    <div class="doc-step-meta">Deployment, telemetry, and testing keep things stable.</div>
+  </li>
+</ul>
+
+<div class="doc-diagram">
+  <div class="doc-diagram-node">Markdown + data</div>
+  <div class="doc-diagram-node">Build pipeline</div>
+  <div class="doc-diagram-node">Static pages</div>
+  <div class="doc-diagram-node">Telemetry + search</div>
+</div>
 
 ## Sections
 - Tech stack overview

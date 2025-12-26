@@ -359,6 +359,39 @@
     border-radius: 4px;
 }
 
+.detailReadmeContent img {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.detailReadmeContent table {
+    width: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin: 0.4rem 0;
+}
+
+.detailReadmeContent th,
+.detailReadmeContent td {
+    border: 1px solid var(--color-border);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.detailReadmeContent thead th {
+    background: var(--color-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.6rem;
+    color: var(--color-text-deemphasized);
+}
+
+.detailReadmeContent tbody tr:nth-child(even) {
+    background: rgba(15, 23, 32, 0.04);
+}
+
 .detailMuted {
     margin: 0;
     font-size: 0.8rem;
@@ -547,6 +580,14 @@
     color: var(--color-text-deemphasized);
 }
 
+.metricsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+}
+
 .pipelineStatus {
     display: inline-flex;
     align-items: center;
@@ -645,6 +686,95 @@
 }
 
 .pipelineLink {
+    justify-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.metricsCallout {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 0.8rem;
+    padding: 1rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+}
+
+.metricsHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.metricsKicker {
+    margin: 0 0 0.2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsTitle {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.metricsText {
+    margin: 0.3rem 0 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.9rem;
+}
+
+.metricsMeta {
+    display: grid;
+    gap: 0.3rem;
+    align-items: start;
+    font-size: 0.75rem;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsMetaLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.metricsMetaValue time {
+    font-family: var(--font-mono);
+}
+
+.metricsMetaBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.metricsGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.metricsLink {
     justify-self: flex-start;
     display: inline-flex;
     align-items: center;
