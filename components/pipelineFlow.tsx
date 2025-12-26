@@ -131,6 +131,7 @@ export default function PipelineFlow({
 }: PipelineFlowProps) {
     const wrapRef = useRef<HTMLDivElement | null>(null);
     const flowInstanceRef = useRef<ReactFlowInstance | null>(null);
+    const hasUserViewportRef = useRef(false);
     const nodeById = useMemo(() => {
         const map = new Map<string, PipelineNode>();
         nodes.forEach((node) => map.set(node.id, node));
@@ -276,7 +277,7 @@ export default function PipelineFlow({
         return {nodeHandles: nodeHandlesMap, edgeHandles: edgeHandlesMap};
     }, [edges, laneIndexById, layout.trackByNode, nodeById, nodes]);
 
-    const flowNodes: Node[] = useMemo(() => {
+    const baseNodes: Node[] = useMemo(() => {
         const maxColumn = nodes.reduce((max, node) => Math.max(max, getColumn(node)), 0);
         const laneWidth = nodeOffsetX + (maxColumn + 1) * stepGap + nodeWidth;
         const laneNodes: Node[] = lanes.map((lane, index) => ({
@@ -309,8 +310,6 @@ export default function PipelineFlow({
                 data: {
                     title: node.title,
                     meta: node.meta,
-                    active: node.step <= activeStepIndex,
-                    current: node.step === activeStepIndex,
                     step: node.step,
                     inHandles: handleSpec.inHandles,
                     outHandles: handleSpec.outHandles,
@@ -333,7 +332,28 @@ export default function PipelineFlow({
         });
 
         return [...laneNodes, ...pipelineNodes];
-    }, [activeStepIndex, laneIndexById, lanes, layout.laneGap, layout.laneHeight, layout.trackByNode, layout.trackCountByLane, nodeHandles, nodes]);
+    }, [laneIndexById, lanes, layout.laneGap, layout.laneHeight, layout.trackByNode, layout.trackCountByLane, nodeHandles, nodes]);
+
+    const flowNodes: Node[] = useMemo(() => {
+        return baseNodes.map((node) => {
+            if (node.type !== 'pipeline') return node;
+            const data = node.data as {
+                title: string;
+                meta: string;
+                step: number;
+                inHandles: HandleSpec[];
+                outHandles: HandleSpec[];
+            };
+            return {
+                ...node,
+                data: {
+                    ...data,
+                    active: data.step <= activeStepIndex,
+                    current: data.step === activeStepIndex,
+                },
+            };
+        });
+    }, [activeStepIndex, baseNodes]);
 
     const flowEdges: Edge[] = useMemo(() => {
         return edges.map((edge) => {
@@ -376,12 +396,13 @@ export default function PipelineFlow({
         [onSelectStep],
     );
 
-    const updateViewport = useCallback(() => {
+    const updateViewport = useCallback((force = false) => {
+        if (!force && hasUserViewportRef.current) return;
         const instance = flowInstanceRef.current;
         const rect = wrapRef.current?.getBoundingClientRect();
         if (!instance || !rect) return;
         const padding = 32;
-        const bounds = flowNodes.reduce(
+        const bounds = baseNodes.reduce(
             (acc, node) => {
                 const width = node.width ?? 0;
                 const height = node.height ?? 0;
@@ -402,12 +423,12 @@ export default function PipelineFlow({
         const x = padding - bounds.minX * zoom;
         const y = padding - bounds.minY * zoom;
         instance.setViewport({x, y, zoom});
-    }, [flowNodes]);
+    }, [baseNodes]);
 
     const handleInit = useCallback(
         (instance: ReactFlowInstance) => {
             flowInstanceRef.current = instance;
-            requestAnimationFrame(updateViewport);
+            requestAnimationFrame(() => updateViewport(true));
         },
         [updateViewport],
     );
@@ -421,6 +442,10 @@ export default function PipelineFlow({
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [updateViewport]);
+
+    const handleMoveStart = useCallback(() => {
+        hasUserViewportRef.current = true;
+    }, []);
 
     return (
         <div className={styles.flowWrap} ref={wrapRef}>
@@ -444,6 +469,7 @@ export default function PipelineFlow({
                 minZoom={0.65}
                 maxZoom={1.1}
                 onNodeClick={handleNodeClick}
+                onMoveStart={handleMoveStart}
                 onInit={handleInit}
             >
                 <Background gap={24} size={1} color="rgba(37, 104, 255, 0.2)" />
