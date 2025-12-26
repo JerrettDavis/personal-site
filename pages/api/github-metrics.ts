@@ -1,6 +1,4 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import fs from 'fs/promises';
-import path from 'path';
 import type {
     GithubMetricsHistory,
     GithubMetricsResponse,
@@ -10,6 +8,8 @@ import type {
     GithubWeekMetrics,
     RangeTotals,
 } from '../../lib/githubMetricsTypes';
+import {getMetricsStore} from '../../lib/metricsStore';
+import type {MetricsStore} from '../../lib/metricsStore';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -24,8 +24,6 @@ const CACHE_TTL_MS = 15 * 60 * 1000;
 const STALE_TTL_MS = 60 * 60 * 1000;
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
 const TREND_WEEKS = 12;
-const METRICS_PATH = path.join(process.cwd(), 'data', 'githubMetricsHistory.json');
-const LOCK_PATH = path.join(process.cwd(), 'data', '.githubMetrics.lock');
 const LOCK_STALE_MS = 4 * 60 * 60 * 1000;
 
 const emptyTotals = (): RangeTotals => ({week: 0, month: 0, year: 0});
@@ -120,37 +118,16 @@ const buildSummary = (repos: GithubRepoMetricSummary[], now: number): GithubMetr
     return summary;
 };
 
-const loadHistory = async (): Promise<GithubMetricsHistory | null> => {
-    try {
-        const raw = await fs.readFile(METRICS_PATH, 'utf8');
-        const parsed = JSON.parse(raw) as GithubMetricsHistory;
-        if (!parsed || !Array.isArray(parsed.repos)) {
-            return null;
-        }
-        return parsed;
-    } catch {
-        return null;
-    }
-};
-
-const loadLock = async () => {
-    try {
-        const raw = await fs.readFile(LOCK_PATH, 'utf8');
-        const parsed = JSON.parse(raw);
-        const startedAt = new Date(parsed.startedAt).getTime();
-        if (Number.isNaN(startedAt)) return null;
-        return {startedAt};
-    } catch {
-        return null;
-    }
-};
-
 const buildUpdateState = async (
+    store: MetricsStore,
     history: GithubMetricsHistory | null,
     now: number,
 ): Promise<GithubMetricsUpdateState | null> => {
-    const lock = await loadLock();
-    const lockActive = Boolean(lock && now - lock.startedAt < LOCK_STALE_MS);
+    const lock = await store.getLock();
+    const lockStartedAt = lock?.startedAt ? Date.parse(lock.startedAt) : 0;
+    const lockActive = Boolean(
+        lock && Number.isFinite(lockStartedAt) && now - lockStartedAt < LOCK_STALE_MS,
+    );
     const progress = history?.progress;
     const totalRepos = progress?.totalRepos ?? history?.repos?.length ?? 0;
     const processedRepos = progress?.processedRepos ?? history?.repos?.length ?? 0;
@@ -197,7 +174,8 @@ const buildPayloadFromHistory = (
         };
     }
 
-    const repoSummaries = history.repos.map((repo) => buildRepoSummary(repo, now));
+    const visibleRepos = history.repos.filter((repo) => repo.visibility === 'public');
+    const repoSummaries = visibleRepos.map((repo) => buildRepoSummary(repo, now));
     const summary = buildSummary(repoSummaries, now);
 
     return {
@@ -218,27 +196,26 @@ export default async function handler(
         const forceRefresh = req.query.refresh === '1';
         const cacheEntry = getCacheEntry<GithubMetricsResponse>(CACHE_KEY);
 
-        const history = await loadHistory();
-        const update = await buildUpdateState(history, now);
+        const store = await getMetricsStore();
+        const history = await store.getHistory();
+        const update = await buildUpdateState(store, history, now);
 
         if (!forceRefresh && cacheEntry && now < cacheEntry.expiresAt && !update?.inProgress) {
-            const cacheTimestamp = cacheEntry.data.historyUpdatedAt
+            const historyUpdatedAt = history?.generatedAt
+                ? Date.parse(history.generatedAt)
+                : 0;
+            const cacheUpdatedAt = cacheEntry.data.historyUpdatedAt
                 ? Date.parse(cacheEntry.data.historyUpdatedAt)
                 : 0;
-            if (Number.isFinite(cacheTimestamp)) {
-                const stat = await fs.stat(METRICS_PATH).catch(() => null);
-                if (stat && stat.mtimeMs > cacheTimestamp + 1000) {
-                    // History updated; bypass cache and rebuild.
-                } else {
-                    res.setHeader(
-                        'Cache-Control',
-                        'public, s-maxage=300, stale-while-revalidate=600',
-                    );
-                    return res.status(200).json({
-                        ...cacheEntry.data,
-                        update: update ?? cacheEntry.data.update ?? null,
-                    });
-                }
+            if (historyUpdatedAt <= cacheUpdatedAt) {
+                res.setHeader(
+                    'Cache-Control',
+                    'public, s-maxage=300, stale-while-revalidate=600',
+                );
+                return res.status(200).json({
+                    ...cacheEntry.data,
+                    update: update ?? cacheEntry.data.update ?? null,
+                });
             }
         }
 
@@ -281,7 +258,8 @@ export default async function handler(
         if (cacheEntry && Date.now() < cacheEntry.staleUntil) {
             return res.status(200).json(cacheEntry.data);
         }
-        const update = await buildUpdateState(null, Date.now());
+        const store = await getMetricsStore();
+        const update = await buildUpdateState(store, null, Date.now());
         return res
             .status(200)
             .json({...buildPayloadFromHistory(null, update, Date.now()), error: `GitHub metrics error: ${error}`});

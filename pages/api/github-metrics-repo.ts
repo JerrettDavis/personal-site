@@ -1,7 +1,7 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import fs from 'fs/promises';
-import path from 'path';
 import type {GithubMetricsHistory} from '../../lib/githubMetricsTypes';
+import {getMetricsStore} from '../../lib/metricsStore';
+import type {MetricsStore} from '../../lib/metricsStore';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -17,8 +17,6 @@ type RepoRefreshResponse = {
     inProgress?: boolean;
 };
 
-const METRICS_PATH = path.join(process.cwd(), 'data', 'githubMetricsHistory.json');
-const LOCK_PATH = path.join(process.cwd(), 'data', '.githubMetrics.lock');
 const LOCK_STALE_MS = 4 * 60 * 60 * 1000;
 const LOCAL_COOLDOWN_MS = 60 * 1000;
 const PROD_COOLDOWN_MS = 5 * 60 * 1000;
@@ -51,46 +49,12 @@ const fetchContributorStats = async (fullName: string, headers: Record<string, s
     return null;
 };
 
-const loadHistory = async (): Promise<GithubMetricsHistory | null> => {
-    try {
-        const raw = await fs.readFile(METRICS_PATH, 'utf8');
-        const parsed = JSON.parse(raw) as GithubMetricsHistory;
-        if (!parsed || !Array.isArray(parsed.repos)) return null;
-        return parsed;
-    } catch {
-        return null;
-    }
-};
-
-const writeHistory = async (history: GithubMetricsHistory) => {
-    const tempPath = `${METRICS_PATH}.tmp`;
-    const payload = `${JSON.stringify(history, null, 2)}\n`;
-    await fs.writeFile(tempPath, payload, 'utf8');
-    try {
-        await fs.rename(tempPath, METRICS_PATH);
-    } catch (error: any) {
-        await fs.writeFile(METRICS_PATH, payload, 'utf8');
-        try {
-            await fs.unlink(tempPath);
-        } catch {
-            // ignore temp cleanup
-        }
-        if (error?.code && !['EPERM', 'EEXIST'].includes(error.code)) {
-            throw error;
-        }
-    }
-};
-
-const loadLock = async () => {
-    try {
-        const raw = await fs.readFile(LOCK_PATH, 'utf8');
-        const parsed = JSON.parse(raw);
-        const startedAt = new Date(parsed.startedAt).getTime();
-        if (Number.isNaN(startedAt)) return null;
-        return {startedAt};
-    } catch {
-        return null;
-    }
+const isLockActive = async (store: MetricsStore) => {
+    const lock = await store.getLock();
+    if (!lock?.startedAt) return false;
+    const startedAt = Date.parse(lock.startedAt);
+    if (Number.isNaN(startedAt)) return false;
+    return Date.now() - startedAt < LOCK_STALE_MS;
 };
 
 const trimSnapshots = (snapshots: GithubMetricsHistory['repos'][number]['snapshots'], cutoffMs: number) =>
@@ -113,8 +77,8 @@ export default async function handler(
         return res.status(200).json({ok: false, message: 'Missing GITHUB_TOKEN.'});
     }
 
-    const lock = await loadLock();
-    if (lock && Date.now() - lock.startedAt < LOCK_STALE_MS) {
+    const store = await getMetricsStore();
+    if (await isLockActive(store)) {
         return res.status(200).json({
             ok: false,
             message: 'Metrics update already running.',
@@ -130,7 +94,7 @@ export default async function handler(
     }
 
     const promise = (async () => {
-        const history = await loadHistory();
+        const history = await store.getHistory();
         if (!history) {
             return {ok: false, message: 'Metrics history not found.'};
         }
@@ -142,6 +106,9 @@ export default async function handler(
         }
 
         const repoEntry = history.repos[repoIndex];
+        if (repoEntry.visibility !== 'public') {
+            return {ok: false, message: 'Repository is not public.'};
+        }
         const cooldownMs =
             process.env.NODE_ENV === 'production' ? PROD_COOLDOWN_MS : LOCAL_COOLDOWN_MS;
         const lastUpdated = repoEntry.updatedAt
@@ -174,6 +141,9 @@ export default async function handler(
                 headers,
             );
             if (freshRepo) {
+                if (freshRepo.private) {
+                    return {ok: false, message: 'Repository is private.'};
+                }
                 repoData = {
                     ...repoEntry,
                     name: freshRepo.name ?? repoEntry.name,
@@ -183,6 +153,7 @@ export default async function handler(
                     stars: freshRepo.stargazers_count ?? repoEntry.stars,
                     forks: freshRepo.forks_count ?? repoEntry.forks,
                     pushedAt: freshRepo.pushed_at ?? repoEntry.pushedAt,
+                    visibility: freshRepo.private ? 'private' : 'public',
                 };
             }
         } catch (error) {
@@ -236,7 +207,7 @@ export default async function handler(
         if (history.progress) {
             history.progress.updatedAt = updatedAt;
         }
-        await writeHistory(history);
+        await store.saveHistory(history);
 
         return {ok: true, updatedAt};
     })()

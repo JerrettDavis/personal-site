@@ -67,6 +67,7 @@ order: 2
       <li><code>lib/cacheStore.ts</code> centralizes caching, inflight dedupe, and rate limits.</li>
       <li>Project detail panels fetch on demand and hydrate into expanded cards.</li>
       <li><code>data/githubMetricsHistory.json</code> stores historical commit and LOC snapshots.</li>
+      <li><code>lib/metricsStore.ts</code> can swap the JSON file for a database adapter.</li>
     </ul>
   </div>
 </div>

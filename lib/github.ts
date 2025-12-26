@@ -14,6 +14,7 @@ export interface GitHubRepo {
     forks_count: number;
     archived: boolean;
     fork: boolean;
+    private?: boolean;
     pushed_at: string;
     updated_at: string;
 }
@@ -75,6 +76,7 @@ export const getActiveRepos = async ({
         const cutoff = getLookbackDate(lookbackDays);
         return {
             repos: mockRepos
+                .filter((repo) => !repo.private)
                 .filter((repo) => (includeForks ? true : !repo.fork))
                 .filter((repo) => (includeArchived ? true : !repo.archived))
                 .filter((repo) => new Date(repo.pushed_at) >= cutoff)
@@ -105,6 +107,7 @@ export const getActiveRepos = async ({
 
         return {
             repos: repos
+                .filter((repo) => !repo.private)
                 .filter((repo) => (includeForks ? true : !repo.fork))
                 .filter((repo) => (includeArchived ? true : !repo.archived))
                 .filter((repo) => new Date(repo.pushed_at) >= cutoff)

@@ -1,6 +1,12 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {ProjectDetailResponse} from '../../lib/projectDetails';
 import {renderMarkdown} from '../../lib/markdown-render';
+import {getActiveRepos} from '../../lib/github';
+import {
+    GITHUB_USERNAME,
+    PROJECT_ACTIVITY_DAYS,
+    PROJECT_OVERRIDES,
+} from '../../data/projects';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -15,6 +21,8 @@ import {
 type RepoPayload = {
     open_issues_count: number;
     html_url: string;
+    private?: boolean;
+    owner?: {login?: string | null};
 };
 
 type ReadmePayload = {
@@ -37,6 +45,9 @@ const PROVIDER = 'github';
 const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 60 * 60 * 1000;
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
+const ALLOWLIST_CACHE_KEY = 'project-detail-allowlist';
+const ALLOWLIST_TTL_MS = 10 * 60 * 1000;
+const ALLOWLIST_STALE_MS = 60 * 60 * 1000;
 
 const buildHeaders = () => {
     const headers: Record<string, string> = {
@@ -46,6 +57,41 @@ const buildHeaders = () => {
         headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
     }
     return headers;
+};
+
+const buildAllowlist = async () => {
+    const resolveOverrideName = (repo: string) =>
+        repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
+    const allowlist = new Set(
+        PROJECT_OVERRIDES.map(
+            (project) => resolveOverrideName(project.repo).toLowerCase(),
+        ),
+    );
+    const {repos, error} = await getActiveRepos({
+        username: GITHUB_USERNAME,
+        lookbackDays: PROJECT_ACTIVITY_DAYS,
+        includeForks: false,
+        includeArchived: false,
+        onRateLimit: (until) => setRateLimit(PROVIDER, until, 'allowlist'),
+    });
+    if (error) {
+        console.warn(error);
+    }
+    repos.forEach((repo) => {
+        allowlist.add(repo.full_name.toLowerCase());
+    });
+    return allowlist;
+};
+
+const getAllowlist = async () => {
+    const now = Date.now();
+    const cacheEntry = getCacheEntry<Set<string>>(ALLOWLIST_CACHE_KEY);
+    if (cacheEntry && now < cacheEntry.expiresAt) {
+        return cacheEntry.data;
+    }
+    const allowlist = await buildAllowlist();
+    setCacheEntry(ALLOWLIST_CACHE_KEY, allowlist, ALLOWLIST_TTL_MS, ALLOWLIST_STALE_MS);
+    return allowlist;
 };
 
 const parseRateLimit = (headers: Headers) => {
@@ -185,6 +231,17 @@ const buildPayload = async (
     }
 
     const repoPayload = await fetchRepoData(fullName, headers);
+    if (repoPayload.private) {
+        return {
+            repoFullName: fullName,
+            readme: null,
+            openIssues: null,
+            openPulls: null,
+            latestRelease: null,
+            fetchedAt: new Date().toISOString(),
+            error: 'Repository is private.',
+        };
+    }
     let readme: ProjectDetailResponse['readme'] = null;
     let openPulls: number | null = null;
     let latestRelease: ProjectDetailResponse['latestRelease'] = null;
@@ -238,6 +295,20 @@ export default async function handler(
                 latestRelease: null,
                 fetchedAt: new Date().toISOString(),
                 error: 'Missing repo query parameter.',
+            });
+        }
+
+        const normalizedRepo = repo.trim().toLowerCase();
+        const allowlist = await getAllowlist();
+        if (!allowlist.has(normalizedRepo)) {
+            return res.status(200).json({
+                repoFullName: repo,
+                readme: null,
+                openIssues: null,
+                openPulls: null,
+                latestRelease: null,
+                fetchedAt: new Date().toISOString(),
+                error: 'Repository is not available.',
             });
         }
 

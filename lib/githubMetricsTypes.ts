@@ -21,6 +21,7 @@ export type GithubRepoMetrics = {
     stars: number;
     forks: number;
     pushedAt: string | null;
+    visibility?: 'public' | 'private';
     updatedAt?: string | null;
     weeks: GithubWeekMetrics[];
     snapshots: GithubRepoSnapshot[];

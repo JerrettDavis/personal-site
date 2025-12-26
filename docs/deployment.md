@@ -75,6 +75,36 @@ order: 5
 - Use <code>GITHUB_TOKEN</code> with access to owned repos.
 - The optional workflow lives at <code>.github/workflows/github-metrics.yml</code> and runs daily.
 - LOC trends are derived from GitHub contributor stats (weekly additions + deletions).
+- The metrics store defaults to the JSON file above; set <code>METRICS_STORE=custom</code> and provide <code>METRICS_STORE_ADAPTER</code> (path to a JS module exporting <code>createMetricsStore</code> or <code>metricsStore</code> with <code>getHistory</code>, <code>saveHistory</code>, <code>getLock</code>, <code>setLock</code>, and <code>clearLock</code>) to plug in a database-backed store.
+- Only public repos are stored and served. Run <code>npm run metrics:update</code> once after changing tokens to purge any legacy private entries.
+
+<details class="doc-accordion">
+  <summary>Local Postgres adapter</summary>
+  <ul>
+    <li>Set <code>METRICS_STORE=custom</code>.</li>
+    <li>Set <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
+    <li>Set <code>METRICS_PG_URL=postgres://...</code> (or <code>DATABASE_URL</code>).</li>
+    <li>Optional: <code>METRICS_PG_SCHEMA</code>, <code>METRICS_PG_HISTORY_TABLE</code>, <code>METRICS_PG_LOCK_TABLE</code>, <code>METRICS_PG_KEY</code>.</li>
+  </ul>
+</details>
+
+<details class="doc-accordion">
+  <summary>Local SQLite adapter</summary>
+  <ul>
+    <li>Set <code>METRICS_STORE=custom</code>.</li>
+    <li>Set <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/sqlite.js</code>.</li>
+    <li>Optional: <code>METRICS_SQLITE_PATH</code> (defaults to <code>data/githubMetrics.sqlite</code>).</li>
+    <li>Optional: <code>METRICS_SQLITE_HISTORY_TABLE</code>, <code>METRICS_SQLITE_LOCK_TABLE</code>, <code>METRICS_SQLITE_KEY</code>.</li>
+  </ul>
+</details>
+<div class="doc-callout">
+  <div class="doc-callout-title">Local default</div>
+  <div class="doc-callout-body">
+    When running locally without <code>METRICS_STORE</code> or <code>METRICS_STORE_ADAPTER</code>,
+    the metrics store defaults to the SQLite adapter in <code>scripts/metricsStoreAdapters/sqlite.js</code>.
+    Set <code>METRICS_STORE=file</code> to force JSON storage.
+  </div>
+</div>
 
 <details class="doc-accordion">
   <summary>Local checklist</summary>
@@ -113,6 +143,26 @@ order: 5
       <td>GITHUB_TOKEN</td>
       <td>GitHub API access</td>
       <td>Pipelines + project details</td>
+    </tr>
+    <tr>
+      <td>METRICS_STORE</td>
+      <td>Metrics storage mode (<code>file</code> or <code>custom</code>)</td>
+      <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>METRICS_STORE_ADAPTER</td>
+      <td>Path to a custom metrics store module</td>
+      <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>METRICS_PG_URL</td>
+      <td>Postgres connection string for the adapter</td>
+      <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>METRICS_SQLITE_PATH</td>
+      <td>SQLite file path for local metrics storage</td>
+      <td>GitHub metrics history</td>
     </tr>
   </tbody>
 </table>
