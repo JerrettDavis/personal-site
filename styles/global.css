@@ -61,6 +61,10 @@ html {
     height: 100%;
 }
 
+nextjs-portal {
+    display: contents;
+}
+
 body {
     background: var(--color-bg-primary);
     background-image: radial-gradient(1200px 600px at 12% -10%, var(--color-bg-glow-1), transparent),

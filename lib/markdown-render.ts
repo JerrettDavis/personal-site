@@ -8,7 +8,6 @@ export const renderMarkdown = async (content: string, useToc: boolean): Promise<
         unifiedModule,
         remarkParseModule,
         remarkRehypeModule,
-        remarkCapitalizeModule,
         rehypeHighlightModule,
         rehypeSlugModule,
         rehypeStringifyModule,
@@ -21,7 +20,6 @@ export const renderMarkdown = async (content: string, useToc: boolean): Promise<
         dynamicImport('unified'),
         dynamicImport('remark-parse'),
         dynamicImport('remark-rehype'),
-        dynamicImport('remark-capitalize'),
         dynamicImport('rehype-highlight'),
         dynamicImport('rehype-slug'),
         dynamicImport('rehype-stringify'),
@@ -35,7 +33,6 @@ export const renderMarkdown = async (content: string, useToc: boolean): Promise<
     const {unified} = unifiedModule as typeof import('unified');
     const {default: remarkParse} = remarkParseModule as typeof import('remark-parse');
     const {default: remarkRehype} = remarkRehypeModule as typeof import('remark-rehype');
-    const {default: remarkCapitalize} = remarkCapitalizeModule as typeof import('remark-capitalize');
     const {default: rehypeHighlight} = rehypeHighlightModule as typeof import('rehype-highlight');
     const {default: rehypeSlug} = rehypeSlugModule as typeof import('rehype-slug');
     const {default: rehypeStringify} = rehypeStringifyModule as typeof import('rehype-stringify');
@@ -48,7 +45,6 @@ export const renderMarkdown = async (content: string, useToc: boolean): Promise<
     let builder = unified()
         .use(remarkParse)
         .use(remarkRehype)
-        .use(remarkCapitalize)
         .use(rehypeHighlight, {languages: {...common, dockerfile, gherkin}})
         .use(rehypeSlug);
 

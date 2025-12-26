@@ -1,5 +1,8 @@
 .flowWrap {
     height: 720px;
+    max-height: 80vh;
+    max-height: 80svh;
+    max-height: 80dvh;
     border-radius: 16px;
     border: 1px solid var(--color-border);
     background: var(--color-surface);

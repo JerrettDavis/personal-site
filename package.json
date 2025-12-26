@@ -42,7 +42,6 @@
     "rehype-slug": "^5.1.0",
     "rehype-stringify": "^9.0.4",
     "remark": "^14.0.3",
-    "remark-capitalize": "^1.1.0",
     "remark-html": "^15.0.2",
     "remark-parse": "^10.0.2",
     "remark-rehype": "^10.1.0",
@@ -56,7 +55,7 @@
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.6",
-    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/npm": "^13.1.3",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
@@ -71,7 +70,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "semantic-release": "^24.2.9",
+    "semantic-release": "^25.0.2",
     "typescript": "^5.3.3"
   }
 }
