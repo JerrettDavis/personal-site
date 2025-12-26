@@ -92,6 +92,19 @@ export const useReveal = (containerRef: RefObject<HTMLElement | null>, deps: Dep
         });
         root.dataset.revealReady = 'true';
 
+        if (prefersCoarsePointer) {
+            revealTargets.forEach((element) => {
+                element.style.setProperty('--reveal-progress', '1');
+            });
+            return () => {
+                revealTargets.forEach((element) => {
+                    element.removeAttribute('data-reveal');
+                    element.style.removeProperty('--reveal-progress');
+                });
+                delete root.dataset.revealReady;
+            };
+        }
+
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
             revealTargets.forEach((element) => setProgress(element, 1, 0, 1));
