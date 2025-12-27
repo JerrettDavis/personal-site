@@ -66,7 +66,7 @@ export default async function handler(
         return res.status(200).json(payload);
     }
 
-    const promise = (async () => {
+    const promise = (async (): Promise<MetricsUpdateResponse> => {
         const store = await getMetricsStore();
         const now = Date.now();
         const lock = await store.getLock();
