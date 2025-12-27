@@ -25,6 +25,11 @@ on:
         description: 'Specific post ID to syndicate (optional)'
         required: false
         type: string
+      max_age_days:
+        description: 'Skip posts older than this many days (0 disables)'
+        required: false
+        type: string
+        default: '365'
 
 permissions:
   contents: write
@@ -55,6 +60,7 @@ jobs:
         env:
           HASHNODE_API_TOKEN: ${{ secrets.HASHNODE_API_TOKEN }}
           DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
+          SYNDICATE_MAX_AGE_DAYS: 365
         run: |
           FLAGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
@@ -65,6 +71,9 @@ jobs:
           fi
           if [ -n "${{ github.event.inputs.post_id }}" ]; then
             FLAGS="$FLAGS --post=${{ github.event.inputs.post_id }}"
+          fi
+          if [ -n "${{ github.event.inputs.max_age_days }}" ]; then
+            FLAGS="$FLAGS --max-age-days=${{ github.event.inputs.max_age_days }}"
           fi
           npm run syndicate -- $FLAGS
 

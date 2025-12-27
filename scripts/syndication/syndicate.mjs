@@ -11,7 +11,7 @@
  * - DEVTO_API_KEY: API key for Dev.to
  * 
  * Usage:
- *   node scripts/syndication/syndicate.mjs [--dry-run] [--force] [--post=<post-id>]
+ *   node scripts/syndication/syndicate.mjs [--dry-run] [--force] [--post=<post-id>] [--max-age-days=<days>]
  */
 
 import fs from 'fs/promises';
@@ -33,6 +33,15 @@ const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
 const isForce = args.includes('--force');
 const specificPost = args.find(arg => arg.startsWith('--post='))?.split('=')[1];
+const maxAgeDaysValue =
+    args.find(arg => arg.startsWith('--max-age-days='))?.split('=')[1] ??
+    process.env.SYNDICATE_MAX_AGE_DAYS ??
+    '';
+const maxAgeDays = (() => {
+    const parsed = Number.parseInt(maxAgeDaysValue, 10);
+    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    return parsed;
+})();
 
 /**
  * Load JSON file with error handling
@@ -111,7 +120,7 @@ async function loadPosts() {
 /**
  * Check if a post should be syndicated based on configuration and frontmatter
  */
-function shouldSyndicate(post, config) {
+function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
     const { frontmatter } = post;
     
     // Explicit frontmatter override
@@ -160,6 +169,18 @@ function shouldSyndicate(post, config) {
         if (!hasIncludedCategory) return false;
     }
     
+    if (maxAgeDaysOverride) {
+        const publishedAt = frontmatter.date instanceof Date
+            ? frontmatter.date.getTime()
+            : Date.parse(frontmatter.date);
+        if (Number.isFinite(publishedAt)) {
+            const maxAgeMs = maxAgeDaysOverride * 24 * 60 * 60 * 1000;
+            if (Date.now() - publishedAt > maxAgeMs) {
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
@@ -462,6 +483,10 @@ async function syndicate() {
     if (isDryRun) {
         console.log('🧪 DRY RUN MODE - No actual publications will be made\n');
     }
+
+    if (maxAgeDays) {
+        console.log(`Skipping posts older than ${maxAgeDays} days.\n`);
+    }
     
     // Load configuration and state
     const config = await loadConfig();
@@ -504,7 +529,7 @@ async function syndicate() {
     for (const post of postsToProcess) {
         console.log(`📝 Processing: ${post.id}`);
         
-        if (!shouldSyndicate(post, config)) {
+        if (!shouldSyndicate(post, config, maxAgeDays)) {
             console.log(`  ⏭️  Skipped (syndication disabled)\n`);
             skippedCount++;
             continue;
