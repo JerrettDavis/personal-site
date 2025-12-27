@@ -9,10 +9,21 @@ const normalizeTitleKey = (value) =>
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '');
 
-const normalizeDevtoTag = (tag) =>
-    String(tag ?? '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
+const DEVTO_TAG_MAPPINGS = {
+    'c#': 'csharp',
+    'f#': 'fsharp',
+    'c++': 'cpp',
+};
+
+const normalizeDevtoTag = (tag) => {
+    const raw = String(tag ?? '').trim();
+    if (!raw) return '';
+    const lower = raw.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(DEVTO_TAG_MAPPINGS, lower)) {
+        return DEVTO_TAG_MAPPINGS[lower];
+    }
+    return lower.replace(/[^a-z0-9]/g, '');
+};
 
 const buildDevtoTags = (tags, maxTags) => {
     const cleaned = (Array.isArray(tags) ? tags : [])

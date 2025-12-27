@@ -21,12 +21,12 @@ describe('Syndication Dev.to helpers', () => {
 
         it('normalizes Dev.to tags to lowercase alphanumerics', () => {
             expect(normalizeDevtoTag('EF-Core')).toBe('efcore');
-            expect(normalizeDevtoTag('C#')).toBe('c');
+            expect(normalizeDevtoTag('C#')).toBe('csharp');
         });
 
         it('dedupes and limits Dev.to tags', () => {
             const tags = ['EF-Core', 'ef core', 'C#', 'C#', 'extra', 'five'];
-            expect(buildDevtoTags(tags, 4)).toEqual(['efcore', 'c', 'extra', 'five']);
+            expect(buildDevtoTags(tags, 4)).toEqual(['efcore', 'csharp', 'extra', 'five']);
         });
     });
 

@@ -194,7 +194,7 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
         if (!hasIncludedCategory) return false;
     }
 
-    // Explicit overrides above bypass the age window and filters below.
+    // Age filter runs after tag/category filters. Posts with syndicate: true bypass all checks.
     if (maxAgeDaysOverride) {
         const publishedAt = frontmatter.date instanceof Date
             ? frontmatter.date.getTime()
@@ -454,6 +454,7 @@ async function syndicate() {
     let publishedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
+    let rateLimitedSkips = 0;
     
     let devtoRateLimited = false;
     let devtoIndex = null;
@@ -515,15 +516,15 @@ async function syndicate() {
         // Publish to Dev.to
         if (config.platforms.devto?.enabled) {
             try {
+                let skipDevto = false;
                 if (devtoRateLimited) {
                     console.log(`  ⏭️  Skipped: rate limited`);
-                    skippedCount++;
-                    console.log('');
-                    continue;
+                    rateLimitedSkips++;
+                    skipDevto = true;
                 }
-                const preparedDevto = prepareContent(post, config, 'devto');
+                const preparedDevto = prepareContent(post, config, 'devto');    
                 const collision = findDevtoCollision(preparedDevto, devtoIndex);
-                if (collision && !isForce) {
+                if (!skipDevto && collision && !isForce) {
                     const publishedAt = collision.published_at || preparedDevto.publishedAt;
                     state.posts[post.id].devto = {
                         id: String(collision.id ?? ''),
@@ -538,33 +539,35 @@ async function syndicate() {
                         console.log(`  🔗 ${state.posts[post.id].devto.url}`);
                     }
                     skippedCount++;
-                    console.log('');
-                    continue;
+                    skipDevto = true;
                 }
 
-                console.log(`  📤 Publishing to Dev.to...`);
-                const result = await publishToDevTo(post, config, state, preparedDevto);
+                if (!skipDevto) {
+                    console.log(`  📤 Publishing to Dev.to...`);
+                    const result = await publishToDevTo(post, config, state, preparedDevto);
 
-                if (result.skipped) {
-                    console.log(`  ⏭️  Skipped: ${result.reason}`);
-                    if (result.url) console.log(`  🔗 ${result.url}`);
-                    if (result.rateLimited) {
-                        devtoRateLimited = true;
+                    if (result.skipped) {
+                        console.log(`  ⏭️  Skipped: ${result.reason}`);
+                        if (result.url) console.log(`  🔗 ${result.url}`);        
+                        if (result.rateLimited) {
+                            devtoRateLimited = true;
+                            rateLimitedSkips++;
+                        }
+                        if (result.markAsPublished) {
+                            state.posts[post.id].devto = {
+                                id: result.id ?? '',
+                                url: result.url ?? '',
+                                publishedAt: result.publishedAt ?? new Date().toISOString(),
+                                lastUpdated: result.lastUpdated ?? new Date().toISOString(),
+                            };
+                        }
+                        skippedCount++;
+                    } else if (result.success) {
+                        console.log(`  ✅ Published to Dev.to`);
+                        console.log(`  🔗 ${result.url}`);
+                        state.posts[post.id].devto = result;
+                        publishedCount++;
                     }
-                    if (result.markAsPublished) {
-                        state.posts[post.id].devto = {
-                            id: result.id ?? '',
-                            url: result.url ?? '',
-                            publishedAt: result.publishedAt ?? new Date().toISOString(),
-                            lastUpdated: result.lastUpdated ?? new Date().toISOString(),
-                        };
-                    }
-                    skippedCount++;
-                } else if (result.success) {
-                    console.log(`  ✅ Published to Dev.to`);
-                    console.log(`  🔗 ${result.url}`);
-                    state.posts[post.id].devto = result;
-                    publishedCount++;
                 }
             } catch (error) {
                 console.error(`  ❌ Error publishing to Dev.to: ${error.message}`);
@@ -585,6 +588,9 @@ async function syndicate() {
     console.log('📊 Summary:');
     console.log(`  ✅ Published: ${publishedCount}`);
     console.log(`  ⏭️  Skipped: ${skippedCount}`);
+    if (rateLimitedSkips > 0) {
+        console.log(`  ⛔ Rate limited skips: ${rateLimitedSkips}`);
+    }
     console.log(`  ❌ Errors: ${errorCount}`);
     
     if (errorCount > 0) {
@@ -604,14 +610,3 @@ if (isDirectRun) {
         process.exit(1);
     });
 }
-
-export {
-    sanitizeTitle,
-    normalizeTitleKey,
-    normalizeDevtoTag,
-    buildDevtoTags,
-    buildDevtoCollisionIndex,
-    findDevtoCollision,
-    publishToDevTo,
-    shouldSyndicate,
-};
