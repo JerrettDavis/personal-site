@@ -25,6 +25,8 @@ const rootDir = path.join(__dirname, '../..');
 // Platform-specific constraints
 const HASHNODE_MAX_TAGS = 5;
 const DEVTO_MAX_TAGS = 4;
+const DEVTO_PER_PAGE = 100;
+const DEVTO_MAX_PAGES = 3;
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -186,6 +188,11 @@ const sanitizeTitle = (value) =>
         .replace(/\s+/g, ' ')
         .trim();
 
+const normalizeTitleKey = (value) =>
+    sanitizeTitle(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
 const normalizeDevtoTag = (tag) =>
     String(tag ?? '')
         .toLowerCase()
@@ -196,6 +203,43 @@ const buildDevtoTags = (tags) => {
         .map((tag) => normalizeDevtoTag(tag))
         .filter(Boolean);
     return Array.from(new Set(cleaned)).slice(0, DEVTO_MAX_TAGS);
+};
+
+const buildDevtoCollisionIndex = (articles) => {
+    const byCanonical = new Map();
+    const byTitle = new Map();
+
+    (Array.isArray(articles) ? articles : []).forEach((article) => {
+        const canonical = article?.canonical_url || article?.canonicalUrl;
+        if (canonical) {
+            byCanonical.set(String(canonical).toLowerCase(), article);
+        }
+
+        const titleKey = normalizeTitleKey(article?.title);
+        if (titleKey) {
+            byTitle.set(titleKey, article);
+        }
+    });
+
+    return { byCanonical, byTitle };
+};
+
+const findDevtoCollision = (prepared, index) => {
+    if (!index) return null;
+
+    const canonicalKey = prepared.canonicalUrl
+        ? String(prepared.canonicalUrl).toLowerCase()
+        : '';
+    if (canonicalKey && index.byCanonical.has(canonicalKey)) {
+        return index.byCanonical.get(canonicalKey);
+    }
+
+    const titleKey = normalizeTitleKey(prepared.title);
+    if (titleKey && index.byTitle.has(titleKey)) {
+        return index.byTitle.get(titleKey);
+    }
+
+    return null;
 };
 
 /**
@@ -287,7 +331,7 @@ async function publishToHashnode(post, config, state) {
 /**
  * Publish to Dev.to using REST API
  */
-async function publishToDevTo(post, config, state) {
+async function publishToDevTo(post, config, state, preparedOverride) {
     const platformConfig = config.platforms.devto;
     if (!platformConfig.enabled) {
         return { skipped: true, reason: 'Platform disabled' };
@@ -308,7 +352,7 @@ async function publishToDevTo(post, config, state) {
         throw new Error('DEVTO_API_KEY environment variable is required');
     }
     
-    const prepared = prepareContent(post, config, 'devto');
+    const prepared = preparedOverride ?? prepareContent(post, config, 'devto');
     
     const article = {
         title: sanitizeTitle(prepared.title),
@@ -364,6 +408,52 @@ async function publishToDevTo(post, config, state) {
 }
 
 /**
+ * Fetch existing Dev.to articles for collision detection
+ */
+async function fetchDevtoArticles() {
+    const apiKey = process.env.DEVTO_API_KEY;
+    if (!apiKey) {
+        throw new Error('DEVTO_API_KEY environment variable is required');
+    }
+
+    const articles = [];
+
+    for (let page = 1; page <= DEVTO_MAX_PAGES; page += 1) {
+        const response = await fetch(
+            `https://dev.to/api/articles/me/published?per_page=${DEVTO_PER_PAGE}&page=${page}`,
+            {
+                method: 'GET',
+                headers: {
+                    'api-key': apiKey
+                }
+            }
+        );
+
+        if (response.status === 429) {
+            return { rateLimited: true, articles: [] };
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Dev.to API error: ${response.status} - ${errorText}`);
+        }
+
+        const pageArticles = await response.json();
+        if (!Array.isArray(pageArticles) || pageArticles.length === 0) {
+            break;
+        }
+
+        articles.push(...pageArticles);
+
+        if (pageArticles.length < DEVTO_PER_PAGE) {
+            break;
+        }
+    }
+
+    return { articles };
+}
+
+/**
  * Main syndication function
  */
 async function syndicate() {
@@ -395,6 +485,21 @@ async function syndicate() {
     let errorCount = 0;
     
     let devtoRateLimited = false;
+    let devtoIndex = null;
+
+    if (config.platforms.devto?.enabled && !isDryRun && !isForce) {
+        try {
+            const existing = await fetchDevtoArticles();
+            if (existing.rateLimited) {
+                devtoRateLimited = true;
+                console.log('⚠️  Dev.to rate limited, skipping Dev.to publish.');
+            } else {
+                devtoIndex = buildDevtoCollisionIndex(existing.articles);
+            }
+        } catch (error) {
+            console.warn(`⚠️  Dev.to lookup failed: ${error.message}`);
+        }
+    }
 
     for (const post of postsToProcess) {
         console.log(`📝 Processing: ${post.id}`);
@@ -441,8 +546,29 @@ async function syndicate() {
                     console.log('');
                     continue;
                 }
+                const preparedDevto = prepareContent(post, config, 'devto');
+                const collision = findDevtoCollision(preparedDevto, devtoIndex);
+                if (collision && !isForce) {
+                    const publishedAt = collision.published_at || preparedDevto.publishedAt;
+                    state.posts[post.id].devto = {
+                        id: String(collision.id ?? ''),
+                        url: collision.url || collision.canonical_url || preparedDevto.canonicalUrl,
+                        publishedAt: publishedAt
+                            ? new Date(publishedAt).toISOString()
+                            : new Date().toISOString(),
+                        lastUpdated: new Date().toISOString(),
+                    };
+                    console.log('  Skipped: already published (detected)');
+                    if (state.posts[post.id].devto.url) {
+                        console.log('  ' + state.posts[post.id].devto.url);
+                    }
+                    skippedCount++;
+                    console.log('');
+                    continue;
+                }
+
                 console.log(`  📤 Publishing to Dev.to...`);
-                const result = await publishToDevTo(post, config, state);
+                const result = await publishToDevTo(post, config, state, preparedDevto);
 
                 if (result.skipped) {
                     console.log(`  ⏭️  Skipped: ${result.reason}`);
