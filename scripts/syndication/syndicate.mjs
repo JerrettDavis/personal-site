@@ -157,44 +157,6 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
         return true;
     }
     
-    // Check default setting
-    if (!config.defaults.syndicateByDefault) {
-        return false;
-    }
-    
-    // Check tag filters
-    const postTags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
-    if (config.filters.excludedTags && config.filters.excludedTags.length > 0) {
-        const hasExcludedTag = postTags.some(tag => 
-            config.filters.excludedTags.includes(tag)
-        );
-        if (hasExcludedTag) return false;
-    }
-    
-    if (config.filters.includedTags && config.filters.includedTags.length > 0) {
-        const hasIncludedTag = postTags.some(tag => 
-            config.filters.includedTags.includes(tag)
-        );
-        if (!hasIncludedTag) return false;
-    }
-    
-    // Check category filters
-    const postCategories = Array.isArray(frontmatter.categories) ? frontmatter.categories : [];
-    if (config.filters.excludedCategories && config.filters.excludedCategories.length > 0) {
-        const hasExcludedCategory = postCategories.some(cat => 
-            config.filters.excludedCategories.includes(cat)
-        );
-        if (hasExcludedCategory) return false;
-    }
-    
-    if (config.filters.includedCategories && config.filters.includedCategories.length > 0) {
-        const hasIncludedCategory = postCategories.some(cat => 
-            config.filters.includedCategories.includes(cat)
-        );
-        if (!hasIncludedCategory) return false;
-    }
-    
-    // Explicit overrides above bypass the age window and filters below.
     // Explicit overrides above bypass the age window and filters below.
     if (maxAgeDaysOverride) {
         const publishedAt = frontmatter.date instanceof Date
@@ -206,6 +168,43 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
                 return false;
             }
         }
+    }
+
+    // Check default setting
+    if (!config.defaults.syndicateByDefault) {
+        return false;
+    }
+
+    // Check tag filters
+    const postTags = Array.isArray(frontmatter.tags) ? frontmatter.tags : [];
+    if (config.filters.excludedTags && config.filters.excludedTags.length > 0) {
+        const hasExcludedTag = postTags.some(tag =>
+            config.filters.excludedTags.includes(tag)
+        );
+        if (hasExcludedTag) return false;
+    }
+
+    if (config.filters.includedTags && config.filters.includedTags.length > 0) {
+        const hasIncludedTag = postTags.some(tag =>
+            config.filters.includedTags.includes(tag)
+        );
+        if (!hasIncludedTag) return false;
+    }
+
+    // Check category filters
+    const postCategories = Array.isArray(frontmatter.categories) ? frontmatter.categories : [];
+    if (config.filters.excludedCategories && config.filters.excludedCategories.length > 0) {
+        const hasExcludedCategory = postCategories.some(cat =>
+            config.filters.excludedCategories.includes(cat)
+        );
+        if (hasExcludedCategory) return false;
+    }
+
+    if (config.filters.includedCategories && config.filters.includedCategories.length > 0) {
+        const hasIncludedCategory = postCategories.some(cat =>
+            config.filters.includedCategories.includes(cat)
+        );
+        if (!hasIncludedCategory) return false;
     }
 
     return true;
