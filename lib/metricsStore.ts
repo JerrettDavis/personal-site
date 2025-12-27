@@ -71,6 +71,9 @@ const fileStore: MetricsStore = {
 };
 
 const resolveAdapterModule = async (adapterPath?: string) => {
+    if (!adapterPath) {
+        throw new Error('Missing metrics store adapter path.');
+    }
     const requireFallback = (modulePath: string) => {
         const runtimeRequire =
             (globalThis as any).__non_webpack_require__ ?? eval('require');
@@ -84,25 +87,14 @@ const resolveAdapterModule = async (adapterPath?: string) => {
         return dynamicImport(pathToFileURL(modulePath).href);
     };
 
-    if (adapterPath) {
-        const resolved = path.isAbsolute(adapterPath)
-            ? adapterPath
-            : path.join(process.cwd(), adapterPath);
-        try {
-            return requireFallback(resolved);
-        } catch (error: any) {
-            if (error?.code === 'ERR_REQUIRE_ESM') {
-                return importFallback(resolved);
-            }
-            throw error;
-        }
-    }
-
+    const resolved = path.isAbsolute(adapterPath)
+        ? adapterPath
+        : path.join(process.cwd(), adapterPath);
     try {
-        return requireFallback('./metricsStoreAdapter');
+        return requireFallback(resolved);
     } catch (error: any) {
         if (error?.code === 'ERR_REQUIRE_ESM') {
-            return importFallback(path.join(__dirname, 'metricsStoreAdapter'));
+            return importFallback(resolved);
         }
         throw error;
     }
@@ -147,6 +139,10 @@ const resolveStore = async (): Promise<MetricsStore> => {
 
     if (useAdapter) {
         try {
+            if (!adapterPath) {
+                console.warn('Metrics store adapter not configured. Using file store.');
+                return fileStore;
+            }
             const adapterModule = await resolveAdapterModule(adapterPath);
             const factory =
                 adapterModule.createMetricsStore ??

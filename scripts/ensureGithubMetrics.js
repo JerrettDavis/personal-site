@@ -101,23 +101,22 @@ const resolveAdapterPath = () => {
     return path.join(process.cwd(), 'scripts', 'metricsStoreAdapters', 'sqlite.js');
 };
 
-const resolveAdapterModule = async () => {
-    const adapterPath = resolveAdapterPath();
-    if (adapterPath) {
-        const resolved = path.isAbsolute(adapterPath)
-            ? adapterPath
-            : path.join(process.cwd(), adapterPath);
-        try {
-            return require(resolved);
-        } catch (error) {
-            if (error?.code === 'ERR_REQUIRE_ESM') {
-                const {pathToFileURL} = require('url');
-                return import(pathToFileURL(resolved).href);
-            }
-            throw error;
-        }
+const resolveAdapterModule = async (adapterPath) => {
+    if (!adapterPath) {
+        throw new Error('Missing metrics store adapter path.');
     }
-    return require('./metricsStoreAdapter');
+    const resolved = path.isAbsolute(adapterPath)
+        ? adapterPath
+        : path.join(process.cwd(), adapterPath);
+    try {
+        return require(resolved);
+    } catch (error) {
+        if (error?.code === 'ERR_REQUIRE_ESM') {
+            const {pathToFileURL} = require('url');
+            return import(pathToFileURL(resolved).href);
+        }
+        throw error;
+    }
 };
 
 const resolveStore = async () => {
@@ -126,7 +125,11 @@ const resolveStore = async () => {
     const useAdapter = mode !== 'file' && (mode === 'custom' || Boolean(adapterPath));
     if (useAdapter) {
         try {
-            const adapter = await resolveAdapterModule();
+            if (!adapterPath) {
+                console.warn('Metrics store adapter not configured. Using file store.');
+                return fileStore;
+            }
+            const adapter = await resolveAdapterModule(adapterPath);
             const factory =
                 adapter.createMetricsStore ??
                 adapter.default ??
