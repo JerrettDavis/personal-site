@@ -29,6 +29,7 @@ type RepoPayload = {
 type ReadmePayload = {
     content?: string;
     html_url?: string;
+    download_url?: string | null;
 };
 
 type PullPayload = {
@@ -171,7 +172,16 @@ const fetchReadme = async (
     updateRateLimit(response.headers, 'readme');
     if (response.ok) {
         const payload = (await response.json()) as ReadmePayload;
-        if (!payload.content) return null;
+        if (!payload.content) {
+            const rawFromPayload = await fetchReadmeFromUrl(
+                payload.download_url ?? null,
+                payload.html_url ?? null,
+            );
+            if (rawFromPayload) return rawFromPayload;
+            const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+            if (rawFallback) return rawFallback;
+            return null;
+        }
         const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
         const {snippet, truncated} = buildMarkdownSnippet(decoded);
         if (!snippet) return null;
@@ -187,6 +197,24 @@ const fetchReadme = async (
     if (rawFallback) return rawFallback;
     if (response.status === 404) return null;
     throw new Error(`Readme fetch failed (${response.status}).`);
+};
+
+const fetchReadmeFromUrl = async (
+    downloadUrl: string | null,
+    htmlUrl: string | null,
+) => {
+    if (!downloadUrl) return null;
+    const response = await fetch(downloadUrl);
+    if (!response.ok) return null;
+    const content = await response.text();
+    const {snippet, truncated} = buildMarkdownSnippet(content);
+    if (!snippet) return null;
+    const contentHtml = await renderMarkdown(snippet, false);
+    return {
+        contentHtml,
+        truncated,
+        url: htmlUrl ?? downloadUrl,
+    };
 };
 
 const fetchReadmeRaw = async (
