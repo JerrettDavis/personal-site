@@ -1,0 +1,24 @@
+{
+  "$schema": "./schemas/syndication-config.schema.json",
+  "platforms": {
+    "hashnode": {
+      "enabled": true,
+      "publicationId": "YOUR_HASHNODE_PUBLICATION_ID",
+      "supportsBackdating": true
+    },
+    "devto": {
+      "enabled": true,
+      "supportsBackdating": false
+    }
+  },
+  "filters": {
+    "includedTags": [],
+    "excludedTags": ["draft", "private"],
+    "includedCategories": [],
+    "excludedCategories": ["Private"]
+  },
+  "defaults": {
+    "syndicateByDefault": true,
+    "canonicalUrlBase": "https://jerrettdavis.com"
+  }
+}

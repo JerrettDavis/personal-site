@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Syndication State",
+  "description": "Tracks syndication status of blog posts across platforms",
+  "type": "object",
+  "properties": {
+    "posts": {
+      "type": "object",
+      "description": "Map of post IDs to their syndication status",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "hashnode": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Platform-specific post ID"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL of the syndicated post"
+              },
+              "publishedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the post was published to this platform"
+              },
+              "lastUpdated": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the post was last updated on this platform"
+              }
+            }
+          },
+          "devto": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Platform-specific post ID"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL of the syndicated post"
+              },
+              "publishedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the post was published to this platform"
+              },
+              "lastUpdated": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the post was last updated on this platform"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["posts"]
+}
