@@ -132,7 +132,7 @@ const getCountFromLinkHeader = (linkHeader: string | null, fallback: number) => 
     return Number.isNaN(value) ? fallback : value;
 };
 
-// Minimal escaping for fallback <pre> output only.
+// Minimal escaping for fallback <pre> output only (text content, no attributes).
 const escapeHtml = (value: string) =>
     value
         .replace(/&/g, '&amp;')
