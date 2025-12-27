@@ -160,9 +160,6 @@ const clearLock = async () => {
     }
 };
 
-let lockCreated = false;
-let activeStore = null;
-
 const fileStore = {
     getHistory: loadExisting,
     saveHistory: writePayload,
@@ -252,63 +249,136 @@ const resolveStore = async () => {
     return fileStore;
 };
 
-const main = async () => {
-    await loadEnv();
+const updateGithubMetrics = async (options = {}) => {
+    const shouldLoadEnv = options.loadEnv !== false;
+    const forceUpdate = options.force === true;
+    if (shouldLoadEnv) {
+        await loadEnv();
+    }
     const token = process.env.GITHUB_TOKEN;
     if (!token) {
         throw new Error('Missing GITHUB_TOKEN.');
     }
-    const store = await resolveStore();
-    activeStore = store;
-    const existingLock = await store.getLock();
-    const lockStartedAt = existingLock?.startedAt
-        ? new Date(existingLock.startedAt).getTime()
-        : 0;
-    if (lockStartedAt && Date.now() - lockStartedAt < LOCK_STALE_MS) {
-        console.log('Metrics update already in progress.');
-        return;
-    }
-    await store.setLock({pid: process.pid, startedAt: new Date().toISOString()});
-    lockCreated = true;
-    const headers = {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${token}`,
-    };
-    const user = await fetchUser(headers);
-    const login = user.login;
-    const repos = await fetchRepos(headers);
-    const now = new Date();
-    const snapshotDate = now.toISOString().slice(0, 10);
-    const snapshotCutoff = now.getTime() - 400 * 24 * 60 * 60 * 1000;
-    const existing = await store.getHistory();
-    const existingMap = new Map(
-        Array.isArray(existing?.repos)
-            ? existing.repos.map((repo) => [repo.fullName, repo])
-            : [],
-    );
 
-    const ownedRepos = repos.filter(
-        (repo) =>
-            !repo.private &&
-            !repo.fork &&
-            !repo.archived &&
-            repo.owner?.login === login,
-    );
+    let lockCreated = false;
+    let activeStore = null;
 
-    const progress = {
-        totalRepos: ownedRepos.length,
-        processedRepos: 0,
-        startedAt: now.toISOString(),
-        updatedAt: now.toISOString(),
-        finishedAt: null,
-    };
-    const basePayload = {
-        generatedAt: now.toISOString(),
-        user: login,
-        progress,
-        repos: ownedRepos.map((repo) => {
-            const previous = existingMap.get(repo.full_name);
-            return {
+    try {
+        const store = await resolveStore();
+        activeStore = store;
+        const existingLock = await store.getLock();
+        const lockStartedAt = existingLock?.startedAt
+            ? new Date(existingLock.startedAt).getTime()
+            : 0;
+        if (lockStartedAt && Date.now() - lockStartedAt < LOCK_STALE_MS) {
+            return {status: 'in_progress'};
+        }
+        const existing = await store.getHistory();
+        const minIntervalMs = Number(process.env.METRICS_UPDATE_MIN_INTERVAL_MS ?? '');
+        if (!forceUpdate && Number.isFinite(minIntervalMs) && minIntervalMs > 0) {
+            const updatedAt = existing?.generatedAt ? Date.parse(existing.generatedAt) : 0;
+            if (updatedAt && Date.now() - updatedAt < minIntervalMs) {
+                return {
+                    status: 'skipped',
+                    updatedAt: existing?.generatedAt ?? null,
+                    nextAllowedAt: new Date(updatedAt + minIntervalMs).toISOString(),
+                };
+            }
+        }
+        await store.setLock({pid: process.pid, startedAt: new Date().toISOString()});
+        lockCreated = true;
+        const headers = {
+            Accept: 'application/vnd.github+json',
+            Authorization: `Bearer ${token}`,
+        };
+        const user = await fetchUser(headers);
+        const login = user.login;
+        const repos = await fetchRepos(headers);
+        const now = new Date();
+        const snapshotDate = now.toISOString().slice(0, 10);
+        const snapshotCutoff = now.getTime() - 400 * 24 * 60 * 60 * 1000;
+        const existingMap = new Map(
+            Array.isArray(existing?.repos)
+                ? existing.repos.map((repo) => [repo.fullName, repo])
+                : [],
+        );
+
+        const ownedRepos = repos.filter(
+            (repo) =>
+                !repo.private &&
+                !repo.fork &&
+                !repo.archived &&
+                repo.owner?.login === login,
+        );
+
+        const progress = {
+            totalRepos: ownedRepos.length,
+            processedRepos: 0,
+            startedAt: now.toISOString(),
+            updatedAt: now.toISOString(),
+            finishedAt: null,
+        };
+        const basePayload = {
+            generatedAt: now.toISOString(),
+            user: login,
+            progress,
+            repos: ownedRepos.map((repo) => {
+                const previous = existingMap.get(repo.full_name);
+                return {
+                    id: repo.id,
+                    name: repo.name,
+                    fullName: repo.full_name,
+                    description: repo.description ?? null,
+                    htmlUrl: repo.html_url,
+                    stars: repo.stargazers_count ?? 0,
+                    forks: repo.forks_count ?? 0,
+                    pushedAt: repo.pushed_at ?? null,
+                    visibility: repo.private ? 'private' : 'public',
+                    updatedAt: previous?.updatedAt ?? null,
+                    weeks: Array.isArray(previous?.weeks) ? previous.weeks : [],
+                    snapshots: Array.isArray(previous?.snapshots)
+                        ? previous.snapshots
+                        : [],
+                };
+            }),
+        };
+        const repoIndex = new Map(
+            basePayload.repos.map((repo, index) => [repo.fullName, index]),
+        );
+
+        let processedRepos = 0;
+        for (const repo of ownedRepos) {
+            const fullName = repo.full_name;
+            const contributorStats = await fetchContributorStats(fullName, headers);
+            const contributor = contributorStats.find(
+                (entry) => entry.author && entry.author.login === login,
+            );
+            const weeks = Array.isArray(contributor?.weeks)
+                ? contributor.weeks.map((week) => ({
+                      week: week.w,
+                      commits: week.c,
+                      additions: week.a,
+                      deletions: week.d,
+                  }))
+                : [];
+            const previous = existingMap.get(fullName);
+            const previousSnapshots = Array.isArray(previous?.snapshots)
+                ? previous.snapshots
+                : [];
+            const trimmedSnapshots = trimSnapshots(previousSnapshots, snapshotCutoff).filter(
+                (snapshot) => snapshot.date !== snapshotDate,
+            );
+            const snapshots = [
+                ...trimmedSnapshots,
+                {
+                    date: snapshotDate,
+                    stars: repo.stargazers_count ?? 0,
+                    forks: repo.forks_count ?? 0,
+                    pushedAt: repo.pushed_at ?? null,
+                },
+            ];
+
+            const updatedRepo = {
                 id: repo.id,
                 name: repo.name,
                 fullName: repo.full_name,
@@ -318,98 +388,50 @@ const main = async () => {
                 forks: repo.forks_count ?? 0,
                 pushedAt: repo.pushed_at ?? null,
                 visibility: repo.private ? 'private' : 'public',
-                updatedAt: previous?.updatedAt ?? null,
-                weeks: Array.isArray(previous?.weeks) ? previous.weeks : [],
-                snapshots: Array.isArray(previous?.snapshots) ? previous.snapshots : [],
+                weeks,
+                snapshots,
+                updatedAt: new Date().toISOString(),
             };
-        }),
-    };
-    const repoIndex = new Map(
-        basePayload.repos.map((repo, index) => [repo.fullName, index]),
-    );
-
-    let processedRepos = 0;
-    for (const repo of ownedRepos) {
-        const fullName = repo.full_name;
-        const contributorStats = await fetchContributorStats(fullName, headers);
-        const contributor = contributorStats.find(
-            (entry) => entry.author && entry.author.login === login,
-        );
-        const weeks = Array.isArray(contributor?.weeks)
-            ? contributor.weeks.map((week) => ({
-                  week: week.w,
-                  commits: week.c,
-                  additions: week.a,
-                  deletions: week.d,
-              }))
-            : [];
-        const previous = existingMap.get(fullName);
-        const previousSnapshots = Array.isArray(previous?.snapshots)
-            ? previous.snapshots
-            : [];
-        const trimmedSnapshots = trimSnapshots(previousSnapshots, snapshotCutoff).filter(
-            (snapshot) => snapshot.date !== snapshotDate,
-        );
-        const snapshots = [
-            ...trimmedSnapshots,
-            {
-                date: snapshotDate,
-                stars: repo.stargazers_count ?? 0,
-                forks: repo.forks_count ?? 0,
-                pushedAt: repo.pushed_at ?? null,
-            },
-        ];
-
-        const updatedRepo = {
-            id: repo.id,
-            name: repo.name,
-            fullName: repo.full_name,
-            description: repo.description ?? null,
-            htmlUrl: repo.html_url,
-            stars: repo.stargazers_count ?? 0,
-            forks: repo.forks_count ?? 0,
-            pushedAt: repo.pushed_at ?? null,
-            visibility: repo.private ? 'private' : 'public',
-            weeks,
-            snapshots,
-            updatedAt: new Date().toISOString(),
-        };
-        const index = repoIndex.get(fullName);
-        if (index !== undefined) {
-            basePayload.repos[index] = updatedRepo;
-        } else {
-            basePayload.repos.push(updatedRepo);
+            const index = repoIndex.get(fullName);
+            if (index !== undefined) {
+                basePayload.repos[index] = updatedRepo;
+            } else {
+                basePayload.repos.push(updatedRepo);
+            }
+            processedRepos += 1;
+            basePayload.progress.processedRepos = processedRepos;
+            basePayload.progress.updatedAt = new Date().toISOString();
+            basePayload.generatedAt = basePayload.progress.updatedAt;
+            await store.saveHistory(basePayload);
+            await sleep(250);
         }
-        processedRepos += 1;
-        basePayload.progress.processedRepos = processedRepos;
-        basePayload.progress.updatedAt = new Date().toISOString();
-        basePayload.generatedAt = basePayload.progress.updatedAt;
+
+        basePayload.repos.sort((a, b) => {
+            if (!a.pushedAt) return 1;
+            if (!b.pushedAt) return -1;
+            return a.pushedAt < b.pushedAt ? 1 : -1;
+        });
+
+        basePayload.progress.processedRepos = basePayload.progress.totalRepos;
+        basePayload.progress.finishedAt = new Date().toISOString();
+        basePayload.progress.updatedAt = basePayload.progress.finishedAt;
+        basePayload.generatedAt = basePayload.progress.finishedAt;
         await store.saveHistory(basePayload);
-        await sleep(250);
+        console.log(`Updated GitHub metrics for ${basePayload.repos.length} repos.`);
+        return {status: 'updated', repos: basePayload.repos.length, updatedAt: basePayload.generatedAt};
+    } finally {
+        if (lockCreated && activeStore?.clearLock) {
+            await activeStore.clearLock();
+        }
     }
-
-    basePayload.repos.sort((a, b) => {
-        if (!a.pushedAt) return 1;
-        if (!b.pushedAt) return -1;
-        return a.pushedAt < b.pushedAt ? 1 : -1;
-    });
-
-    basePayload.progress.processedRepos = basePayload.progress.totalRepos;
-    basePayload.progress.finishedAt = new Date().toISOString();
-    basePayload.progress.updatedAt = basePayload.progress.finishedAt;
-    basePayload.generatedAt = basePayload.progress.finishedAt;
-    await store.saveHistory(basePayload);
-    console.log(`Updated GitHub metrics for ${basePayload.repos.length} repos.`);
 };
 
-main()
-    .catch((error) => {
-        console.error(error);
-        process.exitCode = 1;
-    })
-    .finally(() => {
-        if (lockCreated && activeStore?.clearLock) {
-            return activeStore.clearLock();
-        }
-        return undefined;
-    });
+if (require.main === module) {
+    updateGithubMetrics()
+        .catch((error) => {
+            console.error(error);
+            process.exitCode = 1;
+        });
+}
+
+module.exports = {updateGithubMetrics, loadEnv};

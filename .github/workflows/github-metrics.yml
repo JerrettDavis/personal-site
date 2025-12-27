@@ -19,6 +19,11 @@ jobs:
         run: node scripts/updateGithubMetrics.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          METRICS_STORE: custom
+          METRICS_STORE_ADAPTER: scripts/metricsStoreAdapters/postgres.js
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          METRICS_UPDATE_MIN_INTERVAL_MS: 21600000
       - name: Commit updated metrics
         run: |
           git config user.name "github-actions[bot]"

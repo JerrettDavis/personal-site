@@ -77,6 +77,7 @@ order: 5
 - LOC trends are derived from GitHub contributor stats (weekly additions + deletions).
 - The metrics store defaults to the JSON file above; set <code>METRICS_STORE=custom</code> and provide <code>METRICS_STORE_ADAPTER</code> (path to a JS module exporting <code>createMetricsStore</code> or <code>metricsStore</code> with <code>getHistory</code>, <code>saveHistory</code>, <code>getLock</code>, <code>setLock</code>, and <code>clearLock</code>) to plug in a database-backed store.
 - Only public repos are stored and served. Run <code>npm run metrics:update</code> once after changing tokens to purge any legacy private entries.
+- Vercel cron jobs call <code>/api/github-metrics-update</code> for redundancy and on-demand updates (schedule defined in <code>vercel.json</code>).
 
 <details class="doc-accordion">
   <summary>Local Postgres adapter</summary>
@@ -127,6 +128,14 @@ order: 5
   <div class="doc-callout-body">
     In production, if <code>POSTGRES_URL</code> (or other Postgres connection envs) is present and no
     metrics override is set, the metrics store automatically uses the Postgres adapter.
+  </div>
+</div>
+<div class="doc-callout">
+  <div class="doc-callout-title">On-demand refresh</div>
+  <div class="doc-callout-body">
+    Use <code>/api/github-metrics-update</code> to trigger a fresh metrics run. Set
+    <code>METRICS_UPDATE_SECRET</code> to require a bearer token, and
+    <code>METRICS_UPDATE_MIN_INTERVAL_MS</code> to throttle refreshes.
   </div>
 </div>
 
@@ -192,6 +201,16 @@ order: 5
       <td>DATABASE_URL_UNPOOLED</td>
       <td>Neon Postgres unpooled connection string</td>
       <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>METRICS_UPDATE_SECRET</td>
+      <td>Optional bearer token for the update endpoint</td>
+      <td>GitHub metrics update</td>
+    </tr>
+    <tr>
+      <td>METRICS_UPDATE_MIN_INTERVAL_MS</td>
+      <td>Minimum delay between update runs (ms)</td>
+      <td>GitHub metrics update</td>
     </tr>
     <tr>
       <td>METRICS_SQLITE_PATH</td>
