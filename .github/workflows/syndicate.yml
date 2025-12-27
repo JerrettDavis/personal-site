@@ -71,11 +71,13 @@ jobs:
           if [ -n "${{ github.event.inputs.post_id }}" ]; then
             FLAGS="$FLAGS --post=${{ github.event.inputs.post_id }}"
           fi
-          MAX_AGE_DAYS="${{ github.event.inputs.max_age_days }}"
-          if [ -z "$MAX_AGE_DAYS" ]; then
-            MAX_AGE_DAYS="365"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MAX_AGE_DAYS="${{ github.event.inputs.max_age_days }}"
+            if [ -z "$MAX_AGE_DAYS" ]; then
+              MAX_AGE_DAYS="365"
+            fi
+            FLAGS="$FLAGS --max-age-days=$MAX_AGE_DAYS"
           fi
-          FLAGS="$FLAGS --max-age-days=$MAX_AGE_DAYS"
           npm run syndicate -- $FLAGS
 
       - name: Commit updated state

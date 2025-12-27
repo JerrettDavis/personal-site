@@ -157,19 +157,6 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
         return true;
     }
     
-    // Explicit overrides above bypass the age window and filters below.
-    if (maxAgeDaysOverride) {
-        const publishedAt = frontmatter.date instanceof Date
-            ? frontmatter.date.getTime()
-            : Date.parse(frontmatter.date);
-        if (Number.isFinite(publishedAt)) {
-            const maxAgeMs = maxAgeDaysOverride * 24 * 60 * 60 * 1000;
-            if (Date.now() - publishedAt > maxAgeMs) {
-                return false;
-            }
-        }
-    }
-
     // Check default setting
     if (!config.defaults.syndicateByDefault) {
         return false;
@@ -205,6 +192,19 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
             config.filters.includedCategories.includes(cat)
         );
         if (!hasIncludedCategory) return false;
+    }
+
+    // Explicit overrides above bypass the age window and filters below.
+    if (maxAgeDaysOverride) {
+        const publishedAt = frontmatter.date instanceof Date
+            ? frontmatter.date.getTime()
+            : Date.parse(frontmatter.date);
+        if (Number.isFinite(publishedAt)) {
+            const maxAgeMs = maxAgeDaysOverride * 24 * 60 * 60 * 1000;
+            if (Date.now() - publishedAt > maxAgeMs) {
+                return false;
+            }
+        }
     }
 
     return true;
@@ -458,17 +458,21 @@ async function syndicate() {
     let devtoRateLimited = false;
     let devtoIndex = null;
 
-    if (config.platforms.devto?.enabled && !isDryRun && !isForce) {
-        try {
-            const existing = await fetchDevtoArticles();
-            if (existing.rateLimited) {
-                devtoRateLimited = true;
-                console.log('⚠️  Dev.to rate limited, skipping Dev.to publish.');
-            } else {
-                devtoIndex = buildDevtoCollisionIndex(existing.articles);
+    if (config.platforms.devto?.enabled && !isForce) {
+        if (!process.env.DEVTO_API_KEY) {
+            console.warn('⚠️  Dev.to lookup skipped: DEVTO_API_KEY is missing.');
+        } else {
+            try {
+                const existing = await fetchDevtoArticles();
+                if (existing.rateLimited) {
+                    devtoRateLimited = true;
+                    console.log('⚠️  Dev.to rate limited, skipping Dev.to publish.');
+                } else {
+                    devtoIndex = buildDevtoCollisionIndex(existing.articles);
+                }
+            } catch (error) {
+                console.warn(`⚠️  Dev.to lookup failed: ${error.message}`);
             }
-        } catch (error) {
-            console.warn(`⚠️  Dev.to lookup failed: ${error.message}`);
         }
     }
 
