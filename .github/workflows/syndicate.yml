@@ -133,35 +133,43 @@ jobs:
           script: |
             const title = '🚨 Syndication Failed';
             const body = `The syndication workflow failed on commit ${context.sha}.
-            
+
             **Workflow Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
-            
+
             Please check the logs and retry manually if needed.
-            
+
             ## Troubleshooting Steps
             1. Check the workflow logs for specific error messages
             2. Verify API tokens are set correctly in repository secrets
             3. Check if platform APIs are accessible
             4. Review the .syndication.config.json for any misconfigurations
             5. Try running with --dry-run flag to test without publishing
-            
+
             ## Manual Retry
             You can manually trigger the workflow from the Actions tab with custom parameters.`;
-            
-            // Check if an issue already exists
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'syndication,automated'
-            });
-            
-            if (issues.data.length === 0) {
-              await github.rest.issues.create({
+
+            try {
+              const issues = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: title,
-                body: body,
-                labels: ['syndication', 'automated', 'bug']
+                state: 'open',
+                labels: 'syndication,automated'
               });
+
+              if (issues.data.length === 0) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['syndication', 'automated', 'bug']
+                });
+              }
+            } catch (error) {
+              const status = error?.status ?? error?.response?.status;
+              if (status === 403 || status === 404) {
+                console.warn(`Issue creation skipped: ${error.message}`);
+                return;
+              }
+              throw error;
             }
