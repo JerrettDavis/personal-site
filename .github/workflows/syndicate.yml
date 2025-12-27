@@ -33,6 +33,8 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+  issues: write
 
 jobs:
   syndicate:
@@ -84,14 +86,45 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
+
           if git diff --quiet .syndication-state.json; then
             echo "No state changes to commit"
-          else
-            git add .syndication-state.json
-            git commit -m "chore: update syndication state [skip ci]"
-            git push
+            exit 0
           fi
+
+          BRANCH_NAME="chore/syndication-state-${GITHUB_RUN_ID}"
+          echo "SYNDICATION_STATE_BRANCH=${BRANCH_NAME}" >> $GITHUB_ENV
+          git checkout -b "$BRANCH_NAME"
+          git add .syndication-state.json
+          git commit -m "chore: update syndication state [skip ci]"
+          git push origin "$BRANCH_NAME"
+
+      - name: Open syndication state PR
+        if: github.event.inputs.dry_run != 'true' && env.SYNDICATION_STATE_BRANCH != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = process.env.SYNDICATION_STATE_BRANCH;
+            const title = 'chore: update syndication state';
+            const body = 'Automated update from the syndication workflow.';
+
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${branch}`,
+            });
+
+            if (prs.data.length === 0) {
+              await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                head: branch,
+                base: 'main',
+                body,
+              });
+            }
 
       - name: Create issue on failure
         if: failure()
