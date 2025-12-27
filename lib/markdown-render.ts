@@ -18,7 +18,18 @@ type MarkdownModules = {
     gherkin: typeof import('highlight.js/lib/languages/gherkin').default;
 };
 
+type MarkdownBasicModules = {
+    unified: typeof import('unified').unified;
+    remarkParse: typeof import('remark-parse').default;
+    remarkRehype: typeof import('remark-rehype').default;
+    remarkGfm: typeof import('remark-gfm').default;
+    rehypeSlug: typeof import('rehype-slug').default;
+    rehypeStringify: typeof import('rehype-stringify').default;
+    rehypeFormat: typeof import('rehype-format').default;
+};
+
 let markdownModulesPromise: Promise<MarkdownModules> | null = null;
+let markdownBasicModulesPromise: Promise<MarkdownBasicModules> | null = null;
 
 const loadMarkdownModules = () => {
     if (!markdownModulesPromise) {
@@ -56,6 +67,32 @@ const loadMarkdownModules = () => {
     return markdownModulesPromise;
 };
 
+const loadMarkdownBasicModules = () => {
+    if (!markdownBasicModulesPromise) {
+        markdownBasicModulesPromise = (async () => {
+            const unifiedModule = await dynamicImport('unified');
+            const remarkParseModule = await dynamicImport('remark-parse');
+            const remarkRehypeModule = await dynamicImport('remark-rehype');
+            const remarkGfmModule = await dynamicImport('remark-gfm');
+            const rehypeSlugModule = await dynamicImport('rehype-slug');
+            const rehypeStringifyModule = await dynamicImport('rehype-stringify');
+            const rehypeFormatModule = await dynamicImport('rehype-format');
+
+            return {
+                unified: (unifiedModule as typeof import('unified')).unified,
+                remarkParse: (remarkParseModule as typeof import('remark-parse')).default,
+                remarkRehype: (remarkRehypeModule as typeof import('remark-rehype')).default,
+                remarkGfm: (remarkGfmModule as typeof import('remark-gfm')).default,
+                rehypeSlug: (rehypeSlugModule as typeof import('rehype-slug')).default,
+                rehypeStringify: (rehypeStringifyModule as typeof import('rehype-stringify')).default,
+                rehypeFormat: (rehypeFormatModule as typeof import('rehype-format')).default,
+            };
+        })();
+    }
+
+    return markdownBasicModulesPromise;
+};
+
 export const renderMarkdown = async (
     content: string,
     useToc: boolean,
@@ -80,7 +117,10 @@ export const renderMarkdown = async (
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
-        .use(rehypeHighlight, {languages: {...lowlightCommon, dockerfile, gherkin}})
+        .use(rehypeHighlight, {
+            languages: {...lowlightCommon, dockerfile, gherkin},
+            ignoreMissing: true,
+        })
         .use(rehypeSlug);
 
     if (useToc) {
@@ -91,5 +131,31 @@ export const renderMarkdown = async (
         .use(rehypeStringify, allowHtml ? {allowDangerousHtml: true} : undefined)
         .use(rehypeFormat)
         .process(content);
+    return processed.toString();
+};
+
+export const renderMarkdownBasic = async (
+    content: string,
+    allowHtml = false,
+): Promise<string> => {
+    const {
+        unified,
+        remarkParse,
+        remarkRehype,
+        remarkGfm,
+        rehypeSlug,
+        rehypeStringify,
+        rehypeFormat,
+    } = await loadMarkdownBasicModules();
+
+    const processed = await unified()
+        .use(remarkParse)
+        .use(remarkGfm)
+        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
+        .use(rehypeSlug)
+        .use(rehypeStringify, allowHtml ? {allowDangerousHtml: true} : undefined)
+        .use(rehypeFormat)
+        .process(content);
+
     return processed.toString();
 };

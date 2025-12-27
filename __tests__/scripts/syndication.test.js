@@ -9,7 +9,7 @@ describe('Syndication Filtering Logic', () => {
      * Mock implementation of shouldSyndicate function
      * This mirrors the logic from syndicate.mjs
      */
-    function shouldSyndicate(post, config) {
+    function shouldSyndicate(post, config, maxAgeDays = null, now = Date.now()) {
         const { frontmatter } = post;
         
         // Explicit frontmatter override
@@ -52,12 +52,24 @@ describe('Syndication Filtering Logic', () => {
         }
         
         if (config.filters.includedCategories && config.filters.includedCategories.length > 0) {
-            const hasIncludedCategory = postCategories.some(cat => 
+            const hasIncludedCategory = postCategories.some(cat =>
                 config.filters.includedCategories.includes(cat)
             );
             if (!hasIncludedCategory) return false;
         }
-        
+
+        if (maxAgeDays) {
+            const publishedAt = frontmatter.date instanceof Date
+                ? frontmatter.date.getTime()
+                : Date.parse(frontmatter.date);
+            if (Number.isFinite(publishedAt)) {
+                const maxAgeMs = maxAgeDays * 24 * 60 * 60 * 1000;
+                if (now - publishedAt > maxAgeMs) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -246,6 +258,48 @@ describe('Syndication Filtering Logic', () => {
                 frontmatter: { categories: null }
             };
             expect(shouldSyndicate(post, config)).toBe(true);
+        });
+    });
+
+    describe('Age Filtering', () => {
+        const now = new Date('2025-01-01T00:00:00Z').getTime();
+
+        it('should skip posts older than the max age', () => {
+            const post = {
+                id: 'old-post',
+                frontmatter: { date: '2023-01-01T00:00:00Z' }
+            };
+            expect(shouldSyndicate(post, baseConfig, 365, now)).toBe(false);
+        });
+
+        it('should allow posts within the max age', () => {
+            const post = {
+                id: 'recent-post',
+                frontmatter: { date: '2024-12-15T00:00:00Z' }
+            };
+            expect(shouldSyndicate(post, baseConfig, 365, now)).toBe(true);
+        });
+
+        it('should allow posts without dates', () => {
+            const post = {
+                id: 'no-date',
+                frontmatter: {}
+            };
+            expect(shouldSyndicate(post, baseConfig, 365, now)).toBe(true);
+        });
+
+        it('should allow explicit syndication overrides for older posts', () => {
+            const oldPostWithoutOverride = {
+                id: 'old-post-no-override',
+                frontmatter: { date: '2020-01-01T00:00:00Z' }
+            };
+            expect(shouldSyndicate(oldPostWithoutOverride, baseConfig, 365, now)).toBe(false);
+
+            const oldPostWithOverride = {
+                id: 'override-post',
+                frontmatter: { syndicate: true, date: '2020-01-01T00:00:00Z' }
+            };
+            expect(shouldSyndicate(oldPostWithOverride, baseConfig, 365, now)).toBe(true);
         });
     });
 

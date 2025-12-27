@@ -1,6 +1,6 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {ProjectDetailResponse} from '../../lib/projectDetails';
-import {renderMarkdown} from '../../lib/markdown-render';
+import {renderMarkdownServer, renderMarkdownServerBasic} from '../../lib/markdown-render-server';
 import {getActiveRepos} from '../../lib/github';
 import {
     GITHUB_USERNAME,
@@ -23,11 +23,13 @@ type RepoPayload = {
     html_url: string;
     private?: boolean;
     owner?: {login?: string | null};
+    default_branch?: string | null;
 };
 
 type ReadmePayload = {
     content?: string;
     html_url?: string;
+    download_url?: string | null;
 };
 
 type PullPayload = {
@@ -59,7 +61,12 @@ const buildHeaders = () => {
     return headers;
 };
 
-const buildAllowlist = async () => {
+type AllowlistResult = {
+    allowlist: Set<string>;
+    error: string | null;
+};
+
+const buildAllowlist = async (): Promise<AllowlistResult> => {
     const resolveOverrideName = (repo: string) =>
         repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
     const allowlist = new Set(
@@ -80,18 +87,23 @@ const buildAllowlist = async () => {
     repos.forEach((repo) => {
         allowlist.add(repo.full_name.toLowerCase());
     });
-    return allowlist;
+    return {allowlist, error};
 };
 
-const getAllowlist = async () => {
+const getAllowlist = async (): Promise<AllowlistResult> => {
     const now = Date.now();
-    const cacheEntry = getCacheEntry<Set<string>>(ALLOWLIST_CACHE_KEY);
+    const cacheEntry = getCacheEntry<AllowlistResult>(ALLOWLIST_CACHE_KEY);
     if (cacheEntry && now < cacheEntry.expiresAt) {
         return cacheEntry.data;
     }
-    const allowlist = await buildAllowlist();
-    setCacheEntry(ALLOWLIST_CACHE_KEY, allowlist, ALLOWLIST_TTL_MS, ALLOWLIST_STALE_MS);
-    return allowlist;
+    const allowlistResult = await buildAllowlist();
+    setCacheEntry(
+        ALLOWLIST_CACHE_KEY,
+        allowlistResult,
+        ALLOWLIST_TTL_MS,
+        ALLOWLIST_STALE_MS,
+    );
+    return allowlistResult;
 };
 
 const parseRateLimit = (headers: Headers) => {
@@ -120,8 +132,32 @@ const getCountFromLinkHeader = (linkHeader: string | null, fallback: number) => 
     return Number.isNaN(value) ? fallback : value;
 };
 
+// Minimal escaping for fallback <pre> output only.
+const escapeHtml = (value: string) =>
+    value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+const renderReadmeSnippet = async (snippet: string) => {
+    try {
+        return await renderMarkdownServer(snippet, false);
+    } catch {
+        try {
+            return await renderMarkdownServerBasic(snippet, false);
+        } catch {
+            return `<pre>${escapeHtml(snippet)}</pre>`;
+        }
+    }
+};
+
 const buildMarkdownSnippet = (content: string, maxLines = 18) => {
     const lines = content.split('\n');
+    while (lines.length > 0 && lines[0].trim() === '') {
+        lines.shift();
+    }
     if (lines.length === 0) return {snippet: '', truncated: false};
     const truncated = lines.length > maxLines;
     const snippetLines = lines.slice(0, maxLines);
@@ -152,26 +188,116 @@ const fetchRepoData = async (
 const fetchReadme = async (
     fullName: string,
     headers: Record<string, string>,
+    defaultBranch?: string | null,
 ) => {
     const response = await fetch(`https://api.github.com/repos/${fullName}/readme`, {
         headers,
     });
     updateRateLimit(response.headers, 'readme');
-    if (response.status === 404) return null;
-    if (!response.ok) {
-        throw new Error(`Readme fetch failed (${response.status}).`);
+    if (response.ok) {
+        const payload = (await response.json()) as ReadmePayload;
+        if (!payload.content) {
+            const rawFromPayload = await fetchReadmeFromUrl(
+                payload.download_url ?? null,
+                payload.html_url ?? null,
+            );
+            if (rawFromPayload) return rawFromPayload;
+            const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+            if (rawFallback) return rawFallback;
+            return null;
+        }
+        const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
+        const {snippet, truncated} = buildMarkdownSnippet(decoded);
+        if (!snippet) {
+            const rawFromPayload = await fetchReadmeFromUrl(
+                payload.download_url ?? null,
+                payload.html_url ?? null,
+            );
+            if (rawFromPayload) return rawFromPayload;
+            const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+            if (rawFallback) return rawFallback;
+            return null;
+        }
+        const contentHtml = await renderReadmeSnippet(snippet);
+        return {
+            contentHtml,
+            truncated,
+            url: payload.html_url ?? null,
+        };
     }
-    const payload = (await response.json()) as ReadmePayload;
-    if (!payload.content) return null;
-    const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
-    const {snippet, truncated} = buildMarkdownSnippet(decoded);
+
+    const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+    if (rawFallback) return rawFallback;
+    if (response.status === 404) return null;
+    throw new Error(`Readme fetch failed (${response.status}).`);
+};
+
+const fetchReadmeFromUrl = async (
+    downloadUrl: string | null,
+    htmlUrl: string | null,
+) => {
+    if (!downloadUrl) return null;
+    const response = await fetch(downloadUrl);
+    if (!response.ok) return null;
+    const content = await response.text();
+    const {snippet, truncated} = buildMarkdownSnippet(content);
     if (!snippet) return null;
-    const contentHtml = await renderMarkdown(snippet, false);
+    const contentHtml = await renderReadmeSnippet(snippet);
     return {
         contentHtml,
         truncated,
-        url: payload.html_url ?? null,
+        url: htmlUrl ?? downloadUrl,
     };
+};
+
+const fetchReadmeRaw = async (
+    fullName: string,
+    defaultBranch?: string | null,
+) => {
+    const MAX_ATTEMPTS = 8;
+    const MAX_NETWORK_ERRORS = 2;
+    let attempts = 0;
+    let networkErrors = 0;
+    const branches = [
+        defaultBranch,
+        defaultBranch === 'main' ? null : 'main',
+        defaultBranch === 'master' ? null : 'master',
+    ].filter((branch): branch is string => Boolean(branch));
+    const candidates = [
+        'README.md',
+        'README.MD',
+        'readme.md',
+        'readme.MD',
+        'README',
+        'readme',
+    ];
+    for (const branch of branches) {
+        for (const candidate of candidates) {
+            attempts += 1;
+            if (attempts > MAX_ATTEMPTS) return null;
+            let response: Response;
+            try {
+                response = await fetch(
+                    `https://raw.githubusercontent.com/${fullName}/${branch}/${candidate}`,
+                );
+            } catch {
+                networkErrors += 1;
+                if (networkErrors >= MAX_NETWORK_ERRORS) return null;
+                continue;
+            }
+            if (!response.ok) continue;
+            const content = await response.text();
+            const {snippet, truncated} = buildMarkdownSnippet(content);
+            if (!snippet) return null;
+            const contentHtml = await renderReadmeSnippet(snippet);
+            return {
+                contentHtml,
+                truncated,
+                url: `https://github.com/${fullName}/blob/${branch}/${candidate}`,
+            };
+        }
+    }
+    return null;
 };
 
 const fetchPullCount = async (
@@ -247,7 +373,7 @@ const buildPayload = async (
     let latestRelease: ProjectDetailResponse['latestRelease'] = null;
 
     try {
-        readme = await fetchReadme(fullName, headers);
+        readme = await fetchReadme(fullName, headers, repoPayload.default_branch ?? null);
     } catch {
         readme = null;
     }
@@ -299,8 +425,9 @@ export default async function handler(
         }
 
         const normalizedRepo = repo.trim().toLowerCase();
-        const allowlist = await getAllowlist();
-        if (!allowlist.has(normalizedRepo)) {
+        const {allowlist, error: allowlistError} = await getAllowlist();
+        const isOwnedRepo = normalizedRepo.startsWith(`${GITHUB_USERNAME}/`);
+        if (!allowlist.has(normalizedRepo) && !(allowlistError && isOwnedRepo)) {
             return res.status(200).json({
                 repoFullName: repo,
                 readme: null,

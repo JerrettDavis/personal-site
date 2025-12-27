@@ -29,6 +29,10 @@ order: 6
     <div class="doc-step-meta">Configure which posts to syndicate based on tags and categories.</div>
   </li>
   <li class="doc-step">
+    <div class="doc-step-title">Age window</div>
+    <div class="doc-step-meta">Skip older posts unless explicitly overridden via frontmatter (e.g., <code>syndicate: true</code> bypasses the age window).</div>
+  </li>
+  <li class="doc-step">
     <div class="doc-step-title">State tracking</div>
     <div class="doc-step-meta">Publication URLs and timestamps stored in <code>.syndication-state.json</code>.</div>
   </li>
@@ -114,6 +118,7 @@ Syndication filters determine post eligibility:
 2. **Excluded tags/categories**: Posts with these are skipped
 3. **Included tags/categories**: If defined, posts must match at least one
 4. **Default behavior**: Respects `syndicateByDefault` setting when no override exists
+5. **Age window**: `--max-age-days` skips posts older than the threshold unless they have `syndicate: true` in their frontmatter
 
 Example filter configuration:
 
@@ -175,6 +180,10 @@ For each eligible post:
 5. Record publication URL and timestamp
 6. Commit state updates to repository
 
+### Dev.to collision detection
+
+Before publishing to Dev.to, the script fetches up to 300 of your published articles (3 pages x 100) and checks for collisions using canonical URLs first, then normalized titles. When a match is found, the post is marked as already published in state and publishing is skipped.
+
 ### State tracking
 
 `.syndication-state.json` maintains publication history:
@@ -216,6 +225,9 @@ npm run syndicate -- --force
 
 # Publish a specific post
 npm run syndicate -- --post=my-post-slug
+
+# Skip posts older than one year (0 disables)
+npm run syndicate -- --max-age-days=365
 ```
 
 ### Manual workflow trigger
@@ -227,6 +239,9 @@ npm run syndicate -- --post=my-post-slug
    - **Dry run**: Test without publishing
    - **Force**: Re-publish existing posts
    - **Post ID**: Syndicate only specific post
+   - **Max age days**: Skip posts older than the threshold (0 disables)
+
+**Dev.to collision detection:** The script fetches up to 300 of your published Dev.to articles (3 pages x 100) and skips publishing when the canonical URL or normalized title already exists. Canonical URL matches take precedence; title matching is a best-effort fallback.
 
 ### Automatic syndication
 
