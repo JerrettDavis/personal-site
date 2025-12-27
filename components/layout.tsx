@@ -85,6 +85,8 @@ export default function Layout({
         : styles.container;
     const mainRef = useRef<HTMLElement | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jerrettdavis.com';
+    const ogImageUrl = `${baseUrl}/og-image.png`;
 
     useEffect(() => {
         setIsMenuOpen(false);
@@ -127,7 +129,7 @@ export default function Layout({
                 <meta name="twitter:description" content={metaDescription}/>
                 <meta
                     property="og:image"
-                    content="/og-image.png"
+                    content={ogImageUrl}
                 />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
