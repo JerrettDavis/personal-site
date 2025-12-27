@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/github-metrics-update",
-      "schedule": "0 */6 * * *"
+      "schedule": "15 4 * * *"
     }
   ]
 }
