@@ -180,18 +180,9 @@ function prepareContent(post, config, platform) {
  * Publish to Hashnode using GraphQL API
  */
 async function publishToHashnode(post, config, state) {
-    const token = process.env.HASHNODE_API_TOKEN;
-    if (!token) {
-        throw new Error('HASHNODE_API_TOKEN environment variable is required');
-    }
-    
     const platformConfig = config.platforms.hashnode;
     if (!platformConfig.enabled) {
         return { skipped: true, reason: 'Platform disabled' };
-    }
-    
-    if (!platformConfig.publicationId) {
-        throw new Error('Hashnode publicationId is required in config');
     }
     
     const existingState = state.posts[post.id]?.hashnode;
@@ -202,6 +193,15 @@ async function publishToHashnode(post, config, state) {
     if (isDryRun) {
         console.log(`  [DRY RUN] Would publish to Hashnode`);
         return { skipped: true, reason: 'Dry run' };
+    }
+    
+    const token = process.env.HASHNODE_API_TOKEN;
+    if (!token) {
+        throw new Error('HASHNODE_API_TOKEN environment variable is required');
+    }
+    
+    if (!platformConfig.publicationId) {
+        throw new Error('Hashnode publicationId is required in config');
     }
     
     const prepared = prepareContent(post, config, 'hashnode');
@@ -266,11 +266,6 @@ async function publishToHashnode(post, config, state) {
  * Publish to Dev.to using REST API
  */
 async function publishToDevTo(post, config, state) {
-    const apiKey = process.env.DEVTO_API_KEY;
-    if (!apiKey) {
-        throw new Error('DEVTO_API_KEY environment variable is required');
-    }
-    
     const platformConfig = config.platforms.devto;
     if (!platformConfig.enabled) {
         return { skipped: true, reason: 'Platform disabled' };
@@ -284,6 +279,11 @@ async function publishToDevTo(post, config, state) {
     if (isDryRun) {
         console.log(`  [DRY RUN] Would publish to Dev.to`);
         return { skipped: true, reason: 'Dry run' };
+    }
+    
+    const apiKey = process.env.DEVTO_API_KEY;
+    if (!apiKey) {
+        throw new Error('DEVTO_API_KEY environment variable is required');
     }
     
     const prepared = prepareContent(post, config, 'devto');

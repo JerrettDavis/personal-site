@@ -42,6 +42,15 @@ Prerequisites: Node.js and npm.
 This project is designed for Vercel hosting. Set `NEXT_PUBLIC_SITE_URL` to control the canonical
 base URL used in sitemap generation.
 
+## Syndication
+The site includes automated syndication to Hashnode and Dev.to. See [SYNDICATION.md](./SYNDICATION.md)
+for detailed setup instructions and configuration options. Key features:
+- Automatic publishing to external platforms after deployment
+- Per-post syndication control via frontmatter
+- Tag/category filtering
+- Dry-run mode for testing
+- State tracking to prevent duplicates
+
 ## Telemetry
 The site surfaces live build and repo telemetry via API routes under `/api`. Configure the
 following optional environment variables to avoid anonymous rate limits:

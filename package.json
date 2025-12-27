@@ -2,7 +2,6 @@
   "name": "personal-site",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
     "predev": "node scripts/ensureGithubMetrics.js",
     "dev": "next dev",
@@ -14,8 +13,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "metrics:update": "node scripts/updateGithubMetrics.js",
-    "syndicate": "node scripts/syndication/syndicate.js",
-    "syndicate:dry-run": "node scripts/syndication/syndicate.js --dry-run"
+    "syndicate": "node scripts/syndication/syndicate.mjs",
+    "syndicate:dry-run": "node scripts/syndication/syndicate.mjs --dry-run"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
