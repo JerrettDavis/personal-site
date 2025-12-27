@@ -132,6 +132,7 @@ const getCountFromLinkHeader = (linkHeader: string | null, fallback: number) => 
     return Number.isNaN(value) ? fallback : value;
 };
 
+// Minimal escaping for fallback <pre> output only.
 const escapeHtml = (value: string) =>
     value
         .replace(/&/g, '&amp;')
@@ -253,6 +254,10 @@ const fetchReadmeRaw = async (
     fullName: string,
     defaultBranch?: string | null,
 ) => {
+    const MAX_ATTEMPTS = 8;
+    const MAX_NETWORK_ERRORS = 2;
+    let attempts = 0;
+    let networkErrors = 0;
     const branches = [
         defaultBranch,
         defaultBranch === 'main' ? null : 'main',
@@ -268,9 +273,18 @@ const fetchReadmeRaw = async (
     ];
     for (const branch of branches) {
         for (const candidate of candidates) {
-            const response = await fetch(
-                `https://raw.githubusercontent.com/${fullName}/${branch}/${candidate}`,
-            );
+            attempts += 1;
+            if (attempts > MAX_ATTEMPTS) return null;
+            let response: Response;
+            try {
+                response = await fetch(
+                    `https://raw.githubusercontent.com/${fullName}/${branch}/${candidate}`,
+                );
+            } catch {
+                networkErrors += 1;
+                if (networkErrors >= MAX_NETWORK_ERRORS) return null;
+                continue;
+            }
             if (!response.ok) continue;
             const content = await response.text();
             const {snippet, truncated} = buildMarkdownSnippet(content);

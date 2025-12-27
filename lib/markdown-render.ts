@@ -116,7 +116,7 @@ export const renderMarkdown = async (
     let builder = unified()
         .use(remarkParse)
         .use(remarkGfm)
-        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)  
+        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
         .use(rehypeHighlight, {
             languages: {...lowlightCommon, dockerfile, gherkin},
             ignoreMissing: true,

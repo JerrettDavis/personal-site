@@ -19,6 +19,7 @@ const normalizeDevtoTag = (tag) => {
     const raw = String(tag ?? '').trim();
     if (!raw) return '';
     const lower = raw.toLowerCase();
+    // Apply explicit mappings before stripping punctuation (e.g. "c++" -> "cpp").
     if (Object.prototype.hasOwnProperty.call(DEVTO_TAG_MAPPINGS, lower)) {
         return DEVTO_TAG_MAPPINGS[lower];
     }
@@ -29,6 +30,9 @@ const buildDevtoTags = (tags, maxTags) => {
     const cleaned = (Array.isArray(tags) ? tags : [])
         .map((tag) => normalizeDevtoTag(tag))
         .filter(Boolean);
+    // Note: tags are normalized before de-duplication. When multiple originals
+    // normalize to the same value, the first occurrence is kept (Set preserves
+    // insertion order), so earlier tags have priority.
     return Array.from(new Set(cleaned)).slice(0, maxTags);
 };
 

@@ -103,5 +103,26 @@ describe('Syndication Dev.to helpers', () => {
                 url: prepared.canonicalUrl,
             });
         });
+
+        it('returns null for ok responses', async () => {
+            const response = {
+                status: 200,
+                ok: true,
+                text: async () => '',
+            };
+            const result = await interpretDevtoResponse(response, prepared);
+            expect(result).toBeNull();
+        });
+
+        it('throws for non-ok responses without known handling', async () => {
+            const response = {
+                status: 500,
+                ok: false,
+                text: async () => 'Server error',
+            };
+            await expect(interpretDevtoResponse(response, prepared)).rejects.toThrow(
+                'Dev.to API error: 500 - Server error',
+            );
+        });
     });
 });

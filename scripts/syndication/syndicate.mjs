@@ -25,6 +25,7 @@ const rootDir = path.join(__dirname, '../..');
 
 const {
     sanitizeTitle,
+    normalizeTitleKey,
     buildDevtoTags,
     buildDevtoCollisionIndex,
     findDevtoCollision,
@@ -562,12 +563,52 @@ async function syndicate() {
                                 publishedAt: result.publishedAt ?? new Date().toISOString(),
                                 lastUpdated: result.lastUpdated ?? new Date().toISOString(),
                             };
+                            if (devtoIndex) {
+                                devtoIndex.byCanonical.set(
+                                    preparedDevto.canonicalUrl.toLowerCase(),
+                                    {
+                                        id: result.id ?? '',
+                                        canonical_url: preparedDevto.canonicalUrl,
+                                        title: preparedDevto.title,
+                                        url: result.url ?? '',
+                                    },
+                                );
+                                devtoIndex.byTitle.set(
+                                    normalizeTitleKey(preparedDevto.title),
+                                    {
+                                        id: result.id ?? '',
+                                        canonical_url: preparedDevto.canonicalUrl,
+                                        title: preparedDevto.title,
+                                        url: result.url ?? '',
+                                    },
+                                );
+                            }
                         }
                         skippedCount++;
                     } else if (result.success) {
                         console.log(`  ✅ Published to Dev.to`);
                         console.log(`  🔗 ${result.url}`);
                         state.posts[post.id].devto = result;
+                        if (devtoIndex) {
+                            devtoIndex.byCanonical.set(
+                                preparedDevto.canonicalUrl.toLowerCase(),
+                                {
+                                    id: result.id,
+                                    canonical_url: preparedDevto.canonicalUrl,
+                                    title: preparedDevto.title,
+                                    url: result.url,
+                                },
+                            );
+                            devtoIndex.byTitle.set(
+                                normalizeTitleKey(preparedDevto.title),
+                                {
+                                    id: result.id,
+                                    canonical_url: preparedDevto.canonicalUrl,
+                                    title: preparedDevto.title,
+                                    url: result.url,
+                                },
+                            );
+                        }
                         publishedCount++;
                     }
                 }
@@ -603,8 +644,18 @@ async function syndicate() {
     console.log('\n✨ Syndication complete!');
 }
 
-const isDirectRun =
-    process.argv[1] && path.resolve(process.argv[1]) === __filename;
+const isDirectRun = (() => {
+    const argv1 = process.argv[1];
+    if (!argv1) return false;
+    const resolvedArgv1 = path.resolve(argv1);
+    if (resolvedArgv1 === __filename) return true;
+    try {
+        const argv1FileUrl = new URL(`file://${resolvedArgv1}`).href;
+        return argv1FileUrl === import.meta.url;
+    } catch {
+        return false;
+    }
+})();
 
 if (isDirectRun) {
     syndicate().catch(error => {
