@@ -23,6 +23,7 @@ type RepoPayload = {
     html_url: string;
     private?: boolean;
     owner?: {login?: string | null};
+    default_branch?: string | null;
 };
 
 type ReadmePayload = {
@@ -162,26 +163,67 @@ const fetchRepoData = async (
 const fetchReadme = async (
     fullName: string,
     headers: Record<string, string>,
+    defaultBranch?: string | null,
 ) => {
     const response = await fetch(`https://api.github.com/repos/${fullName}/readme`, {
         headers,
     });
     updateRateLimit(response.headers, 'readme');
-    if (response.status === 404) return null;
-    if (!response.ok) {
-        throw new Error(`Readme fetch failed (${response.status}).`);
+    if (response.ok) {
+        const payload = (await response.json()) as ReadmePayload;
+        if (!payload.content) return null;
+        const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
+        const {snippet, truncated} = buildMarkdownSnippet(decoded);
+        if (!snippet) return null;
+        const contentHtml = await renderMarkdown(snippet, false);
+        return {
+            contentHtml,
+            truncated,
+            url: payload.html_url ?? null,
+        };
     }
-    const payload = (await response.json()) as ReadmePayload;
-    if (!payload.content) return null;
-    const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
-    const {snippet, truncated} = buildMarkdownSnippet(decoded);
-    if (!snippet) return null;
-    const contentHtml = await renderMarkdown(snippet, false);
-    return {
-        contentHtml,
-        truncated,
-        url: payload.html_url ?? null,
-    };
+
+    const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+    if (rawFallback) return rawFallback;
+    if (response.status === 404) return null;
+    throw new Error(`Readme fetch failed (${response.status}).`);
+};
+
+const fetchReadmeRaw = async (
+    fullName: string,
+    defaultBranch?: string | null,
+) => {
+    const branches = [
+        defaultBranch,
+        defaultBranch === 'main' ? null : 'main',
+        defaultBranch === 'master' ? null : 'master',
+    ].filter((branch): branch is string => Boolean(branch));
+    const candidates = [
+        'README.md',
+        'README.MD',
+        'readme.md',
+        'readme.MD',
+        'README',
+        'readme',
+    ];
+    for (const branch of branches) {
+        for (const candidate of candidates) {
+            const response = await fetch(
+                `https://raw.githubusercontent.com/${fullName}/${branch}/${candidate}`,
+            );
+            if (!response.ok) continue;
+            const content = await response.text();
+            const {snippet, truncated} = buildMarkdownSnippet(content);
+            if (!snippet) return null;
+            const contentHtml = await renderMarkdown(snippet, false);
+            return {
+                contentHtml,
+                truncated,
+                url: `https://github.com/${fullName}/blob/${branch}/${candidate}`,
+            };
+        }
+    }
+    return null;
 };
 
 const fetchPullCount = async (
@@ -257,7 +299,7 @@ const buildPayload = async (
     let latestRelease: ProjectDetailResponse['latestRelease'] = null;
 
     try {
-        readme = await fetchReadme(fullName, headers);
+        readme = await fetchReadme(fullName, headers, repoPayload.default_branch ?? null);
     } catch {
         readme = null;
     }
