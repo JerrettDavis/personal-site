@@ -132,6 +132,22 @@ const getCountFromLinkHeader = (linkHeader: string | null, fallback: number) => 
     return Number.isNaN(value) ? fallback : value;
 };
 
+const escapeHtml = (value: string) =>
+    value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+const renderReadmeSnippet = async (snippet: string) => {
+    try {
+        return await renderMarkdown(snippet, false);
+    } catch {
+        return `<pre>${escapeHtml(snippet)}</pre>`;
+    }
+};
+
 const buildMarkdownSnippet = (content: string, maxLines = 18) => {
     const lines = content.split('\n');
     while (lines.length > 0 && lines[0].trim() === '') {
@@ -197,7 +213,7 @@ const fetchReadme = async (
             if (rawFallback) return rawFallback;
             return null;
         }
-        const contentHtml = await renderMarkdown(snippet, false);
+        const contentHtml = await renderReadmeSnippet(snippet);
         return {
             contentHtml,
             truncated,
@@ -221,7 +237,7 @@ const fetchReadmeFromUrl = async (
     const content = await response.text();
     const {snippet, truncated} = buildMarkdownSnippet(content);
     if (!snippet) return null;
-    const contentHtml = await renderMarkdown(snippet, false);
+    const contentHtml = await renderReadmeSnippet(snippet);
     return {
         contentHtml,
         truncated,
@@ -255,7 +271,7 @@ const fetchReadmeRaw = async (
             const content = await response.text();
             const {snippet, truncated} = buildMarkdownSnippet(content);
             if (!snippet) return null;
-            const contentHtml = await renderMarkdown(snippet, false);
+            const contentHtml = await renderReadmeSnippet(snippet);
             return {
                 contentHtml,
                 truncated,
