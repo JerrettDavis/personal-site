@@ -166,7 +166,7 @@ function shouldSyndicate(post, config) {
  */
 function prepareContent(post, config, platform) {
     const { frontmatter, markdown } = post;
-    const canonicalUrl = `${config.defaults.canonicalUrlBase}/blog/${post.id}`;
+    const canonicalUrl = `${config.defaults.canonicalUrlBase}/blog/posts/${post.id}`;
     
     // Add canonical URL notice at the top
     const notice = `> This article was originally published on [my blog](${canonicalUrl}).\n\n`;

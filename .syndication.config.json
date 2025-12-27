@@ -14,8 +14,17 @@
   "filters": {
     "includedTags": [],
     "excludedTags": ["draft", "private"],
-    "includedCategories": [],
-    "excludedCategories": ["Private"]
+    "includedCategories": [
+      "Architecture",
+      "Programming",
+      "Programming/Architecture",
+      "Programming/Automation",
+      "Programming/Databases",
+      "Programming/Fun",
+      "Programming/Tooling",
+      "Software Engineering"
+    ],
+    "excludedCategories": ["Personal", "Personal/Travel", "Private"]
   },
   "defaults": {
     "syndicateByDefault": true,

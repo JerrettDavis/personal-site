@@ -78,8 +78,17 @@ Edit `.syndication.config.json` in the repository root:
   "filters": {
     "includedTags": [],
     "excludedTags": ["draft", "private"],
-    "includedCategories": [],
-    "excludedCategories": ["Private"]
+    "includedCategories": [
+      "Architecture",
+      "Programming",
+      "Programming/Architecture",
+      "Programming/Automation",
+      "Programming/Databases",
+      "Programming/Fun",
+      "Programming/Tooling",
+      "Software Engineering"
+    ],
+    "excludedCategories": ["Personal", "Personal/Travel", "Private"]
   },
   "defaults": {
     "syndicateByDefault": true,
@@ -113,8 +122,8 @@ Example filter configuration:
   "filters": {
     "includedTags": ["javascript", "webdev"],
     "excludedTags": ["draft", "private"],
-    "includedCategories": ["Programming"],
-    "excludedCategories": ["Personal"]
+    "includedCategories": ["Programming", "Software Engineering", "Architecture"],
+    "excludedCategories": ["Personal", "Personal/Travel"]
   }
 }
 ```
