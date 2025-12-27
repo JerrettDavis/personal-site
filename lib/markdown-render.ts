@@ -79,8 +79,11 @@ export const renderMarkdown = async (
     let builder = unified()
         .use(remarkParse)
         .use(remarkGfm)
-        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
-        .use(rehypeHighlight, {languages: {...lowlightCommon, dockerfile, gherkin}})
+        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)  
+        .use(rehypeHighlight, {
+            languages: {...lowlightCommon, dockerfile, gherkin},
+            ignoreMissing: true,
+        })
         .use(rehypeSlug);
 
     if (useToc) {
@@ -91,5 +94,31 @@ export const renderMarkdown = async (
         .use(rehypeStringify, allowHtml ? {allowDangerousHtml: true} : undefined)
         .use(rehypeFormat)
         .process(content);
+    return processed.toString();
+};
+
+export const renderMarkdownBasic = async (
+    content: string,
+    allowHtml = false,
+): Promise<string> => {
+    const {
+        unified,
+        remarkParse,
+        remarkRehype,
+        remarkGfm,
+        rehypeSlug,
+        rehypeStringify,
+        rehypeFormat,
+    } = await loadMarkdownModules();
+
+    const processed = await unified()
+        .use(remarkParse)
+        .use(remarkGfm)
+        .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
+        .use(rehypeSlug)
+        .use(rehypeStringify, allowHtml ? {allowDangerousHtml: true} : undefined)
+        .use(rehypeFormat)
+        .process(content);
+
     return processed.toString();
 };

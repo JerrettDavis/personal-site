@@ -1,6 +1,6 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {ProjectDetailResponse} from '../../lib/projectDetails';
-import {renderMarkdown} from '../../lib/markdown-render';
+import {renderMarkdown, renderMarkdownBasic} from '../../lib/markdown-render';
 import {getActiveRepos} from '../../lib/github';
 import {
     GITHUB_USERNAME,
@@ -144,7 +144,11 @@ const renderReadmeSnippet = async (snippet: string) => {
     try {
         return await renderMarkdown(snippet, false);
     } catch {
-        return `<pre>${escapeHtml(snippet)}</pre>`;
+        try {
+            return await renderMarkdownBasic(snippet, false);
+        } catch {
+            return `<pre>${escapeHtml(snippet)}</pre>`;
+        }
     }
 };
 
