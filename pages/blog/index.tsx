@@ -129,21 +129,96 @@ const createTagsIfPresent = (tags?: TagData[] | null | undefined) => {
     }
 }
 
+type CategoryNode = {
+    name: string;
+    path: string;
+    count: number;
+    isCategory: boolean;
+    children: CategoryNode[];
+};
+
+const buildCategoryTree = (categories: Category[]): CategoryNode[] => {
+    const byName = new Map<string, Category>(
+        categories.map((category) => [category.categoryName, category]),
+    );
+    const root: CategoryNode = {
+        name: '',
+        path: '',
+        count: 0,
+        isCategory: false,
+        children: [],
+    };
+    const ensureNode = (parent: CategoryNode, name: string, fullPath: string) => {
+        let node = parent.children.find((child) => child.name === name);
+        if (!node) {
+            node = {
+                name,
+                path: '',
+                count: 0,
+                isCategory: false,
+                children: [],
+            };
+            parent.children.push(node);
+        }
+        const match = byName.get(fullPath);
+        if (match) {
+            node.isCategory = true;
+            node.count = match.count;
+            node.path = match.categoryPath;
+        }
+        return node;
+    };
+
+    categories.forEach((category) => {
+        const parts = category.categoryName
+            .split('/')
+            .map((part) => part.trim())
+            .filter(Boolean);
+        let current = root;
+        parts.forEach((part, index) => {
+            const fullPath = parts.slice(0, index + 1).join('/');
+            current = ensureNode(current, part, fullPath);
+        });
+    });
+
+    const sortNodes = (nodes: CategoryNode[]) => {
+        nodes.sort((a, b) => a.name.localeCompare(b.name));
+        nodes.forEach((node) => sortNodes(node.children));
+    };
+    sortNodes(root.children);
+    return root.children;
+};
+
+const renderCategoryTree = (nodes: CategoryNode[], depth = 0): JSX.Element => (
+    <ul className={depth === 0 ? styles.categoryTree : styles.categoryBranch}>
+        {nodes.map((node) => (
+            <li className={styles.categoryNode} key={node.path || `${node.name}-${depth}`}>
+                {node.isCategory ? (
+                    <Link
+                        href={`/blog/categories/${node.path}`}
+                        className={`${styles.categoryLink} glowable`}
+                    >
+                        <span className={styles.categoryLabel}>{node.name}</span>
+                        <span className={styles.categoryCount}>{node.count}</span>
+                    </Link>
+                ) : (
+                    <div className={styles.categoryGroup}>
+                        <span className={styles.categoryLabel}>{node.name}</span>
+                    </div>
+                )}
+                {node.children.length > 0 ? renderCategoryTree(node.children, depth + 1) : null}
+            </li>
+        ))}
+    </ul>
+);
+
 const createCategoriesIfPresent = (categories?: Category[] | null | undefined) => {
     if (!!categories) {
+        const tree = buildCategoryTree(categories);
         return (
             <div className={styles.sideCard}>
                 <h2 className={styles.sideTitle}>Categories</h2>
-                <ul className={styles.categoryList}>
-                    {categories.map((category) => (
-                        <li className={styles.categoryItem} key={category.categoryName}>
-                            <Link href={`/blog/categories/${category.categoryPath}`} className={`${styles.categoryLink} glowable`}>
-                                <span>{category.categoryName}</span>
-                                <span className={styles.categoryCount}>{category.count}</span>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+                {renderCategoryTree(tree)}
             </div>
         );
     } else {

@@ -209,7 +209,7 @@
     border-color: var(--color-primary);
 }
 
-.categoryList {
+.categoryTree {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -217,8 +217,18 @@
     gap: 0.6rem;
 }
 
-.categoryItem {
-    display: block;
+.categoryBranch {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding-left: 0.9rem;
+    display: grid;
+    gap: 0.5rem;
+    border-left: 1px dashed var(--color-border);
+}
+
+.categoryNode {
+    display: grid;
+    gap: 0.4rem;
 }
 
 .categoryLink {
@@ -235,12 +245,33 @@
     font-size: 0.9rem;
 }
 
+.categoryGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+    background: linear-gradient(140deg, var(--color-surface), var(--color-surface-2));
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
 .categoryLink:hover {
     text-decoration: none;
     border-color: var(--color-primary);
 }
 
+.categoryLabel {
+    font-weight: 600;
+}
+
 .categoryCount {
     font-size: 0.75rem;
     color: var(--color-text-deemphasized);
+}
+
+.categoryBranch .categoryLink,
+.categoryBranch .categoryGroup {
+    font-size: 0.85rem;
 }

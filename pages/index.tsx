@@ -3,7 +3,7 @@ import Layout, {PageType} from '../components/layout';
 import Link from 'next/link';
 import Image from 'next/image';
 import {GetStaticProps} from 'next';
-import {useEffect, useRef, useState} from 'react';
+import {useRef} from 'react';
 import DateStamp from '../components/date';
 import styles from './index.module.css';
 import {getSortedPostsData, getAllSeriesSummaries, getTotalPostWordCount} from '../lib/posts';
@@ -15,8 +15,6 @@ import {getAllCategories} from '../lib/categories';
 import {useParallax} from '../lib/hooks/useParallax';
 import StatGrid from '../components/statGrid';
 import {toSeriesSlug} from '../lib/blog-utils';
-import dynamic from 'next/dynamic';
-import {PIPELINE_EDGES, PIPELINE_LANES, PIPELINE_NODES, PIPELINE_STEPS} from '../data/pipelineFlow';
 
 interface HomeProps {
     recentPosts: PostSummary[];
@@ -41,14 +39,8 @@ interface HomeProps {
 
 const introSentence = 'Software engineer, writer, and systems thinker building a long-form, static-first web presence.';
 
-const PipelineFlow = dynamic(() => import('../components/pipelineFlow'), {ssr: false});
-
-
 export default function Home({recentPosts, docs, totals, tickerItems, heartbeat}: HomeProps) {
     const heroRef = useRef<HTMLElement | null>(null);
-    const [activeStepIndex, setActiveStepIndex] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(true);
-    const [showPipelineFlow, setShowPipelineFlow] = useState(false);
     const wordFormatter = new Intl.NumberFormat('en-US');
     const telemetryStats = [
         {id: 'posts', label: 'Posts', value: totals.posts},
@@ -64,42 +56,6 @@ export default function Home({recentPosts, docs, totals, tickerItems, heartbeat}
     const latestUpdateContent = heartbeat.latestUpdate
         ? <DateStamp dateString={heartbeat.latestUpdate} />
         : 'n/a';
-
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const handleChange = () => {
-            if (media.matches) {
-                setIsPlaying(false);
-            }
-        };
-        handleChange();
-        if (media.addEventListener) {
-            media.addEventListener('change', handleChange);
-        } else {
-            media.addListener(handleChange);
-        }
-        return () => {
-            if (media.addEventListener) {
-                media.removeEventListener('change', handleChange);
-            } else {
-                media.removeListener(handleChange);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!isPlaying) return;
-        const interval = window.setInterval(() => {
-            setActiveStepIndex((prev) => (prev + 1) % PIPELINE_STEPS.length);
-        }, 4200);
-        return () => window.clearInterval(interval);
-    }, [isPlaying]);
-
-    const activeStep = PIPELINE_STEPS[activeStepIndex];
-    const pipelineProgress = PIPELINE_STEPS.length > 1
-        ? (activeStepIndex / (PIPELINE_STEPS.length - 1)) * 100
-        : 0;
 
     return (
         <Layout pageType={PageType.Home} description={introSentence}>
@@ -188,37 +144,6 @@ export default function Home({recentPosts, docs, totals, tickerItems, heartbeat}
                     </div>
                 </div>
             </section>
-            {tickerItems.length > 0 && (
-                <section className={styles.tickerSection} aria-label="Signal ticker">
-                    <div className={styles.tickerHeader}>
-                        <div>
-                            <p className={styles.tickerKicker}>Signal</p>
-                            <h2 className={styles.tickerTitle}>Topic loop</h2>
-                        </div>
-                        <span className={styles.tickerMeta}>Tags, categories, and series</span>
-                    </div>
-                    <div className={styles.ticker}>
-                        <div className={styles.tickerTrack}>
-                            {tickerLoop.map((item, index) => {
-                                const isDuplicate = index >= tickerItems.length;
-                                return (
-                                    <Link
-                                        href={item.href}
-                                        className={`${styles.tickerItem} glowable`}
-                                        data-type={item.type}
-                                        aria-hidden={isDuplicate}
-                                        tabIndex={isDuplicate ? -1 : undefined}
-                                        key={`${item.type}-${item.label}-${index}`}
-                                    >
-                                        <span className={styles.tickerType}>{item.type}</span>
-                                        <span className={styles.tickerLabel}>{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
-            )}
             <section className={styles.section}>
                 <div className={styles.sectionHeader}>
                     <p className={styles.sectionKicker}>Explore</p>
@@ -277,141 +202,37 @@ export default function Home({recentPosts, docs, totals, tickerItems, heartbeat}
                     ))}
                 </div>
             </section>
-            <section className={styles.section}>
-                <div className={styles.sectionHeader}>
-                    <p className={styles.sectionKicker}>Tech demo</p>
-                    <h2 className={styles.sectionTitle}>Static pipeline signal</h2>
-                    <p className={styles.sectionLead}>
-                        A lightweight visual of the markdown-to-page path that keeps the site fast.
-                    </p>
-                </div>
-                <div className={styles.signalCard}>
-                    <div className={styles.signalHeader}>
+            {tickerItems.length > 0 && (
+                <section className={styles.tickerSection} aria-label="Signal ticker">
+                    <div className={styles.tickerHeader}>
                         <div>
-                            <p className={styles.signalKicker}>Pipeline</p>
-                            <h3 className={styles.signalTitle}>Content flow</h3>
+                            <p className={styles.tickerKicker}>Signal</p>
+                            <h2 className={styles.tickerTitle}>Topic loop</h2>
                         </div>
-                        <div className={styles.signalControls}>
-                            <button
-                                type="button"
-                                className={`${styles.signalControlButton} glowable`}
-                                onClick={() => setIsPlaying((prev) => !prev)}
-                                aria-pressed={isPlaying}
-                                aria-label={isPlaying ? 'Pause pipeline animation' : 'Play pipeline animation'}
-                            >
-                                {isPlaying ? 'Pause' : 'Play'}
-                            </button>
-                            <button
-                                type="button"
-                                className={`${styles.signalControlButton} glowable`}
-                                onClick={() => setShowPipelineFlow((prev) => !prev)}
-                                aria-pressed={showPipelineFlow}
-                                aria-label={showPipelineFlow ? 'Hide flow diagram' : 'View flow diagram'}
-                            >
-                                {showPipelineFlow ? 'Hide diagram' : 'View flow diagram'}
-                            </button>
-                            <span className={styles.signalStepBadge}>
-                                Step {activeStepIndex + 1} / {PIPELINE_STEPS.length}
-                            </span>
-                        </div>
+                        <span className={styles.tickerMeta}>Tags, categories, and series</span>
                     </div>
-                    <div className={styles.signalSummary}>
-                        <div className={styles.signalSummaryHeader}>
-                            <p className={styles.signalSummaryKicker}>Active stage</p>
-                            <h4 className={styles.signalSummaryTitle}>{activeStep.title}</h4>
-                            <p className={styles.signalSummaryText}>{activeStep.summary}</p>
-                        </div>
-                        <div className={styles.signalSummaryMeta}>
-                            {activeStep.meta.map((item) => (
-                                <span className={styles.signalMetaChip} key={item}>
-                                    {item}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                    <div className={styles.signalFlow}>
-                        {showPipelineFlow ? (
-                            <PipelineFlow
-                                lanes={PIPELINE_LANES}
-                                nodes={PIPELINE_NODES}
-                                edges={PIPELINE_EDGES}
-                                activeStepIndex={activeStepIndex}
-                                isPlaying={isPlaying}
-                                onSelectStep={(stepIndex) => {
-                                    setActiveStepIndex(stepIndex);
-                                    setIsPlaying(false);
-                                }}
-                            />
-                        ) : (
-                            <div className={styles.signalFlowPlaceholder}>
-                                <p className={styles.signalFlowNote}>
-                                    Flow diagram is hidden on the home page. Toggle it on or open the full view.
-                                </p>
-                                <div className={styles.signalFlowActions}>
-                                    <button
-                                        type="button"
-                                        className={`${styles.signalControlButton} glowable`}
-                                        onClick={() => setShowPipelineFlow(true)}
-                                    >
-                                        View flow diagram
-                                    </button>
+                    <div className={styles.ticker}>
+                        <div className={styles.tickerTrack}>
+                            {tickerLoop.map((item, index) => {
+                                const isDuplicate = index >= tickerItems.length;
+                                return (
                                     <Link
-                                        href="/docs/content-pipeline"
-                                        className={`${styles.signalControlButton} glowable`}
+                                        href={item.href}
+                                        className={`${styles.tickerItem} glowable`}
+                                        data-type={item.type}
+                                        aria-hidden={isDuplicate}
+                                        tabIndex={isDuplicate ? -1 : undefined}
+                                        key={`${item.type}-${item.label}-${index}`}
                                     >
-                                        Full view
+                                        <span className={styles.tickerType}>{item.type}</span>
+                                        <span className={styles.tickerLabel}>{item.label}</span>
                                     </Link>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    <div className={styles.signalTimelineRow}>
-                        <div className={styles.signalTimelineTrack} aria-hidden="true">
-                            <span
-                                className={styles.signalTimelineProgress}
-                                style={{width: `${pipelineProgress}%`}}
-                            />
-                        </div>
-                        <ol className={styles.signalTimeline} aria-label="Pipeline timeline">
-                            {PIPELINE_STEPS.map((step, index) => (
-                                <li
-                                    className={styles.signalTimelineItem}
-                                    data-active={index === activeStepIndex ? 'true' : undefined}
-                                    key={step.id}
-                                >
-                                    <button
-                                        type="button"
-                                        className={`${styles.signalTimelineButton} glowable`}
-                                        onClick={() => {
-                                            setActiveStepIndex(index);
-                                            setIsPlaying(false);
-                                        }}
-                                        aria-current={index === activeStepIndex ? 'step' : undefined}
-                                    >
-                                        <span className={styles.signalTimelineIndex}>
-                                            {String(index + 1).padStart(2, '0')}
-                                        </span>
-                                        <span className={styles.signalTimelineLabel}>{step.label}</span>
-                                        <span className={styles.signalTimelineTitle}>{step.title}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-                    <div className={styles.signalFooter}>
-                        <div className={styles.signalFooterRow}>
-                            <Link href="/docs/content-pipeline">Read the pipeline doc</Link>
-                            <span className={styles.signalNote}>Cache-first, refresh on demand.</span>
-                        </div>
-                        <div className={styles.signalLegend}>
-                            <span className={styles.signalLegendItem}>Parallel lanes</span>
-                            <span className={styles.signalLegendItem}>Preview branches</span>
-                            <span className={styles.signalLegendItem}>Telemetry cache</span>
-                            <span className={styles.signalLegendItem}>Click a node to jump</span>
+                                );
+                            })}
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
             <section className={styles.section}>
                 <div className={styles.sectionHeader}>
                     <p className={styles.sectionKicker}>Writing</p>
