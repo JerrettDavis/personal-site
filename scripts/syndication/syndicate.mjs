@@ -50,7 +50,21 @@ const maxAgeDaysValue =
     '';
 const maxAgeDays = (() => {
     const parsed = Number.parseInt(maxAgeDaysValue, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) return null;
+    if (!Number.isFinite(parsed)) {
+        if (maxAgeDaysValue !== '') {
+            console.warn(
+                `Ignoring invalid --max-age-days value "${maxAgeDaysValue}". Expected a non-negative integer.`
+            );
+        }
+        return null;
+    }
+    if (parsed === 0) return null;
+    if (parsed < 0) {
+        console.warn(
+            `Ignoring invalid --max-age-days value "${maxAgeDaysValue}". Expected a non-negative integer.`
+        );
+        return null;
+    }
     return parsed;
 })();
 
@@ -134,7 +148,7 @@ async function loadPosts() {
 function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
     const { frontmatter } = post;
     
-    // Explicit frontmatter override
+    // Explicit frontmatter override (syndicate: true bypasses all filters).
     if (frontmatter.syndicate === false) {
         return false;
     }
@@ -180,6 +194,7 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
         if (!hasIncludedCategory) return false;
     }
     
+    // Explicit overrides above bypass the age window and filters below.
     // Explicit overrides above bypass the age window and filters below.
     if (maxAgeDaysOverride) {
         const publishedAt = frontmatter.date instanceof Date
@@ -417,7 +432,7 @@ async function syndicate() {
     }
 
     if (maxAgeDays) {
-        console.log(`Skipping posts older than ${maxAgeDays} days.\n`);
+        console.log(`⏳ Skipping posts older than ${maxAgeDays} days.\n`);
     }
     
     // Load configuration and state

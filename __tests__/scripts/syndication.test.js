@@ -289,11 +289,17 @@ describe('Syndication Filtering Logic', () => {
         });
 
         it('should allow explicit syndication overrides for older posts', () => {
-            const post = {
+            const oldPostWithoutOverride = {
+                id: 'old-post-no-override',
+                frontmatter: { date: '2020-01-01T00:00:00Z' }
+            };
+            expect(shouldSyndicate(oldPostWithoutOverride, baseConfig, 365, now)).toBe(false);
+
+            const oldPostWithOverride = {
                 id: 'override-post',
                 frontmatter: { syndicate: true, date: '2020-01-01T00:00:00Z' }
             };
-            expect(shouldSyndicate(post, baseConfig, 365, now)).toBe(true);
+            expect(shouldSyndicate(oldPostWithOverride, baseConfig, 365, now)).toBe(true);
         });
     });
 
