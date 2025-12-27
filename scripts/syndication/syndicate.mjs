@@ -17,10 +17,21 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import devtoUtils from './devtoUtils.cjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '../..');
+
+const {
+    sanitizeTitle,
+    normalizeTitleKey,
+    normalizeDevtoTag,
+    buildDevtoTags,
+    buildDevtoCollisionIndex,
+    findDevtoCollision,
+    interpretDevtoResponse,
+} = devtoUtils;
 
 // Platform-specific constraints
 const HASHNODE_MAX_TAGS = 5;
@@ -169,6 +180,7 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
         if (!hasIncludedCategory) return false;
     }
     
+    // Explicit overrides above bypass the age window and filters below.
     if (maxAgeDaysOverride) {
         const publishedAt = frontmatter.date instanceof Date
             ? frontmatter.date.getTime()
@@ -202,66 +214,6 @@ function prepareContent(post, config, platform) {
         publishedAt: frontmatter.date
     };
 }
-
-const sanitizeTitle = (value) =>
-    String(value ?? '')
-        .replace(/[\u0000-\u001F\u007F]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-const normalizeTitleKey = (value) =>
-    sanitizeTitle(value)
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-
-const normalizeDevtoTag = (tag) =>
-    String(tag ?? '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-
-const buildDevtoTags = (tags) => {
-    const cleaned = (Array.isArray(tags) ? tags : [])
-        .map((tag) => normalizeDevtoTag(tag))
-        .filter(Boolean);
-    return Array.from(new Set(cleaned)).slice(0, DEVTO_MAX_TAGS);
-};
-
-const buildDevtoCollisionIndex = (articles) => {
-    const byCanonical = new Map();
-    const byTitle = new Map();
-
-    (Array.isArray(articles) ? articles : []).forEach((article) => {
-        const canonical = article?.canonical_url || article?.canonicalUrl;
-        if (canonical) {
-            byCanonical.set(String(canonical).toLowerCase(), article);
-        }
-
-        const titleKey = normalizeTitleKey(article?.title);
-        if (titleKey) {
-            byTitle.set(titleKey, article);
-        }
-    });
-
-    return { byCanonical, byTitle };
-};
-
-const findDevtoCollision = (prepared, index) => {
-    if (!index) return null;
-
-    const canonicalKey = prepared.canonicalUrl
-        ? String(prepared.canonicalUrl).toLowerCase()
-        : '';
-    if (canonicalKey && index.byCanonical.has(canonicalKey)) {
-        return index.byCanonical.get(canonicalKey);
-    }
-
-    const titleKey = normalizeTitleKey(prepared.title);
-    if (titleKey && index.byTitle.has(titleKey)) {
-        return index.byTitle.get(titleKey);
-    }
-
-    return null;
-};
 
 /**
  * Publish to Hashnode using GraphQL API
@@ -379,7 +331,7 @@ async function publishToDevTo(post, config, state, preparedOverride) {
         title: sanitizeTitle(prepared.title),
         body_markdown: prepared.content,
         published: true,
-        tags: buildDevtoTags(prepared.tags),
+        tags: buildDevtoTags(prepared.tags, DEVTO_MAX_TAGS),
         canonical_url: prepared.canonicalUrl
     };
     
@@ -392,29 +344,9 @@ async function publishToDevTo(post, config, state, preparedOverride) {
         body: JSON.stringify({ article })
     });
     
-    if (response.status === 429) {
-        return { skipped: true, reason: 'Rate limited', rateLimited: true };
-    }
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        if (
-            response.status === 422 &&
-            errorText.includes('Canonical url has already been taken')
-        ) {
-            const publishedAt = prepared.publishedAt
-                ? new Date(prepared.publishedAt).toISOString()
-                : new Date().toISOString();
-            return {
-                skipped: true,
-                reason: 'Already published',
-                markAsPublished: true,
-                url: prepared.canonicalUrl,
-                publishedAt,
-                lastUpdated: new Date().toISOString(),
-            };
-        }
-        throw new Error(`Dev.to API error: ${response.status} - ${errorText}`);
+    const interpreted = await interpretDevtoResponse(response, prepared);
+    if (interpreted) {
+        return interpreted;
     }
     
     const result = await response.json();
@@ -583,9 +515,9 @@ async function syndicate() {
                             : new Date().toISOString(),
                         lastUpdated: new Date().toISOString(),
                     };
-                    console.log('  Skipped: already published (detected)');
+                    console.log('  ⏭️  Skipped: already published (detected)');
                     if (state.posts[post.id].devto.url) {
-                        console.log('  ' + state.posts[post.id].devto.url);
+                        console.log(`  🔗 ${state.posts[post.id].devto.url}`);
                     }
                     skippedCount++;
                     console.log('');
@@ -645,8 +577,23 @@ async function syndicate() {
     console.log('\n✨ Syndication complete!');
 }
 
-// Run the script
-syndicate().catch(error => {
-    console.error('\n💥 Fatal error:', error);
-    process.exit(1);
-});
+const isDirectRun =
+    process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (isDirectRun) {
+    syndicate().catch(error => {
+        console.error('\n💥 Fatal error:', error);
+        process.exit(1);
+    });
+}
+
+export {
+    sanitizeTitle,
+    normalizeTitleKey,
+    normalizeDevtoTag,
+    buildDevtoTags,
+    buildDevtoCollisionIndex,
+    findDevtoCollision,
+    publishToDevTo,
+    shouldSyndicate,
+};
