@@ -59,12 +59,17 @@ const buildHeaders = () => {
     return headers;
 };
 
-const buildAllowlist = async () => {
+type AllowlistResult = {
+    allowlist: Set<string>;
+    error: string | null;
+};
+
+const buildAllowlist = async (): Promise<AllowlistResult> => {
     const resolveOverrideName = (repo: string) =>
         repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
     const allowlist = new Set(
         PROJECT_OVERRIDES.map(
-            (project) => resolveOverrideName(project.repo).toLowerCase(),
+            (project) => resolveOverrideName(project.repo).toLowerCase(),       
         ),
     );
     const {repos, error} = await getActiveRepos({
@@ -72,7 +77,7 @@ const buildAllowlist = async () => {
         lookbackDays: PROJECT_ACTIVITY_DAYS,
         includeForks: false,
         includeArchived: false,
-        onRateLimit: (until) => setRateLimit(PROVIDER, until, 'allowlist'),
+        onRateLimit: (until) => setRateLimit(PROVIDER, until, 'allowlist'),     
     });
     if (error) {
         console.warn(error);
@@ -80,18 +85,23 @@ const buildAllowlist = async () => {
     repos.forEach((repo) => {
         allowlist.add(repo.full_name.toLowerCase());
     });
-    return allowlist;
+    return {allowlist, error};
 };
 
-const getAllowlist = async () => {
+const getAllowlist = async (): Promise<AllowlistResult> => {
     const now = Date.now();
-    const cacheEntry = getCacheEntry<Set<string>>(ALLOWLIST_CACHE_KEY);
+    const cacheEntry = getCacheEntry<AllowlistResult>(ALLOWLIST_CACHE_KEY);
     if (cacheEntry && now < cacheEntry.expiresAt) {
         return cacheEntry.data;
     }
-    const allowlist = await buildAllowlist();
-    setCacheEntry(ALLOWLIST_CACHE_KEY, allowlist, ALLOWLIST_TTL_MS, ALLOWLIST_STALE_MS);
-    return allowlist;
+    const allowlistResult = await buildAllowlist();
+    setCacheEntry(
+        ALLOWLIST_CACHE_KEY,
+        allowlistResult,
+        ALLOWLIST_TTL_MS,
+        ALLOWLIST_STALE_MS,
+    );
+    return allowlistResult;
 };
 
 const parseRateLimit = (headers: Headers) => {
@@ -299,8 +309,9 @@ export default async function handler(
         }
 
         const normalizedRepo = repo.trim().toLowerCase();
-        const allowlist = await getAllowlist();
-        if (!allowlist.has(normalizedRepo)) {
+        const {allowlist, error: allowlistError} = await getAllowlist();
+        const isOwnedRepo = normalizedRepo.startsWith(`${GITHUB_USERNAME}/`);
+        if (!allowlist.has(normalizedRepo) && !(allowlistError && isOwnedRepo)) {
             return res.status(200).json({
                 repoFullName: repo,
                 readme: null,
