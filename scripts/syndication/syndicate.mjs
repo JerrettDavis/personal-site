@@ -2,14 +2,14 @@
 
 /**
  * Syndication Script
- * 
+ *
  * This script syndicates blog posts to external platforms (Hashnode, Dev.to)
  * based on configuration and post frontmatter settings.
- * 
+ *
  * Environment Variables Required:
  * - HASHNODE_API_TOKEN: API token for Hashnode
  * - DEVTO_API_KEY: API key for Dev.to
- * 
+ *
  * Usage:
  *   node scripts/syndication/syndicate.mjs [--dry-run] [--force] [--post=<post-id>] [--max-age-days=<days>]
  */
@@ -25,8 +25,6 @@ const rootDir = path.join(__dirname, '../..');
 
 const {
     sanitizeTitle,
-    normalizeTitleKey,
-    normalizeDevtoTag,
     buildDevtoTags,
     buildDevtoCollisionIndex,
     findDevtoCollision,
@@ -121,16 +119,16 @@ async function loadPosts() {
     const { default: matter } = await import('gray-matter');
     const postsDir = path.join(rootDir, 'posts');
     const files = await fs.readdir(postsDir);
-    
+
     const posts = [];
     for (const file of files) {
         if (!file.endsWith('.mdx')) continue;
-        
+
         const postId = file.replace(/\.mdx$/, '');
         const fullPath = path.join(postsDir, file);
         const content = await fs.readFile(fullPath, 'utf-8');
         const { data: frontmatter, content: markdown } = matter(content);
-        
+
         posts.push({
             id: postId,
             frontmatter,
@@ -138,7 +136,7 @@ async function loadPosts() {
             file
         });
     }
-    
+
     return posts;
 }
 
@@ -147,16 +145,16 @@ async function loadPosts() {
  */
 function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
     const { frontmatter } = post;
-    
+
     // Explicit frontmatter override (syndicate: true bypasses all filters).
     if (frontmatter.syndicate === false) {
         return false;
     }
-    
+
     if (frontmatter.syndicate === true) {
         return true;
     }
-    
+
     // Check default setting
     if (!config.defaults.syndicateByDefault) {
         return false;
@@ -216,10 +214,10 @@ function shouldSyndicate(post, config, maxAgeDaysOverride = null) {
 function prepareContent(post, config, platform) {
     const { frontmatter, markdown } = post;
     const canonicalUrl = `${config.defaults.canonicalUrlBase}/blog/posts/${post.id}`;
-    
+
     // Add canonical URL notice at the top
     const notice = `> This article was originally published on [my blog](${canonicalUrl}).\n\n`;
-    
+
     return {
         title: frontmatter.title,
         content: notice + markdown,
@@ -237,28 +235,28 @@ async function publishToHashnode(post, config, state) {
     if (!platformConfig.enabled) {
         return { skipped: true, reason: 'Platform disabled' };
     }
-    
+
     const existingState = state.posts[post.id]?.hashnode;
     if (existingState && !isForce) {
         return { skipped: true, reason: 'Already published', url: existingState.url };
     }
-    
+
     if (isDryRun) {
         console.log(`  [DRY RUN] Would publish to Hashnode`);
         return { skipped: true, reason: 'Dry run' };
     }
-    
+
     const token = process.env.HASHNODE_API_TOKEN;
     if (!token) {
         throw new Error('HASHNODE_API_TOKEN environment variable is required');
     }
-    
+
     if (!platformConfig.publicationId) {
         throw new Error('Hashnode publicationId is required in config');
     }
-    
+
     const prepared = prepareContent(post, config, 'hashnode');
-    
+
     // GraphQL mutation for Hashnode
     const mutation = `
         mutation PublishPost($input: PublishPostInput!) {
@@ -271,7 +269,7 @@ async function publishToHashnode(post, config, state) {
             }
         }
     `;
-    
+
     const variables = {
         input: {
             title: prepared.title,
@@ -283,7 +281,7 @@ async function publishToHashnode(post, config, state) {
             } : {})
         }
     };
-    
+
     const response = await fetch('https://gql.hashnode.com', {
         method: 'POST',
         headers: {
@@ -292,20 +290,20 @@ async function publishToHashnode(post, config, state) {
         },
         body: JSON.stringify({ query: mutation, variables })
     });
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Hashnode API error: ${response.status} - ${errorText}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (result.errors) {
         throw new Error(`Hashnode GraphQL error: ${JSON.stringify(result.errors)}`);
     }
-    
+
     const postData = result.data.publishPost.post;
-    
+
     return {
         success: true,
         id: postData.id,
@@ -323,24 +321,24 @@ async function publishToDevTo(post, config, state, preparedOverride) {
     if (!platformConfig.enabled) {
         return { skipped: true, reason: 'Platform disabled' };
     }
-    
+
     const existingState = state.posts[post.id]?.devto;
     if (existingState && !isForce) {
         return { skipped: true, reason: 'Already published', url: existingState.url };
     }
-    
+
     if (isDryRun) {
         console.log(`  [DRY RUN] Would publish to Dev.to`);
         return { skipped: true, reason: 'Dry run' };
     }
-    
+
     const apiKey = process.env.DEVTO_API_KEY;
     if (!apiKey) {
         throw new Error('DEVTO_API_KEY environment variable is required');
     }
-    
+
     const prepared = preparedOverride ?? prepareContent(post, config, 'devto');
-    
+
     const article = {
         title: sanitizeTitle(prepared.title),
         body_markdown: prepared.content,
@@ -348,7 +346,7 @@ async function publishToDevTo(post, config, state, preparedOverride) {
         tags: buildDevtoTags(prepared.tags, DEVTO_MAX_TAGS),
         canonical_url: prepared.canonicalUrl
     };
-    
+
     const response = await fetch('https://dev.to/api/articles', {
         method: 'POST',
         headers: {
@@ -357,14 +355,14 @@ async function publishToDevTo(post, config, state, preparedOverride) {
         },
         body: JSON.stringify({ article })
     });
-    
+
     const interpreted = await interpretDevtoResponse(response, prepared);
     if (interpreted) {
         return interpreted;
     }
-    
+
     const result = await response.json();
-    
+
     return {
         success: true,
         id: String(result.id),
@@ -425,7 +423,7 @@ async function fetchDevtoArticles() {
  */
 async function syndicate() {
     console.log('🔄 Starting syndication process...\n');
-    
+
     if (isDryRun) {
         console.log('🧪 DRY RUN MODE - No actual publications will be made\n');
     }
@@ -433,29 +431,29 @@ async function syndicate() {
     if (maxAgeDays) {
         console.log(`⏳ Skipping posts older than ${maxAgeDays} days.\n`);
     }
-    
+
     // Load configuration and state
     const config = await loadConfig();
     const state = await loadState();
     const posts = await loadPosts();
-    
+
     console.log(`📚 Found ${posts.length} posts\n`);
-    
+
     // Filter posts if specific post requested
-    const postsToProcess = specificPost 
+    const postsToProcess = specificPost
         ? posts.filter(p => p.id === specificPost)
         : posts;
-    
+
     if (specificPost && postsToProcess.length === 0) {
         console.error(`❌ Post not found: ${specificPost}`);
         process.exit(1);
     }
-    
+
     let publishedCount = 0;
     let skippedCount = 0;
     let errorCount = 0;
     let rateLimitedSkips = 0;
-    
+
     let devtoRateLimited = false;
     let devtoIndex = null;
 
@@ -479,24 +477,24 @@ async function syndicate() {
 
     for (const post of postsToProcess) {
         console.log(`📝 Processing: ${post.id}`);
-        
+
         if (!shouldSyndicate(post, config, maxAgeDays)) {
             console.log(`  ⏭️  Skipped (syndication disabled)\n`);
             skippedCount++;
             continue;
         }
-        
+
         // Initialize post state if not exists
         if (!state.posts[post.id]) {
             state.posts[post.id] = {};
         }
-        
+
         // Publish to Hashnode
         if (config.platforms.hashnode?.enabled) {
             try {
                 console.log(`  📤 Publishing to Hashnode...`);
                 const result = await publishToHashnode(post, config, state);
-                
+
                 if (result.skipped) {
                     console.log(`  ⏭️  Skipped: ${result.reason}`);
                     if (result.url) console.log(`  🔗 ${result.url}`);
@@ -512,7 +510,7 @@ async function syndicate() {
                 errorCount++;
             }
         }
-        
+
         // Publish to Dev.to
         if (config.platforms.devto?.enabled) {
             try {
@@ -522,33 +520,37 @@ async function syndicate() {
                     rateLimitedSkips++;
                     skipDevto = true;
                 }
-                const preparedDevto = prepareContent(post, config, 'devto');    
-                const collision = findDevtoCollision(preparedDevto, devtoIndex);
-                if (!skipDevto && collision && !isForce) {
-                    const publishedAt = collision.published_at || preparedDevto.publishedAt;
-                    state.posts[post.id].devto = {
-                        id: String(collision.id ?? ''),
-                        url: collision.url || collision.canonical_url || preparedDevto.canonicalUrl,
-                        publishedAt: publishedAt
-                            ? new Date(publishedAt).toISOString()
-                            : new Date().toISOString(),
-                        lastUpdated: new Date().toISOString(),
-                    };
-                    console.log('  ⏭️  Skipped: already published (detected)');
-                    if (state.posts[post.id].devto.url) {
-                        console.log(`  🔗 ${state.posts[post.id].devto.url}`);
+
+                let preparedDevto = null;
+                if (!skipDevto) {
+                    preparedDevto = prepareContent(post, config, 'devto');
+                    const collision = findDevtoCollision(preparedDevto, devtoIndex);
+                    if (collision && !isForce) {
+                        const publishedAt = collision.published_at || preparedDevto.publishedAt;
+                        state.posts[post.id].devto = {
+                            id: String(collision.id ?? ''),
+                            url: collision.url || collision.canonical_url || preparedDevto.canonicalUrl,
+                            publishedAt: publishedAt
+                                ? new Date(publishedAt).toISOString()
+                                : new Date().toISOString(),
+                            lastUpdated: new Date().toISOString(),
+                        };
+                        console.log('  ⏭️  Skipped: already published (detected)');
+                        if (state.posts[post.id].devto.url) {
+                            console.log(`  🔗 ${state.posts[post.id].devto.url}`);
+                        }
+                        skippedCount++;
+                        skipDevto = true;
                     }
-                    skippedCount++;
-                    skipDevto = true;
                 }
 
-                if (!skipDevto) {
+                if (!skipDevto && preparedDevto) {
                     console.log(`  📤 Publishing to Dev.to...`);
                     const result = await publishToDevTo(post, config, state, preparedDevto);
 
                     if (result.skipped) {
                         console.log(`  ⏭️  Skipped: ${result.reason}`);
-                        if (result.url) console.log(`  🔗 ${result.url}`);        
+                        if (result.url) console.log(`  🔗 ${result.url}`);
                         if (result.rateLimited) {
                             devtoRateLimited = true;
                             rateLimitedSkips++;
@@ -574,16 +576,16 @@ async function syndicate() {
                 errorCount++;
             }
         }
-        
+
         console.log('');
     }
-    
+
     // Save state
     if (!isDryRun) {
         await saveState(state);
         console.log('💾 State saved\n');
     }
-    
+
     // Summary
     console.log('📊 Summary:');
     console.log(`  ✅ Published: ${publishedCount}`);
@@ -592,12 +594,12 @@ async function syndicate() {
         console.log(`  ⛔ Rate limited skips: ${rateLimitedSkips}`);
     }
     console.log(`  ❌ Errors: ${errorCount}`);
-    
+
     if (errorCount > 0) {
         console.log('\n⚠️  Some posts failed to syndicate. Check errors above.');
         process.exit(1);
     }
-    
+
     console.log('\n✨ Syndication complete!');
 }
 

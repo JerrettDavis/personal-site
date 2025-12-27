@@ -71,7 +71,7 @@ const buildAllowlist = async (): Promise<AllowlistResult> => {
         repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
     const allowlist = new Set(
         PROJECT_OVERRIDES.map(
-            (project) => resolveOverrideName(project.repo).toLowerCase(),       
+            (project) => resolveOverrideName(project.repo).toLowerCase(),
         ),
     );
     const {repos, error} = await getActiveRepos({
@@ -79,7 +79,7 @@ const buildAllowlist = async (): Promise<AllowlistResult> => {
         lookbackDays: PROJECT_ACTIVITY_DAYS,
         includeForks: false,
         includeArchived: false,
-        onRateLimit: (until) => setRateLimit(PROVIDER, until, 'allowlist'),     
+        onRateLimit: (until) => setRateLimit(PROVIDER, until, 'allowlist'),
     });
     if (error) {
         console.warn(error);
