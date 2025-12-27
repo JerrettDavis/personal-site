@@ -45,6 +45,7 @@ interface PostBase {
     categories?: string[] | undefined | null;
     series?: string | undefined | null;
     seriesOrder?: number | undefined | null;
+    syndicate?: boolean | undefined | null;
 }
 
 interface PostFrontmatter {
@@ -57,6 +58,7 @@ interface PostFrontmatter {
     series?: string | null;
     seriesOrder?: number | string | null;
     useToc?: boolean;
+    syndicate?: boolean | null;
 }
 
 interface NormalizedPostFrontmatter extends PostBase {
@@ -78,6 +80,7 @@ const normalizePostFrontmatter = (data: PostFrontmatter): NormalizedPostFrontmat
         series: typeof data.series === 'string' ? data.series : null,
         seriesOrder: parseOrderValue(data.seriesOrder),
         useToc: Boolean(data.useToc),
+        syndicate: data.syndicate ?? null,
     };
 };
 
