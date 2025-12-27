@@ -104,6 +104,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const {handleGithubScriptError} = require('./scripts/syndication/githubScriptHelpers.cjs');
             const branch = process.env.SYNDICATION_STATE_BRANCH;
             const title = 'chore: update syndication state';
             const body = 'Automated update from the syndication workflow.';
@@ -127,12 +128,7 @@ jobs:
                 });
               }
             } catch (error) {
-              const status = error?.status ?? error?.response?.status;
-              if (status === 403 || status === 404) {
-                console.warn(`PR creation skipped: ${error.message}`);
-                return;
-              }
-              throw error;
+              handleGithubScriptError(error, 'PR creation');
             }
 
       - name: Create issue on failure
@@ -140,6 +136,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const {handleGithubScriptError} = require('./scripts/syndication/githubScriptHelpers.cjs');
             const title = '🚨 Syndication Failed';
             const body = `The syndication workflow failed on commit ${context.sha}.
 
@@ -175,10 +172,5 @@ jobs:
                 });
               }
             } catch (error) {
-              const status = error?.status ?? error?.response?.status;
-              if (status === 403 || status === 404) {
-                console.warn(`Issue creation skipped: ${error.message}`);
-                return;
-              }
-              throw error;
+              handleGithubScriptError(error, 'Issue creation');
             }
