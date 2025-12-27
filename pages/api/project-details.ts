@@ -134,6 +134,9 @@ const getCountFromLinkHeader = (linkHeader: string | null, fallback: number) => 
 
 const buildMarkdownSnippet = (content: string, maxLines = 18) => {
     const lines = content.split('\n');
+    while (lines.length > 0 && lines[0].trim() === '') {
+        lines.shift();
+    }
     if (lines.length === 0) return {snippet: '', truncated: false};
     const truncated = lines.length > maxLines;
     const snippetLines = lines.slice(0, maxLines);
@@ -184,7 +187,16 @@ const fetchReadme = async (
         }
         const decoded = Buffer.from(payload.content, 'base64').toString('utf-8');
         const {snippet, truncated} = buildMarkdownSnippet(decoded);
-        if (!snippet) return null;
+        if (!snippet) {
+            const rawFromPayload = await fetchReadmeFromUrl(
+                payload.download_url ?? null,
+                payload.html_url ?? null,
+            );
+            if (rawFromPayload) return rawFromPayload;
+            const rawFallback = await fetchReadmeRaw(fullName, defaultBranch);
+            if (rawFallback) return rawFallback;
+            return null;
+        }
         const contentHtml = await renderMarkdown(snippet, false);
         return {
             contentHtml,
