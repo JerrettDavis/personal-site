@@ -108,22 +108,31 @@ jobs:
             const title = 'chore: update syndication state';
             const body = 'Automated update from the syndication workflow.';
 
-            const prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              head: `${context.repo.owner}:${branch}`,
-            });
-
-            if (prs.data.length === 0) {
-              await github.rest.pulls.create({
+            try {
+              const prs = await github.rest.pulls.list({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title,
-                head: branch,
-                base: 'main',
-                body,
+                state: 'open',
+                head: `${context.repo.owner}:${branch}`,
               });
+
+              if (prs.data.length === 0) {
+                await github.rest.pulls.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  head: branch,
+                  base: 'main',
+                  body,
+                });
+              }
+            } catch (error) {
+              const status = error?.status ?? error?.response?.status;
+              if (status === 403 || status === 404) {
+                console.warn(`PR creation skipped: ${error.message}`);
+                return;
+              }
+              throw error;
             }
 
       - name: Create issue on failure
