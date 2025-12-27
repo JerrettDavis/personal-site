@@ -26,6 +26,20 @@ export const NAV_ITEMS: NavItem[] = [
         keywords: ['github', 'portfolio'],
     },
     {
+        label: 'Pipelines',
+        href: '/pipelines',
+        description: 'GitHub Actions pipeline status across active repos.',
+        keywords: ['ci', 'actions', 'builds'],
+        showInNav: false,
+    },
+    {
+        label: 'Work in Progress',
+        href: '/work-in-progress',
+        description: 'Live preview deployments and site build telemetry.',
+        keywords: ['vercel', 'deployments', 'previews'],
+        showInNav: false,
+    },
+    {
         label: 'Hobbies',
         href: '/hobbies',
         description: 'Off-hours interests and hobby-tagged posts.',

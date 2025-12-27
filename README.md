@@ -33,6 +33,18 @@ Prerequisites: Node.js and npm.
 - `npm run build`
 - `npm run start`
 
+## Testing
+- `npm run test` for unit tests.
+- `npm run test:e2e` for Playwright end-to-end checks (runs `npm run dev` unless `PLAYWRIGHT_BASE_URL` is set).
+- First time only: `npx playwright install` to download browsers.
+
 ## Deployment
 This project is designed for Vercel hosting. Set `NEXT_PUBLIC_SITE_URL` to control the canonical
 base URL used in sitemap generation.
+
+## Telemetry
+The site surfaces live build and repo telemetry via API routes under `/api`. Configure the
+following optional environment variables to avoid anonymous rate limits:
+
+- `VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` for preview/build status.
+- `GITHUB_TOKEN` for GitHub Actions pipelines and project detail snapshots.

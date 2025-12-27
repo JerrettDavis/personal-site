@@ -29,3 +29,16 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.vercel
+.env*.local
+
+# local metrics artifacts
+data/.githubMetrics.lock
+data/githubMetricsHistory.json.tmp
+data/*.sqlite
+data/*.sqlite3
+data/*.db
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/*.db-shm
+data/*.db-wal

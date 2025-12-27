@@ -20,7 +20,7 @@ export default function DocsIndex({intro, docs}: DocsIndexProps) {
     return (
         <Layout description={description}>
             <Head>
-                <title>{intro.title} - Jerrett Davis</title>
+                <title>{`${intro.title} - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Docs</p>

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1001,
+    "name": "personal-site",
+    "full_name": "jerrettdavis/personal-site",
+    "description": "Personal site and writing hub.",
+    "html_url": "https://github.com/jerrettdavis/personal-site",
+    "homepage": "https://jerrett.dev",
+    "language": "TypeScript",
+    "topics": ["nextjs", "mdx", "static-site"],
+    "stargazers_count": 128,
+    "forks_count": 12,
+    "archived": false,
+    "fork": false,
+    "pushed_at": "2025-02-01T12:00:00Z",
+    "updated_at": "2025-02-01T12:00:00Z"
+  },
+  {
+    "id": 1002,
+    "name": "tinybdd",
+    "full_name": "jerrettdavis/tinybdd",
+    "description": "Lightweight BDD testing toolkit.",
+    "html_url": "https://github.com/jerrettdavis/tinybdd",
+    "homepage": null,
+    "language": "C#",
+    "topics": ["bdd", "testing"],
+    "stargazers_count": 74,
+    "forks_count": 6,
+    "archived": false,
+    "fork": false,
+    "pushed_at": "2025-01-22T08:30:00Z",
+    "updated_at": "2025-01-22T08:30:00Z"
+  },
+  {
+    "id": 1003,
+    "name": "JD.Efcpt.Build",
+    "full_name": "jerrettdavis/JD.Efcpt.Build",
+    "description": "EF Core Power Tools automation.",
+    "html_url": "https://github.com/jerrettdavis/JD.Efcpt.Build",
+    "homepage": null,
+    "language": "C#",
+    "topics": ["ef-core", "code-generation"],
+    "stargazers_count": 38,
+    "forks_count": 3,
+    "archived": false,
+    "fork": false,
+    "pushed_at": "2025-01-15T14:20:00Z",
+    "updated_at": "2025-01-15T14:20:00Z"
+  }
+]

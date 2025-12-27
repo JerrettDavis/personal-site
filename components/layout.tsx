@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faBluesky, faGithub, faLinkedin, faMastodon} from '@fortawesome/free-brands-svg-icons'
 import dynamic from "next/dynamic";
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {faRss} from "@fortawesome/free-solid-svg-icons";
 import {NAV_ITEMS} from "../data/nav";
 import CommandPalette from "./commandPalette";
@@ -13,6 +13,12 @@ import {useRouter} from "next/router";
 import {useSectionGrid} from "../lib/hooks/useSectionGrid";
 import {useReveal} from "../lib/hooks/useReveal";
 import {useGlowHotspot} from "../lib/hooks/useGlowHotspot";
+import {useScrollProgress} from "../lib/hooks/useScrollProgress";
+import {useSectionIndex} from "../lib/hooks/useSectionIndex";
+import PipelineStatus from "./pipelineStatus";
+import SiteBuildStatus from "./siteBuildStatus";
+import {useBodyScrollLock} from "../lib/hooks/useBodyScrollLock";
+import TelemetryRefresh from "./telemetryRefresh";
 
 const name = 'Jerrett Davis'
 export const siteTitle = 'My Slice of the Internet'
@@ -78,6 +84,13 @@ export default function Layout({
         ? `${styles.container} ${styles.containerWide}`
         : styles.container;
     const mainRef = useRef<HTMLElement | null>(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [router.asPath]);
+
+    useBodyScrollLock(isMenuOpen);
 
     useSectionGrid(
         mainRef,
@@ -91,6 +104,12 @@ export default function Layout({
     );
     useReveal(mainRef, [router.asPath]);
     useGlowHotspot();
+    useScrollProgress([router.asPath]);
+    const {items: sectionItems, activeId} = useSectionIndex(
+        mainRef,
+        {activeClassName: styles.gridSectionActive},
+        [router.asPath],
+    );
 
     return (
         <div>
@@ -170,7 +189,7 @@ export default function Layout({
                             </a>
                         </div>
                     </div>
-                    <nav className={styles.navLinks} aria-label="Primary">
+                    <nav className={styles.navLinks} aria-label="Primary">      
                         {NAV_LINKS.map((item) => (
                             <Link href={item.href} className={`${styles.navLink} glowable`} key={item.href}>
                                 {item.label}
@@ -182,17 +201,91 @@ export default function Layout({
                         />
                     </nav>
                     <div className={styles.actionRow}>
-                        <CommandPalette />
+                        <SiteBuildStatus variant="header" />
+                        <PipelineStatus variant="header" />
                         <div className={utilStyles.marginLeft8}>
                             <ThemeToggle/>
                         </div>
                     </div>
+                    <button
+                        type="button"
+                        className={`${styles.menuToggle} glowable`}
+                        onClick={() => setIsMenuOpen((prev) => !prev)}
+                        aria-label="Toggle navigation menu"
+                        aria-expanded={isMenuOpen}
+                        aria-controls="mobile-nav"
+                        data-open={isMenuOpen}
+                    >
+                        <span className={styles.menuIcon} aria-hidden="true">
+                            <span />
+                            <span />
+                            <span />
+                        </span>
+                        <span className={styles.menuLabel}>Menu</span>
+                    </button>
                 </div>
+                <div className={styles.scrollProgress} aria-hidden="true" />
             </header>
+            <div
+                className={`${styles.mobileScrim} ${isMenuOpen ? styles.mobileScrimOpen : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+                aria-hidden="true"
+            />
+            <div
+                id="mobile-nav"
+                className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}
+                aria-hidden={!isMenuOpen}
+            >
+                <div className={styles.mobileHeader}>
+                    <span className={styles.mobileTitle}>Navigation</span>
+                    <button
+                        type="button"
+                        className={styles.mobileClose}
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        Close
+                    </button>
+                </div>
+                <nav className={styles.mobileLinks} aria-label="Mobile">
+                    {NAV_LINKS.map((item) => (
+                        <Link
+                            href={item.href}
+                            className={`${styles.mobileLink} glowable`}
+                            key={item.href}
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                    <SearchOverlay
+                        className={`${styles.mobileButton} glowable`}
+                        label={SEARCH_ITEM?.label ?? 'Search'}
+                    />
+                </nav>
+                <div className={styles.mobileFooter}>
+                    <span className={styles.mobileFooterLabel}>Theme</span>
+                    <ThemeToggle/>
+                </div>
+            </div>
             <div className={containerClassName}>
                 <main ref={mainRef}>{children}</main>
                 <GoBackToLink pageType={pageType}/>
             </div>
+            {sectionItems.length > 1 && (
+                <nav className={styles.sectionIndex} aria-label="Section index">
+                    {sectionItems.map((item) => (
+                        <a
+                            key={item.id}
+                            href={`#${item.id}`}
+                            className={`${styles.sectionDot} ${activeId === item.id ? styles.sectionDotActive : ''}`}
+                            aria-current={activeId === item.id ? 'true' : undefined}
+                            aria-label={item.label}
+                        >
+                            <span className={styles.sectionDotLabel}>{item.label}</span>
+                        </a>
+                    ))}
+                </nav>
+            )}
             <footer className={styles.siteFooter}>
                 <div className={styles.footerInner}>
                     <div className={styles.footerCol}>
@@ -238,14 +331,22 @@ export default function Layout({
                         </div>
                     </div>
                     <div className={styles.footerCol}>
-                        <div className={styles.footerTitle}>Extras</div>
+                        <div className={styles.footerTitle}>Extras</div>        
                         <div className={styles.footerLinks}>
                             <Link href="/docs/architecture">Architecture map</Link>
                             <Link href="/docs/content-pipeline">Content pipeline</Link>
                             <Link href="/search">Search</Link>
                         </div>
+                        <div className={styles.footerStatus}>
+                            <div className={styles.footerStatusLabel}>Live status</div>
+                            <div className={styles.footerStatusRow}>
+                                <SiteBuildStatus compact variant="menu" />
+                                <PipelineStatus compact variant="menu" />
+                            </div>
+                            <TelemetryRefresh />
+                        </div>
                         <div className={styles.footerNote}>
-                            Tip: Press Cmd/Ctrl + K for the command palette.
+                            <CommandPalette />
                         </div>
                     </div>
                 </div>

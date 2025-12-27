@@ -145,7 +145,7 @@ export const getDocBySlug = async (slug: string[]): Promise<DocData> => {
     const fileContents = await fs.readFile(filePath, 'utf8');
     const {data, content} = matter(fileContents);
     const summary = normalizeFrontmatter(data as DocFrontmatter, slug, content);
-    const contentHtml = await renderMarkdown(content, summary.useToc);
+    const contentHtml = await renderMarkdown(content, summary.useToc, true);
 
     return {
         title: summary.title,

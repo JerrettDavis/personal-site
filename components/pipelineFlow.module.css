@@ -1,0 +1,167 @@
+.flowWrap {
+    height: clamp(420px, 55vh, 600px);
+    max-height: 80vh;
+    max-height: 80svh;
+    max-height: 80dvh;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+    position: relative;
+}
+
+.flow {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.flow :global(.react-flow__edges) {
+    opacity: 0.95;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.flow :global(.react-flow__pane) {
+    cursor: grab;
+}
+
+.flow :global(.react-flow__pane:active) {
+    cursor: grabbing;
+}
+
+.flow :global(.react-flow__edge-path) {
+    stroke-linecap: round;
+}
+
+.flow :global(.react-flow__node) {
+    font-family: inherit;
+}
+
+.flow :global(.react-flow__nodes) {
+    z-index: 3;
+}
+
+.flow :global(.react-flow__node-lane) {
+    z-index: 1;
+}
+
+.flow :global(.react-flow__node-pipeline) {
+    z-index: 3;
+}
+
+.laneNode {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(37, 104, 255, 0.18);
+    background: linear-gradient(90deg, rgba(37, 104, 255, 0.07), transparent 65%);
+    pointer-events: none;
+    position: relative;
+    overflow: hidden;
+    opacity: 0.92;
+}
+
+.laneNode::before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 100%;
+    flex: 0 0 6px;
+    border-radius: 999px;
+    background: rgba(37, 104, 255, 0.5);
+}
+
+.laneNode[data-tone="odd"] {
+    background: linear-gradient(90deg, rgba(86, 188, 255, 0.08), transparent 65%);
+    border-color: rgba(86, 188, 255, 0.25);
+}
+
+.laneNode[data-tone="odd"]::before {
+    background: rgba(86, 188, 255, 0.55);
+}
+
+.laneNode::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: rgba(37, 104, 255, 0.15);
+}
+
+.laneTitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.laneSummary {
+    font-size: 0.7rem;
+    color: var(--color-text-deemphasized);
+    max-width: 200px;
+}
+
+.flowNode {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    height: 100%;
+}
+
+.flowHandle {
+    width: 10px;
+    height: 10px;
+    background: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    border-radius: 999px;
+    opacity: 0.9;
+    transform: translate(-50%, -50%);
+}
+
+
+.flowNodeActive {
+    border-color: var(--color-primary);
+    box-shadow: 0 12px 20px -18px rgba(37, 104, 255, 0.6);
+}
+
+.flowNodeCurrent {
+    transform: translateY(-2px);
+    background: linear-gradient(140deg, rgba(37, 104, 255, 0.18), transparent 70%);
+}
+
+.flowNodeTitle {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.flowNodeMeta {
+    font-size: 0.7rem;
+    color: var(--color-text-deemphasized);
+    font-family: var(--font-mono);
+    line-height: 1.4;
+}
+
+@media screen and (max-width: 64rem) {
+    .flowWrap {
+        height: clamp(360px, 55vh, 520px);
+    }
+}
+
+@media screen and (max-width: 48rem) {
+    .flowWrap {
+        height: clamp(320px, 60vh, 480px);
+    }
+}

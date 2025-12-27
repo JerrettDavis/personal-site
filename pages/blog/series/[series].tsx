@@ -24,7 +24,7 @@ export default function SeriesDetail({
     return (
         <Layout pageType={PageType.BlogPost} description={description}>
             <Head>
-                <title>{series.name} series - the overengineer. - Jerrett Davis</title>
+                <title>{`${series.name} series - the overengineer. - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Series</p>
