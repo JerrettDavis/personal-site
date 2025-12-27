@@ -1,93 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://localhost:3000</id>
+    <id>https://jerrettdavis.com</id>
     <title>Jerrett Davis | The Overengineer Blog Posts | RSS Feed</title>
-    <updated>2025-12-21T05:34:07.544Z</updated>
+    <updated>2025-12-27T04:19:55.547Z</updated>
     <generator>Feed for Node.js</generator>
-    <link rel="alternate" href="http://localhost:3000"/>
-    <link rel="self" href="http://localhost:3000/atom.xml"/>
+    <link rel="alternate" href="https://jerrettdavis.com"/>
+    <link rel="self" href="https://jerrettdavis.com/atom.xml"/>
     <subtitle>The Overengineer Blog. Anything worth doing is worth overdoing.</subtitle>
-    <logo>http://localhost:3000/profile.png</logo>
-    <icon>http://localhost:3000/favicon.png</icon>
+    <logo>https://jerrettdavis.com/profile.png</logo>
+    <icon>https://jerrettdavis.com/favicon.png</icon>
     <rights>All rights reserved 2025, Jerrett Davis</rights>
     <entry>
+        <title type="html"><![CDATA[JD.Efcpt.Build]]></title>
+        <id>https://jerrettdavis.com/blog/posts/jd.efcpt.build</id>
+        <link href="https://jerrettdavis.com/blog/posts/jd.efcpt.build"/>
+        <updated>2025-12-21T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[JD.Efcpt.Build automates EF Core Power Tools scaffolding during the build, keeping database-first models in sync with schema changes without manual regeneration.]]></summary>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[You Don't Hate Abstractions]]></title>
-        <id>http://localhost:3000/blog/you-dont-hate-abstractions</id>
-        <link href="http://localhost:3000/blog/you-dont-hate-abstractions"/>
+        <id>https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions</id>
+        <link href="https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions"/>
         <updated>2025-12-05T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Why developers misuse abstractions, how to design them from behavior and domain first, and how patterns, automation, and declarative modeling lead to better systems.]]></summary>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Programming is like...]]></title>
-        <id>http://localhost:3000/blog/programming-is</id>
-        <link href="http://localhost:3000/blog/programming-is"/>
-        <updated>2025-11-21T00:00:00.000Z</updated>
-        <summary type="html"><![CDATA[Many professions and hobbies offer useful analogies for understanding the work of programming. This post explores several of them to help readers navigate the diverse world of software development.]]></summary>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Abstraction is the Root of all...]]></title>
-        <id>http://localhost:3000/blog/abstraction-is-the-root-of-all</id>
-        <link href="http://localhost:3000/blog/abstraction-is-the-root-of-all"/>
-        <updated>2025-11-18T00:00:00.000Z</updated>
-    </entry>
-    <entry>
         <title type="html"><![CDATA[Announcing TinyBDD: Fluent, Executable Scenarios for .NET]]></title>
-        <id>http://localhost:3000/blog/tinybdd</id>
-        <link href="http://localhost:3000/blog/tinybdd"/>
+        <id>https://jerrettdavis.com/blog/posts/tinybdd</id>
+        <link href="https://jerrettdavis.com/blog/posts/tinybdd"/>
         <updated>2025-09-17T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[BDD: Make the Business Write Your Tests]]></title>
-        <id>http://localhost:3000/blog/making-the-business-write-your-tests-with-bdd</id>
-        <link href="http://localhost:3000/blog/making-the-business-write-your-tests-with-bdd"/>
+        <id>https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd</id>
+        <link href="https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd"/>
         <updated>2025-09-01T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[What if your business wrote the tests, and developers just made them pass?]]></summary>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Good Code Is...]]></title>
-        <id>http://localhost:3000/blog/good-code-is</id>
-        <link href="http://localhost:3000/blog/good-code-is"/>
-        <updated>2025-08-27T00:00:00.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[2025 Life Update and Family Chicago Trip - Pt. 1]]></title>
-        <id>http://localhost:3000/blog/2025-chicago-trip-pt1</id>
-        <link href="http://localhost:3000/blog/2025-chicago-trip-pt1"/>
-        <updated>2025-08-25T00:00:00.000Z</updated>
-    </entry>
-    <entry>
         <title type="html"><![CDATA[What is "Code"?]]></title>
-        <id>http://localhost:3000/blog/what-is-code</id>
-        <link href="http://localhost:3000/blog/what-is-code"/>
+        <id>https://jerrettdavis.com/blog/posts/what-is-code</id>
+        <link href="https://jerrettdavis.com/blog/posts/what-is-code"/>
         <updated>2025-08-11T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[A beginner-friendly exploration of what "code" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker]]></title>
-        <id>http://localhost:3000/blog/automating-daily-database-restores</id>
-        <link href="http://localhost:3000/blog/automating-daily-database-restores"/>
+        <id>https://jerrettdavis.com/blog/posts/automating-daily-database-restores</id>
+        <link href="https://jerrettdavis.com/blog/posts/automating-daily-database-restores"/>
         <updated>2024-02-27T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[A Year in Review]]></title>
-        <id>http://localhost:3000/blog/a-year-in-review-1</id>
-        <link href="http://localhost:3000/blog/a-year-in-review-1"/>
+        <id>https://jerrettdavis.com/blog/posts/a-year-in-review-1</id>
+        <link href="https://jerrettdavis.com/blog/posts/a-year-in-review-1"/>
         <updated>2023-08-13T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Reflecting on the author's experiences throughout 2022, including attempts at a 365-day coding challenge, the impact of significant life events such as the birth of their daughter, and the shifting priorities and challenges faced during the year.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[365 Days of Code - Week 1]]></title>
-        <id>http://localhost:3000/blog/365-days-of-code-week-1</id>
-        <link href="http://localhost:3000/blog/365-days-of-code-week-1"/>
+        <id>https://jerrettdavis.com/blog/posts/365-days-of-code-week-1</id>
+        <link href="https://jerrettdavis.com/blog/posts/365-days-of-code-week-1"/>
         <updated>2022-01-02T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[A recap of the first week participating in the "365 Days of Code" challenge, where the author commits and pushes code related to a personal project daily. The post discusses the motivation behind the challenge, the author's goals, and the results of the first week, including the migration of the personal website from WordPress to a Static Site built with Next.js and React, and the creation of a command line weather client.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[Simple Public ID Generation in EF Core]]></title>
-        <id>http://localhost:3000/blog/ef-core-public-id</id>
-        <link href="http://localhost:3000/blog/ef-core-public-id"/>
+        <id>https://jerrettdavis.com/blog/posts/ef-core-public-id</id>
+        <link href="https://jerrettdavis.com/blog/posts/ef-core-public-id"/>
         <updated>2021-12-27T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[A guide detailing the implementation of a simple public ID generation system in Entity Framework Core (EF Core). The post discusses the background motivation, problems encountered, and the implementation steps, including hiding primary keys, generating public identifiers, and simplifying operations on public entities.]]></summary>
     </entry>

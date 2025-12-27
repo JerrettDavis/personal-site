@@ -1,88 +1,70 @@
 {
     "version": "https://jsonfeed.org/version/1",
     "title": "Jerrett Davis | The Overengineer Blog Posts | RSS Feed",
-    "home_page_url": "http://localhost:3000",
-    "feed_url": "http://localhost:3000/rss.json",
+    "home_page_url": "https://jerrettdavis.com",
+    "feed_url": "https://jerrettdavis.com/rss.json",
     "description": "The Overengineer Blog. Anything worth doing is worth overdoing.",
-    "icon": "http://localhost:3000/profile.png",
+    "icon": "https://jerrettdavis.com/profile.png",
     "items": [
         {
-            "id": "http://localhost:3000/blog/you-dont-hate-abstractions",
-            "url": "http://localhost:3000/blog/you-dont-hate-abstractions",
+            "id": "https://jerrettdavis.com/blog/posts/jd.efcpt.build",
+            "url": "https://jerrettdavis.com/blog/posts/jd.efcpt.build",
+            "title": "JD.Efcpt.Build",
+            "summary": "JD.Efcpt.Build automates EF Core Power Tools scaffolding during the build, keeping database-first models in sync with schema changes without manual regeneration.",
+            "date_modified": "2025-12-21T00:00:00.000Z"
+        },
+        {
+            "id": "https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions",
+            "url": "https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions",
             "title": "You Don't Hate Abstractions",
             "summary": "Why developers misuse abstractions, how to design them from behavior and domain first, and how patterns, automation, and declarative modeling lead to better systems.",
             "date_modified": "2025-12-05T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/programming-is",
-            "url": "http://localhost:3000/blog/programming-is",
-            "title": "Programming is like...",
-            "summary": "Many professions and hobbies offer useful analogies for understanding the work of programming. This post explores several of them to help readers navigate the diverse world of software development.",
-            "date_modified": "2025-11-21T00:00:00.000Z"
-        },
-        {
-            "id": "http://localhost:3000/blog/abstraction-is-the-root-of-all",
-            "url": "http://localhost:3000/blog/abstraction-is-the-root-of-all",
-            "title": "Abstraction is the Root of all...",
-            "date_modified": "2025-11-18T00:00:00.000Z"
-        },
-        {
-            "id": "http://localhost:3000/blog/tinybdd",
-            "url": "http://localhost:3000/blog/tinybdd",
+            "id": "https://jerrettdavis.com/blog/posts/tinybdd",
+            "url": "https://jerrettdavis.com/blog/posts/tinybdd",
             "title": "Announcing TinyBDD: Fluent, Executable Scenarios for .NET",
             "summary": "Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.",
             "date_modified": "2025-09-17T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/making-the-business-write-your-tests-with-bdd",
-            "url": "http://localhost:3000/blog/making-the-business-write-your-tests-with-bdd",
+            "id": "https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd",
+            "url": "https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd",
             "title": "BDD: Make the Business Write Your Tests",
             "summary": "What if your business wrote the tests, and developers just made them pass?",
             "date_modified": "2025-09-01T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/good-code-is",
-            "url": "http://localhost:3000/blog/good-code-is",
-            "title": "Good Code Is...",
-            "date_modified": "2025-08-27T00:00:00.000Z"
-        },
-        {
-            "id": "http://localhost:3000/blog/2025-chicago-trip-pt1",
-            "url": "http://localhost:3000/blog/2025-chicago-trip-pt1",
-            "title": "2025 Life Update and Family Chicago Trip - Pt. 1",
-            "date_modified": "2025-08-25T00:00:00.000Z"
-        },
-        {
-            "id": "http://localhost:3000/blog/what-is-code",
-            "url": "http://localhost:3000/blog/what-is-code",
+            "id": "https://jerrettdavis.com/blog/posts/what-is-code",
+            "url": "https://jerrettdavis.com/blog/posts/what-is-code",
             "title": "What is \"Code\"?",
             "summary": "A beginner-friendly exploration of what \"code\" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
             "date_modified": "2025-08-11T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/automating-daily-database-restores",
-            "url": "http://localhost:3000/blog/automating-daily-database-restores",
+            "id": "https://jerrettdavis.com/blog/posts/automating-daily-database-restores",
+            "url": "https://jerrettdavis.com/blog/posts/automating-daily-database-restores",
             "title": "Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker",
             "summary": "Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.",
             "date_modified": "2024-02-27T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/a-year-in-review-1",
-            "url": "http://localhost:3000/blog/a-year-in-review-1",
+            "id": "https://jerrettdavis.com/blog/posts/a-year-in-review-1",
+            "url": "https://jerrettdavis.com/blog/posts/a-year-in-review-1",
             "title": "A Year in Review",
             "summary": "Reflecting on the author's experiences throughout 2022, including attempts at a 365-day coding challenge, the impact of significant life events such as the birth of their daughter, and the shifting priorities and challenges faced during the year.",
             "date_modified": "2023-08-13T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/365-days-of-code-week-1",
-            "url": "http://localhost:3000/blog/365-days-of-code-week-1",
+            "id": "https://jerrettdavis.com/blog/posts/365-days-of-code-week-1",
+            "url": "https://jerrettdavis.com/blog/posts/365-days-of-code-week-1",
             "title": "365 Days of Code - Week 1",
             "summary": "A recap of the first week participating in the \"365 Days of Code\" challenge, where the author commits and pushes code related to a personal project daily. The post discusses the motivation behind the challenge, the author's goals, and the results of the first week, including the migration of the personal website from WordPress to a Static Site built with Next.js and React, and the creation of a command line weather client.",
             "date_modified": "2022-01-02T00:00:00.000Z"
         },
         {
-            "id": "http://localhost:3000/blog/ef-core-public-id",
-            "url": "http://localhost:3000/blog/ef-core-public-id",
+            "id": "https://jerrettdavis.com/blog/posts/ef-core-public-id",
+            "url": "https://jerrettdavis.com/blog/posts/ef-core-public-id",
             "title": "Simple Public ID Generation in EF Core",
             "summary": "A guide detailing the implementation of a simple public ID generation system in Entity Framework Core (EF Core). The post discusses the background motivation, problems encountered, and the implementation steps, including hiding primary keys, generating public identifiers, and simplifying operations on public entities.",
             "date_modified": "2021-12-27T00:00:00.000Z"
