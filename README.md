@@ -43,7 +43,7 @@ This project is designed for Vercel hosting. Set `NEXT_PUBLIC_SITE_URL` to contr
 base URL used in sitemap generation.
 
 ## Syndication
-The site includes automated syndication to Hashnode and Dev.to. See [SYNDICATION.md](./SYNDICATION.md)
+The site includes automated syndication to Hashnode and Dev.to. See [/docs/syndication](/docs/syndication)
 for detailed setup instructions and configuration options. Key features:
 - Automatic publishing to external platforms after deployment
 - Per-post syndication control via frontmatter

@@ -39,6 +39,11 @@ when the site is built.
     <span class="doc-card-title">Deployment</span>
     <p class="doc-card-text">Learn how builds, previews, and telemetry connect end to end.</p>
   </a>
+  <a class="doc-card" href="/docs/syndication">
+    <span class="doc-card-kicker">Cross-post</span>
+    <span class="doc-card-title">Syndication</span>
+    <p class="doc-card-text">Automated publishing to Hashnode and Dev.to with canonical URLs.</p>
+  </a>
 </div>
 
 ## Live demos
