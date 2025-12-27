@@ -11,20 +11,33 @@ const CONNECTION_STRING =
     process.env.POSTGRES_URL ||
     process.env.POSTGRES_URL_NON_POOLING ||
     process.env.POSTGRES_PRISMA_URL ||
+    process.env.DATABASE_URL_UNPOOLED ||
     process.env.DATABASE_URL ||
     process.env.PG_CONNECTION_STRING;
 
-const ensureConnectionString = () => {
-    if (!CONNECTION_STRING) {
+const hasEnvConfig = () =>
+    Boolean(
+        CONNECTION_STRING ||
+            process.env.PGHOST ||
+            process.env.PGUSER ||
+            process.env.PGPASSWORD ||
+            process.env.PGDATABASE,
+    );
+
+const ensureConnectionConfig = () => {
+    if (!hasEnvConfig()) {
         throw new Error(
-            'Missing Postgres connection string. Set METRICS_PG_URL or POSTGRES_URL.',
+            'Missing Postgres connection config. Set METRICS_PG_URL, POSTGRES_URL, DATABASE_URL, or PGHOST env vars.',
         );
     }
 };
 
 const pool = (() => {
-    ensureConnectionString();
-    return new Pool({connectionString: CONNECTION_STRING});
+    ensureConnectionConfig();
+    if (CONNECTION_STRING) {
+        return new Pool({connectionString: CONNECTION_STRING});
+    }
+    return new Pool();
 })();
 
 let initPromise = null;

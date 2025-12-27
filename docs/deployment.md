@@ -83,7 +83,7 @@ order: 5
   <ul>
     <li>Set <code>METRICS_STORE=custom</code>.</li>
     <li>Set <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
-    <li>Set <code>METRICS_PG_URL=postgres://...</code> (or <code>POSTGRES_URL</code> / <code>DATABASE_URL</code>).</li>
+    <li>Set <code>METRICS_PG_URL=postgres://...</code> (or <code>POSTGRES_URL</code> / <code>DATABASE_URL</code> / <code>DATABASE_URL_UNPOOLED</code>).</li>
     <li>Optional: <code>METRICS_PG_SCHEMA</code>, <code>METRICS_PG_HISTORY_TABLE</code>, <code>METRICS_PG_LOCK_TABLE</code>, <code>METRICS_PG_KEY</code>.</li>
   </ul>
 </details>
@@ -94,6 +94,14 @@ order: 5
     <li>Create a Vercel Postgres database (Hobby tier is free).</li>
     <li>Set <code>METRICS_STORE=custom</code> and <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
     <li>Vercel provides <code>POSTGRES_URL</code> automatically, no extra config needed.</li>
+  </ul>
+</details>
+<details class="doc-accordion">
+  <summary>Neon Postgres (free tier)</summary>
+  <ul>
+    <li>Use the provided <code>DATABASE_URL</code> or <code>DATABASE_URL_UNPOOLED</code> from Neon.</li>
+    <li>Optionally supply <code>PGHOST</code>, <code>PGUSER</code>, <code>PGPASSWORD</code>, <code>PGDATABASE</code> to connect without a URL.</li>
+    <li>Set <code>METRICS_STORE=custom</code> and <code>METRICS_STORE_ADAPTER=scripts/metricsStoreAdapters/postgres.js</code>.</li>
   </ul>
 </details>
 
@@ -178,6 +186,11 @@ order: 5
     <tr>
       <td>POSTGRES_URL</td>
       <td>Vercel Postgres connection string</td>
+      <td>GitHub metrics history</td>
+    </tr>
+    <tr>
+      <td>DATABASE_URL_UNPOOLED</td>
+      <td>Neon Postgres unpooled connection string</td>
       <td>GitHub metrics history</td>
     </tr>
     <tr>
