@@ -180,6 +180,24 @@ function prepareContent(post, config, platform) {
     };
 }
 
+const sanitizeTitle = (value) =>
+    String(value ?? '')
+        .replace(/[\u0000-\u001F\u007F]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+const normalizeDevtoTag = (tag) =>
+    String(tag ?? '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+
+const buildDevtoTags = (tags) => {
+    const cleaned = (Array.isArray(tags) ? tags : [])
+        .map((tag) => normalizeDevtoTag(tag))
+        .filter(Boolean);
+    return Array.from(new Set(cleaned)).slice(0, DEVTO_MAX_TAGS);
+};
+
 /**
  * Publish to Hashnode using GraphQL API
  */
@@ -293,10 +311,10 @@ async function publishToDevTo(post, config, state) {
     const prepared = prepareContent(post, config, 'devto');
     
     const article = {
-        title: prepared.title,
+        title: sanitizeTitle(prepared.title),
         body_markdown: prepared.content,
         published: true,
-        tags: prepared.tags.slice(0, DEVTO_MAX_TAGS),
+        tags: buildDevtoTags(prepared.tags),
         canonical_url: prepared.canonicalUrl
     };
     
@@ -309,8 +327,28 @@ async function publishToDevTo(post, config, state) {
         body: JSON.stringify({ article })
     });
     
+    if (response.status === 429) {
+        return { skipped: true, reason: 'Rate limited', rateLimited: true };
+    }
+
     if (!response.ok) {
         const errorText = await response.text();
+        if (
+            response.status === 422 &&
+            errorText.includes('Canonical url has already been taken')
+        ) {
+            const publishedAt = prepared.publishedAt
+                ? new Date(prepared.publishedAt).toISOString()
+                : new Date().toISOString();
+            return {
+                skipped: true,
+                reason: 'Already published',
+                markAsPublished: true,
+                url: prepared.canonicalUrl,
+                publishedAt,
+                lastUpdated: new Date().toISOString(),
+            };
+        }
         throw new Error(`Dev.to API error: ${response.status} - ${errorText}`);
     }
     
@@ -356,6 +394,8 @@ async function syndicate() {
     let skippedCount = 0;
     let errorCount = 0;
     
+    let devtoRateLimited = false;
+
     for (const post of postsToProcess) {
         console.log(`📝 Processing: ${post.id}`);
         
@@ -395,12 +435,29 @@ async function syndicate() {
         // Publish to Dev.to
         if (config.platforms.devto?.enabled) {
             try {
+                if (devtoRateLimited) {
+                    console.log(`  ⏭️  Skipped: rate limited`);
+                    skippedCount++;
+                    console.log('');
+                    continue;
+                }
                 console.log(`  📤 Publishing to Dev.to...`);
                 const result = await publishToDevTo(post, config, state);
-                
+
                 if (result.skipped) {
                     console.log(`  ⏭️  Skipped: ${result.reason}`);
                     if (result.url) console.log(`  🔗 ${result.url}`);
+                    if (result.rateLimited) {
+                        devtoRateLimited = true;
+                    }
+                    if (result.markAsPublished) {
+                        state.posts[post.id].devto = {
+                            id: result.id ?? '',
+                            url: result.url ?? '',
+                            publishedAt: result.publishedAt ?? new Date().toISOString(),
+                            lastUpdated: result.lastUpdated ?? new Date().toISOString(),
+                        };
+                    }
                     skippedCount++;
                 } else if (result.success) {
                     console.log(`  ✅ Published to Dev.to`);
