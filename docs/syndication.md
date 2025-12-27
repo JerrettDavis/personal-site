@@ -241,6 +241,8 @@ npm run syndicate -- --max-age-days=365
    - **Post ID**: Syndicate only specific post
    - **Max age days**: Skip posts older than the threshold (0 disables)
 
+**Dev.to collision detection:** The script fetches up to 300 of your published Dev.to articles (3 pages x 100) and skips publishing when the canonical URL or normalized title already exists.
+
 ### Automatic syndication
 
 The workflow runs automatically when:
