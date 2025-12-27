@@ -28,6 +28,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   syndicate:
