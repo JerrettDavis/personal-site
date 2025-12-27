@@ -1,4 +1,69 @@
 {
   "$schema": "./schemas/syndication-state.schema.json",
-  "posts": {}
+  "posts": {
+    "365-days-of-code-week-1": {
+      "hashnode": {
+        "id": "694f793f70e506e23091c525",
+        "url": "https://jerrettdavis.hashnode.dev/365-days-of-code-week-1",
+        "publishedAt": "2022-01-02T00:00:00.000Z",
+        "lastUpdated": "2022-01-02T00:00:00.000Z"
+      }
+    },
+    "automating-daily-database-restores": {
+      "hashnode": {
+        "id": "65cc16f5d0a72fefb52ffaa6",
+        "url": "https://jerrettdavis.hashnode.dev/automating-nightly-local-database-refreshes-from-azure-blob-storage-with-docker",
+        "publishedAt": "2024-02-14T01:27:17.359Z",
+        "lastUpdated": "2024-07-09T20:41:32.921Z"
+      }
+    },
+    "ef-core-public-id": {
+      "hashnode": {
+        "id": "694f794170e506e23091c527",
+        "url": "https://jerrettdavis.hashnode.dev/simple-public-id-generation-in-ef-core-1",
+        "publishedAt": "2021-12-27T00:00:00.000Z",
+        "lastUpdated": "2021-12-27T00:00:00.000Z"
+      }
+    },
+    "jd.efcpt.build": {
+      "hashnode": {
+        "id": "694f79416f143b8f05275a0a",
+        "url": "https://jerrettdavis.hashnode.dev/jdefcptbuild",
+        "publishedAt": "2025-12-21T00:00:00.000Z",
+        "lastUpdated": "2025-12-21T00:00:00.000Z"
+      }
+    },
+    "making-the-business-write-your-tests-with-bdd": {
+      "hashnode": {
+        "id": "694f79426f143b8f05275a0c",
+        "url": "https://jerrettdavis.hashnode.dev/bdd-make-the-business-write-your-tests-1",
+        "publishedAt": "2025-09-01T00:00:00.000Z",
+        "lastUpdated": "2025-09-01T00:00:00.000Z"
+      }
+    },
+    "tinybdd": {
+      "hashnode": {
+        "id": "694f79429e269ace613ec4aa",
+        "url": "https://jerrettdavis.hashnode.dev/announcing-tinybdd-fluent-executable-scenarios-for-net",
+        "publishedAt": "2025-09-17T00:00:00.000Z",
+        "lastUpdated": "2025-09-17T00:00:00.000Z"
+      }
+    },
+    "what-is-code": {
+      "hashnode": {
+        "id": "694f79436f143b8f05275a0e",
+        "url": "https://jerrettdavis.hashnode.dev/what-is-code-1",
+        "publishedAt": "2025-08-11T00:00:00.000Z",
+        "lastUpdated": "2025-08-11T00:00:00.000Z"
+      }
+    },
+    "you-dont-hate-abstractions": {
+      "hashnode": {
+        "id": "694f79436f143b8f05275a10",
+        "url": "https://jerrettdavis.hashnode.dev/you-dont-hate-abstractions-1",
+        "publishedAt": "2025-12-05T00:00:00.000Z",
+        "lastUpdated": "2025-12-05T00:00:00.000Z"
+      }
+    }
+  }
 }
