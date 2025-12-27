@@ -189,7 +189,7 @@ const buildCategoryTree = (categories: Category[]): CategoryNode[] => {
     return root.children;
 };
 
-const renderCategoryTree = (nodes: CategoryNode[], depth = 0): JSX.Element => (
+const renderCategoryTree = (nodes: CategoryNode[], depth = 0) => (
     <ul className={depth === 0 ? styles.categoryTree : styles.categoryBranch}>
         {nodes.map((node) => (
             <li className={styles.categoryNode} key={node.path || `${node.name}-${depth}`}>
