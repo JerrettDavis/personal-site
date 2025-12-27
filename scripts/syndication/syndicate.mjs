@@ -11,7 +11,7 @@
  * - DEVTO_API_KEY: API key for Dev.to
  * 
  * Usage:
- *   node scripts/syndication/syndicate.js [--dry-run] [--force] [--post=<post-id>]
+ *   node scripts/syndication/syndicate.mjs [--dry-run] [--force] [--post=<post-id>]
  */
 
 import fs from 'fs/promises';
@@ -21,6 +21,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '../..');
+
+// Platform-specific constraints
+const HASHNODE_MAX_TAGS = 5;
+const DEVTO_MAX_TAGS = 4;
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -224,7 +228,7 @@ async function publishToHashnode(post, config, state) {
             title: prepared.title,
             contentMarkdown: prepared.content,
             publicationId: platformConfig.publicationId,
-            tags: prepared.tags.slice(0, 5).map(tag => ({ slug: tag, name: tag })),
+            tags: prepared.tags.slice(0, HASHNODE_MAX_TAGS).map(tag => ({ slug: tag, name: tag })),
             ...(platformConfig.supportsBackdating && prepared.publishedAt ? {
                 publishedAt: new Date(prepared.publishedAt).toISOString()
             } : {})
@@ -292,7 +296,7 @@ async function publishToDevTo(post, config, state) {
         title: prepared.title,
         body_markdown: prepared.content,
         published: true,
-        tags: prepared.tags.slice(0, 4), // Dev.to allows max 4 tags
+        tags: prepared.tags.slice(0, DEVTO_MAX_TAGS),
         canonical_url: prepared.canonicalUrl
     };
     
