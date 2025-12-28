@@ -1344,7 +1344,7 @@ const MetricTrend = ({
                 <div className={pipelineStyles.metricsTrendBars} role="img" aria-label={label}>
                     {values.map((value, index) => (
                         <span
-                            key={`${label}-${index}-${value}`}
+                            key={`${label}-${index}`}
                             className={pipelineStyles.metricsTrendBar}
                             data-variant={variant}
                             style={{height: `${Math.max(12, (value / maxValue) * 100)}%`}}
