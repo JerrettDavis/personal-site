@@ -135,12 +135,12 @@ const fetchRepoStatus = async (
             };
         }
         const runSummaries = [];
-        const seenNames = new Set<string>();
+        const seenKeys = new Set<string>();
         for (const item of runs) {
             const name = item.name ?? 'Workflow run';
-            const dedupeKey = item.name ?? `run-${item.id}`;
-            if (seenNames.has(dedupeKey)) continue;
-            seenNames.add(dedupeKey);
+            const dedupeKey = item.name ? `name:${item.name}` : `id:${item.id}`;
+            if (seenKeys.has(dedupeKey)) continue;
+            seenKeys.add(dedupeKey);
             runSummaries.push({
                 id: item.id,
                 name,

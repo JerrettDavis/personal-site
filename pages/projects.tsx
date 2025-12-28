@@ -349,19 +349,37 @@ export default function Projects({projects, githubError, projectPosts}: Projects
 
         if (staleRepos.length === 0) return;
 
+        let cancelled = false;
+        let timeoutId: number | null = null;
         autoRefreshRef.current.running = true;
         const runQueue = async () => {
-            for (const repo of staleRepos) {
-                autoRefreshRef.current.queued.set(repo.fullName, Date.now());
-                await handleRefreshRepo(repo.fullName);
-                await new Promise((resolve) => setTimeout(resolve, 1200));
+            try {
+                for (const repo of staleRepos) {
+                    if (cancelled) break;
+                    autoRefreshRef.current.queued.set(repo.fullName, Date.now());
+                    await handleRefreshRepo(repo.fullName);
+                    if (cancelled) break;
+                    await new Promise((resolve) => setTimeout(resolve, 1200));
+                }
+            } finally {
+                autoRefreshRef.current.running = false;
+                if (!cancelled) {
+                    timeoutId = window.setTimeout(() => {
+                        if (!cancelled) {
+                            setAutoRefreshTick((prev) => prev + 1);
+                        }
+                    }, 1500);
+                }
             }
-            autoRefreshRef.current.running = false;
-            setTimeout(() => {
-                setAutoRefreshTick((prev) => prev + 1);
-            }, 1500);
         };
         void runQueue();
+        return () => {
+            cancelled = true;
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+            }
+            autoRefreshRef.current.running = false;
+        };
     }, [metricsRepos, metricsUpdate?.inProgress, handleRefreshRepo, autoRefreshTick]);
 
     const statusLabel = (status?: PipelineState) =>
@@ -652,7 +670,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                         const pipelineRuns = pipelineStatus?.runs ?? [];
                         const fallbackRun = pipelineStatus?.runUrl
                             ? {
-                                id: repo.id,
+                                id: -repo.id,
                                 name: pipelineStatus.runName ?? 'Latest workflow',
                                 status: pipelineStatus.runStatus ?? null,
                                 conclusion: pipelineStatus.runConclusion ?? null,
