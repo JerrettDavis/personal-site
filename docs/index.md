@@ -48,7 +48,7 @@ when the site is built.
 
 ## Live demos
 <div class="doc-grid">
-  <a class="doc-card" href="/pipelines">
+  <a class="doc-card" href="/projects#pipeline-metrics">
     <span class="doc-card-kicker">Telemetry</span>
     <span class="doc-card-title">Pipeline status</span>
     <p class="doc-card-text">See live build and repo activity signals.</p>

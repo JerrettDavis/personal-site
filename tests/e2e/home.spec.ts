@@ -11,7 +11,7 @@ test('home renders shell and live status', async ({page}) => {
     const footer = page.getByRole('contentinfo');
     await expect(footer.getByText('Live status')).toBeVisible();
     await expect(footer.locator('a[data-variant="menu"][href="/work-in-progress"]')).toBeVisible();
-    await expect(footer.locator('a[data-variant="menu"][href="/pipelines"]')).toBeVisible();
+    await expect(footer.locator('a[data-variant="menu"][href="/projects#pipeline-metrics"]')).toBeVisible();
 
     const sectionNav = page.locator('nav[aria-label="Section index"] a');
     const count = await sectionNav.count();

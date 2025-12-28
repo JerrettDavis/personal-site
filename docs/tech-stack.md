@@ -117,7 +117,7 @@ order: 1
     <span class="doc-card-title">Tools library</span>
     <p class="doc-card-text">Catalog of tools and categories used across the site.</p>
   </a>
-  <a class="doc-card" href="/pipelines">
+  <a class="doc-card" href="/projects#pipeline-metrics">
     <span class="doc-card-kicker">Telemetry</span>
     <span class="doc-card-title">Pipelines</span>
     <p class="doc-card-text">Live status powered by GitHub and Vercel APIs.</p>

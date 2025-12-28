@@ -38,8 +38,8 @@ order: 2
       <td>Project cards with expandable detail panels.</td>
     </tr>
     <tr>
-      <td>/pipelines</td>
-      <td>pages/pipelines.tsx</td>
+      <td>/projects#pipeline-metrics</td>
+      <td>pages/projects.tsx</td>
       <td>Repo activity and pipeline telemetry.</td>
     </tr>
     <tr>
@@ -118,7 +118,7 @@ order: 2
     <span class="doc-card-title">Interactive cards</span>
     <p class="doc-card-text">See how data-driven rendering looks in practice.</p>
   </a>
-  <a class="doc-card" href="/pipelines">
+  <a class="doc-card" href="/projects#pipeline-metrics">
     <span class="doc-card-kicker">Telemetry</span>
     <span class="doc-card-title">Pipeline status</span>
     <p class="doc-card-text">Live signals from GitHub and Vercel.</p>
