@@ -235,6 +235,8 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     const scrollFollowupRef = useRef<number | null>(null);
     const [pipelineSpotlight, setPipelineSpotlight] = useState(false);
     const [autoRefreshTick, setAutoRefreshTick] = useState(0);
+    const autoRefreshTimeoutRef = useRef<number | null>(null);
+    const autoRefreshCancelledRef = useRef(false);
     const repoRefreshLocksRef = useRef<Record<string, string>>({});
     const autoRefreshRef = useRef<{running: boolean; queued: Map<string, number>}>({
         running: false,
@@ -349,23 +351,26 @@ export default function Projects({projects, githubError, projectPosts}: Projects
 
         if (staleRepos.length === 0) return;
 
-        let cancelled = false;
-        let timeoutId: number | null = null;
+        autoRefreshCancelledRef.current = false;
+        if (autoRefreshTimeoutRef.current !== null) {
+            window.clearTimeout(autoRefreshTimeoutRef.current);
+            autoRefreshTimeoutRef.current = null;
+        }
         autoRefreshRef.current.running = true;
         const runQueue = async () => {
             try {
                 for (const repo of staleRepos) {
-                    if (cancelled) break;
+                    if (autoRefreshCancelledRef.current) break;
                     autoRefreshRef.current.queued.set(repo.fullName, Date.now());
                     await handleRefreshRepo(repo.fullName);
-                    if (cancelled) break;
+                    if (autoRefreshCancelledRef.current) break;
                     await new Promise((resolve) => setTimeout(resolve, 1200));
                 }
             } finally {
                 autoRefreshRef.current.running = false;
-                if (!cancelled) {
-                    timeoutId = window.setTimeout(() => {
-                        if (!cancelled) {
+                if (!autoRefreshCancelledRef.current) {
+                    autoRefreshTimeoutRef.current = window.setTimeout(() => {
+                        if (!autoRefreshCancelledRef.current) {
                             setAutoRefreshTick((prev) => prev + 1);
                         }
                     }, 1500);
@@ -374,9 +379,10 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         };
         void runQueue();
         return () => {
-            cancelled = true;
-            if (timeoutId !== null) {
-                window.clearTimeout(timeoutId);
+            autoRefreshCancelledRef.current = true;
+            if (autoRefreshTimeoutRef.current !== null) {
+                window.clearTimeout(autoRefreshTimeoutRef.current);
+                autoRefreshTimeoutRef.current = null;
             }
             autoRefreshRef.current.running = false;
         };
@@ -1338,7 +1344,7 @@ const MetricTrend = ({
                 <div className={pipelineStyles.metricsTrendBars} role="img" aria-label={label}>
                     {values.map((value, index) => (
                         <span
-                            key={`${label}-${index}`}
+                            key={`${label}-${index}-${value}`}
                             className={pipelineStyles.metricsTrendBar}
                             data-variant={variant}
                             style={{height: `${Math.max(12, (value / maxValue) * 100)}%`}}

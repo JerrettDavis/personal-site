@@ -89,6 +89,7 @@ const fetchRepoStatus = async (
             runConclusion: null,
             updatedAt: null,
             note: 'Rate limited. Skipping additional requests.',
+            runs: [],
         };
     }
     const url = `https://api.github.com/repos/${repo.full_name}/actions/runs?per_page=${RUNS_PER_REPO}`;
