@@ -1,7 +1,7 @@
 .hero {
     display: grid;
-    gap: 2rem;
-    padding: 3.5rem 0 2rem;
+    gap: 2.4rem;
+    padding: 4rem 0 2.5rem;
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -66,15 +66,15 @@
 
 .avatarWrap {
     padding: 4px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: var(--color-surface);
 }
 
 .avatar {
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
-    box-shadow: 0 12px 24px -22px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card);
 }
 
 .avatarMeta {
@@ -84,7 +84,7 @@
 
 .avatarTitle {
     font-size: 0.85rem;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary);
 }
@@ -96,15 +96,15 @@
 
 .kicker {
     margin: 0 0 0.4rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
 
 .title {
     margin: 0;
-    font-size: 3rem;
+    font-size: 3.2rem;
 }
 
 .lede {
@@ -124,12 +124,13 @@
 .secondaryLink {
     display: inline-flex;
     align-items: center;
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
+    padding: 0.55rem 1.05rem;
+    border-radius: var(--radius-pill);
     text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    font-weight: 600;
 }
 
 .primaryLink {
@@ -144,7 +145,7 @@
 
 .secondaryLink {
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: var(--color-surface);
     color: var(--color-text-primary);
 }
 
@@ -157,11 +158,11 @@
     display: grid;
     gap: 1rem;
     padding: 1.6rem;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     overflow: hidden;
-    box-shadow: 0 24px 40px -32px rgba(0, 0, 0, 0.7);
+    box-shadow: var(--shadow-card);
     z-index: 1;
 }
 
@@ -217,7 +218,7 @@
 .heroCardKicker {
     margin: 0 0 0.2rem;
     font-size: 0.65rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -230,14 +231,14 @@
 .heroCardLink {
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-primary);
-    font-size: 0.7rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
     text-decoration: none;
 }
 
@@ -257,14 +258,15 @@
     display: grid;
     gap: 0.3rem;
     padding: 0.7rem 0.8rem;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
+    box-shadow: var(--shadow-soft);
 }
 
 .statLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -278,7 +280,7 @@
 .commandHint {
     position: relative;
     padding: 0.75rem 0.9rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px dashed var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-deemphasized);
@@ -289,15 +291,16 @@
     display: grid;
     gap: 0.6rem;
     padding: 0.8rem 0.9rem;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
+    box-shadow: var(--shadow-soft);
 }
 
 .heartbeatKicker {
     margin: 0;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -326,7 +329,7 @@
 
 .heartbeatLabel {
     font-size: 0.6rem;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -334,14 +337,14 @@
 .tickerSection {
     margin-top: 3rem;
     padding: 1rem 1.2rem;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: linear-gradient(140deg, var(--color-surface), var(--color-surface-2));
     display: grid;
     gap: 0.9rem;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 18px 32px -30px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card);
 }
 
 .tickerSection::before {
@@ -363,8 +366,8 @@
 
 .tickerKicker {
     margin: 0 0 0.2rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.28em;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -375,8 +378,8 @@
 }
 
 .tickerMeta {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -405,13 +408,14 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.65rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-primary);
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    font-weight: 600;
     white-space: nowrap;
     flex-shrink: 0;
     text-decoration: none;
@@ -427,8 +431,8 @@
 }
 
 .tickerType {
-    font-size: 0.55rem;
-    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
 }
 
@@ -461,7 +465,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.1rem 0.4rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     font-size: 0.75rem;
@@ -481,9 +485,9 @@
 }
 
 .section {
-    margin-top: 3.75rem;
+    margin-top: 4rem;
     display: grid;
-    gap: 2rem;
+    gap: 1.25rem;
 }
 
 .section:last-of-type {
@@ -504,15 +508,15 @@
     top: 0.2rem;
     bottom: 0.2rem;
     width: 2px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: linear-gradient(180deg, var(--color-primary), transparent);
     opacity: 0.6;
 }
 
 .sectionKicker {
     margin: 0;
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -544,12 +548,12 @@
     display: grid;
     gap: 0.8rem;
     padding: 1.1rem 1.2rem;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: linear-gradient(140deg, var(--color-surface), var(--color-surface-2));
     color: var(--color-text-primary);
     text-decoration: none;
-    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -571,7 +575,7 @@
     left: 1rem;
     right: 1rem;
     height: 1px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: linear-gradient(90deg, var(--color-primary), transparent);
     opacity: 0.35;
     pointer-events: none;
@@ -590,7 +594,7 @@
     text-decoration: none;
     border-color: var(--color-primary);
     transform: translateY(-2px);
-    box-shadow: 0 20px 36px -28px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card-strong);
 }
 
 .cardTitle {
@@ -605,8 +609,8 @@
 }
 
 .cardMeta {
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }

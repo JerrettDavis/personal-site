@@ -71,11 +71,13 @@ export default function Layout({
                                    pageType,
                                    description,
                                    containerVariant,
+                                   showSectionIndex = true,
                                }: {
     children: React.ReactNode
     pageType?: PageType
     description?: string
     containerVariant?: 'default' | 'wide'
+    showSectionIndex?: boolean
 }) {
     const router = useRouter();
     const metaDescription = description
@@ -274,7 +276,7 @@ export default function Layout({
                 <main ref={mainRef}>{children}</main>
                 <GoBackToLink pageType={pageType}/>
             </div>
-            {sectionItems.length > 1 && (
+            {showSectionIndex && sectionItems.length > 1 && (
                 <nav className={styles.sectionIndex} aria-label="Section index">
                     {sectionItems.map((item) => (
                         <a

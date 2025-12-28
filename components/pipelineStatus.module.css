@@ -3,15 +3,16 @@
     align-items: center;
     gap: 0.55rem;
     padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: var(--color-surface);
     color: var(--color-text-primary);
-    font-size: 0.65rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
     text-decoration: none;
     white-space: nowrap;
+    font-weight: 600;
 }
 
 .label {
@@ -29,13 +30,13 @@
     align-items: center;
     gap: 0.2rem;
     font-size: 0.6rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
 }
 
 .dot {
     width: 6px;
     height: 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-text-deemphasized);
 }
 
@@ -53,7 +54,7 @@
 
 .meta {
     font-size: 0.6rem;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     color: var(--color-text-deemphasized);
 }
 
@@ -112,8 +113,8 @@
 
     .badge[data-variant="menu"] {
         padding: 0.3rem 0.55rem;
-        font-size: 0.6rem;
-        letter-spacing: 0.12em;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
     }
 
     .badge[data-variant="menu"] .counts {

@@ -3,7 +3,7 @@
     max-height: 80vh;
     max-height: 80svh;
     max-height: 80dvh;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     overflow: hidden;
@@ -58,7 +58,7 @@
     align-items: center;
     gap: 1rem;
     padding: 0.6rem 1.1rem;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1px solid rgba(37, 104, 255, 0.18);
     background: linear-gradient(90deg, rgba(37, 104, 255, 0.07), transparent 65%);
     pointer-events: none;
@@ -73,7 +73,7 @@
     width: 6px;
     height: 100%;
     flex: 0 0 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: rgba(37, 104, 255, 0.5);
 }
 
@@ -98,7 +98,7 @@
 
 .laneTitle {
     font-size: 0.75rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary);
     font-weight: 600;
@@ -114,7 +114,7 @@
     display: grid;
     gap: 0.25rem;
     padding: 0.6rem 0.75rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
@@ -126,7 +126,7 @@
     height: 10px;
     background: var(--color-surface);
     border: 2px solid var(--color-primary);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     opacity: 0.9;
     transform: translate(-50%, -50%);
 }
@@ -134,7 +134,7 @@
 
 .flowNodeActive {
     border-color: var(--color-primary);
-    box-shadow: 0 12px 20px -18px rgba(37, 104, 255, 0.6);
+    box-shadow: var(--shadow-soft);
 }
 
 .flowNodeCurrent {

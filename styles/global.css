@@ -3,58 +3,82 @@ body[data-theme="light"] {
     --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
     --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
     --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-    --color-primary: #1c5f7a;
-    --color-text-primary: #0f1720;
-    --color-text-secondary: #144b63;
-    --color-text-deemphasized: #4b5565;
-    --color-link: #2a4db8;
-    --color-link-deemphasized: #4f66b3;
-    --color-bg-primary: #eef1f6;
-    --color-bg-toggle: #1c5f7a;
+    --color-primary: #14657b;
+    --color-text-primary: #0b1220;
+    --color-text-secondary: #14354a;
+    --color-text-deemphasized: #556171;
+    --color-link: #1d4ed8;
+    --color-link-deemphasized: #3b5dc1;
+    --color-bg-primary: #f2f5fb;
+    --color-bg-toggle: #14657b;
     --color-bg-thumb: #ffffff;
-    --color-border: #c9d3e1;
-    --color-placeholder-bg-start: #e9eef7;
-    --color-placeholder-bg-end: #dde5f1;
-    --color-surface: #f7f9fc;
-    --color-surface-2: #e7ecf4;
-    --color-bg-glow-1: rgba(72, 182, 210, 0.22);
-    --color-bg-glow-2: rgba(108, 120, 200, 0.14);
+    --color-border: #d3dbe8;
+    --color-border-strong: #b9c6da;
+    --color-placeholder-bg-start: #edf2f8;
+    --color-placeholder-bg-end: #e1e8f4;
+    --color-surface: #ffffff;
+    --color-surface-2: #eef2f8;
+    --color-surface-3: #e5ecf5;
+    --color-bg-deemphasized: #e6ebf3;
+    --shadow-soft: 0 1px 2px rgba(12, 18, 32, 0.08);
+    --shadow-card: 0 16px 30px -24px rgba(12, 18, 32, 0.28);
+    --shadow-card-strong: 0 26px 50px -36px rgba(12, 18, 32, 0.45);
+    --radius-xs: 6px;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --radius-pill: 999px;
+    --color-bg-glow-1: rgba(66, 177, 204, 0.2);
+    --color-bg-glow-2: rgba(107, 127, 199, 0.12);
     --color-selection-bg: #1c5f7a;
     --color-selection-text: #f7f9fc;
-    --color-grid: rgba(28, 95, 122, 0.045);
-    --color-grid-strong: rgba(28, 95, 122, 0.07);
-    --color-hex-highlight: rgba(28, 95, 122, 0.16);
-    --color-glow: rgba(28, 95, 122, 0.35);
-    --color-glow-shadow: rgba(28, 95, 122, 0.25);
+    --color-grid: rgba(20, 101, 123, 0.035);
+    --color-grid-strong: rgba(20, 101, 123, 0.06);
+    --color-hex-highlight: rgba(20, 101, 123, 0.14);
+    --color-glow: rgba(20, 101, 123, 0.3);
+    --color-glow-shadow: rgba(20, 101, 123, 0.2);
 }
 
 body[data-theme="dark"] {
     --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
     --font-display: "Space Grotesk", "IBM Plex Sans", sans-serif;
     --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-    --color-primary: #7cc9e4;
-    --color-text-primary: #e7edf7;
-    --color-text-secondary: #7cc9e4;
-    --color-text-deemphasized: #a3adbe;
-    --color-link: #9b90f1;
-    --color-link-deemphasized: #b5ace7;
+    --color-primary: #7fc7de;
+    --color-text-primary: #e8eef7;
+    --color-text-secondary: #a0c7d7;
+    --color-text-deemphasized: #98a4b8;
+    --color-link: #9aa8ff;
+    --color-link-deemphasized: #b3baf4;
     --color-bg-primary: #0a0f18;
     --color-bg-toggle: #1b2334;
-    --color-bg-thumb: #9b90f1;
-    --color-border: #2a3346;
-    --color-placeholder-bg-start: #131a2a;
-    --color-placeholder-bg-end: #0a0f17;
+    --color-bg-thumb: #9aa8ff;
+    --color-border: #2a3447;
+    --color-border-strong: #3d4a63;
+    --color-placeholder-bg-start: #121a2a;
+    --color-placeholder-bg-end: #0b0f19;
     --color-surface: #111827;
-    --color-surface-2: #172235;
-    --color-bg-glow-1: rgba(82, 184, 212, 0.22);
-    --color-bg-glow-2: rgba(120, 118, 200, 0.16);
+    --color-surface-2: #162032;
+    --color-surface-3: #1d2a40;
+    --color-bg-deemphasized: #131b2c;
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-card: 0 18px 36px -26px rgba(0, 0, 0, 0.7);
+    --shadow-card-strong: 0 26px 60px -36px rgba(0, 0, 0, 0.75);
+    --radius-xs: 6px;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --radius-pill: 999px;
+    --color-bg-glow-1: rgba(82, 184, 212, 0.2);
+    --color-bg-glow-2: rgba(120, 118, 200, 0.14);
     --color-selection-bg: #27465f;
     --color-selection-text: #f0f4ff;
-    --color-grid: rgba(124, 201, 228, 0.045);
-    --color-grid-strong: rgba(124, 201, 228, 0.07);
-    --color-hex-highlight: rgba(124, 201, 228, 0.16);
-    --color-glow: rgba(124, 201, 228, 0.35);
-    --color-glow-shadow: rgba(124, 201, 228, 0.25);
+    --color-grid: rgba(127, 199, 222, 0.04);
+    --color-grid-strong: rgba(127, 199, 222, 0.065);
+    --color-hex-highlight: rgba(127, 199, 222, 0.15);
+    --color-glow: rgba(127, 199, 222, 0.32);
+    --color-glow-shadow: rgba(127, 199, 222, 0.22);
 }
 
 html {
@@ -81,8 +105,8 @@ body {
     padding: 0;
     margin: 0;
     font-family: var(--font-body);
-    line-height: 1.6;
-    font-size: 18px;
+    line-height: 1.65;
+    font-size: 17.5px;
     transition: background 0.25s ease-in-out;
     min-height: 100%;
     position: relative;
@@ -99,7 +123,7 @@ body::before {
         repeating-linear-gradient(60deg, var(--color-grid-strong) 0 1px, transparent 1px 48px),
         repeating-linear-gradient(120deg, var(--color-grid-strong) 0 1px, transparent 1px 48px),
         repeating-linear-gradient(0deg, var(--color-grid) 0 1px, transparent 1px 48px);
-    opacity: 0.28;
+    opacity: 0.22;
 }
 
 #__next {
@@ -158,7 +182,7 @@ html[data-reveal-ready="true"] [data-reveal="true"] {
 h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-secondary);
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
 }
 
 * {
@@ -168,10 +192,13 @@ h1, h2, h3, h4, h5, h6 {
 a {
     color: var(--color-link);
     text-decoration: none;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
 }
 
 a:hover {
     text-decoration: underline;
+    text-decoration-thickness: 2px;
 }
 
 a:visited {

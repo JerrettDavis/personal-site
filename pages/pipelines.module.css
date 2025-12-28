@@ -1,20 +1,20 @@
 .hero {
     display: grid;
     gap: 1rem;
-    padding: 2.5rem 0 1.5rem;
+    padding: 3rem 0 2rem;
 }
 
 .kicker {
     margin: 0;
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
 
 .title {
     margin: 0;
-    font-size: 2.6rem;
+    font-size: 2.8rem;
 }
 
 .lede {
@@ -33,9 +33,10 @@
     display: grid;
     gap: 0.35rem;
     padding: 0.85rem 0.95rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
+    box-shadow: var(--shadow-card);
 }
 
 .statValue {
@@ -45,8 +46,8 @@
 }
 
 .statLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -61,8 +62,8 @@
 }
 
 .metaLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
@@ -71,20 +72,20 @@
 }
 
 .metaCache {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
 
 .refreshButton {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.25rem 0.6rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
 }
@@ -96,7 +97,7 @@
 
 .notice {
     padding: 0.75rem 0.9rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-deemphasized);
@@ -106,7 +107,7 @@
 .repoSection {
     margin-top: 2rem;
     display: grid;
-    gap: 1.2rem;
+    gap: 0.8rem;
 }
 
 .sectionTitle {
@@ -124,10 +125,10 @@
     display: grid;
     gap: 0.6rem;
     padding: 1rem 1.1rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-card);
 }
 
 .repoHeader {
@@ -171,7 +172,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
@@ -321,11 +322,11 @@
     display: inline-flex;
     align-items: center;
     padding: 0.2rem 0.55rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
-    font-size: 0.6rem;
-    letter-spacing: 0.16em;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
     white-space: nowrap;
@@ -350,8 +351,8 @@
 }
 
 .metricsTrendLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -369,7 +370,7 @@
 
 .metricsTrendBar {
     width: 8px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-primary);
     opacity: 0.85;
 }
@@ -400,8 +401,8 @@
 }
 
 .metricsInfoLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -429,12 +430,12 @@
 
 .metricsRefreshButton {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
 }
