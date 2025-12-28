@@ -64,7 +64,7 @@ export const PIPELINE_NODES: PipelineNode[] = [
     {id: 'deploy', lane: 'deploy', title: 'Vercel build', meta: 'immutable artifacts', step: 3, order: 0, column: 4},
     {id: 'previews', lane: 'deploy', title: 'Preview branches', meta: 'PR deployments', step: 3, order: 1, column: 4},
     {id: 'telemetry', lane: 'observe', title: 'Telemetry cache', meta: 'cacheStore + hooks', step: 4, order: 0, column: 5},
-    {id: 'status', lane: 'observe', title: 'Status surfaces', meta: '/pipelines + /work-in-progress', step: 4, order: 1, column: 6},
+    {id: 'status', lane: 'observe', title: 'Status surfaces', meta: '/projects#pipeline-metrics + /work-in-progress', step: 4, order: 1, column: 6},
 ];
 
 export const PIPELINE_EDGES: PipelineEdge[] = [

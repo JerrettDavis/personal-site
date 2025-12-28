@@ -231,7 +231,7 @@ order: 5
     <span class="doc-card-title">Work in progress</span>
     <p class="doc-card-text">Active preview deployments and PR status.</p>
   </a>
-  <a class="doc-card" href="/pipelines">
+  <a class="doc-card" href="/projects#pipeline-metrics">
     <span class="doc-card-kicker">Telemetry</span>
     <span class="doc-card-title">Pipeline status</span>
     <p class="doc-card-text">Live build and repo activity surfaces.</p>

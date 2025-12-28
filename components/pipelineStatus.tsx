@@ -21,10 +21,10 @@ export default function PipelineStatus({
 
     return (
         <Link
-            href="/pipelines"
+            href="/projects#pipeline-metrics"
             className={`${styles.badge} glowable ${className ?? ''}`}
             aria-live="polite"
-            aria-label="View GitHub pipeline status details"
+            aria-label="View pipeline metrics overview"
             data-variant={variant}
             data-compact={compact ? 'true' : undefined}
         >

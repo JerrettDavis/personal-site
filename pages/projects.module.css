@@ -28,6 +28,44 @@
     margin-top: 1.6rem;
 }
 
+.densityToggle {
+    margin-top: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.densityLabel {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.densityButtons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.densityButton {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.densityButton[data-active="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(37, 104, 255, 0.3);
+}
+
 .statCard {
     display: grid;
     gap: 0.35rem;
@@ -52,11 +90,28 @@
 }
 
 .grid {
+    --grid-gap: 1.5rem;
+    --grid-min: 260px;
     display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--grid-gap);
+    grid-template-columns: repeat(auto-fit, minmax(var(--grid-min), 1fr));
     margin-top: 2rem;
     align-items: stretch;
+}
+
+.grid[data-density="tiny"] {
+    --grid-gap: 1.5rem;
+    --grid-min: 260px;
+}
+
+.grid[data-density="normal"] {
+    --grid-gap: 2.2rem;
+    --grid-min: 320px;
+}
+
+.grid[data-density="roomy"] {
+    --grid-gap: 3rem;
+    --grid-min: 380px;
 }
 
 .grid[data-expanded="true"] .projectCard {
@@ -82,6 +137,16 @@
     min-height: 360px;
     height: 100%;
     z-index: 0;
+}
+
+.grid[data-density="normal"] .projectCard {
+    padding: 1.6rem;
+    min-height: 390px;
+}
+
+.grid[data-density="roomy"] .projectCard {
+    padding: 1.8rem;
+    min-height: 420px;
 }
 
 .projectCardExpanded {
@@ -481,6 +546,119 @@
     color: var(--color-text-deemphasized);
 }
 
+.detailTelemetryGrid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-bottom: 0.8rem;
+}
+
+.detailTelemetryCard {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+}
+
+.detailTelemetryCardFixed {
+    height: 260px;
+    grid-template-rows: auto 1fr auto auto;
+}
+
+.detailTrendGrid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.detailTrendWrap {
+    height: 130px;
+    overflow: hidden;
+    display: grid;
+    align-content: start;
+}
+
+.detailTelemetryFooter {
+    display: grid;
+    gap: 0.3rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.detailTelemetryStat {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.pipelineRunList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.pipelineRunItem {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    position: relative;
+    overflow: hidden;
+}
+
+.pipelineRunItem::before {
+    content: "";
+    position: absolute;
+    left: 0.55rem;
+    top: 0.6rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-text-deemphasized);
+}
+
+.pipelineRunItem[data-state="running"]::before {
+    background: #e3b341;
+}
+
+.pipelineRunItem[data-state="passing"]::before {
+    background: #2da44e;
+}
+
+.pipelineRunItem[data-state="failing"]::before {
+    background: #d1242f;
+}
+
+.pipelineRunItem[data-state="unknown"]::before {
+    background: var(--color-text-deemphasized);
+}
+
+.pipelineRunLink {
+    padding-left: 0.85rem;
+    font-size: 0.85rem;
+    color: var(--color-link);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.pipelineRunLink:hover {
+    text-decoration: underline;
+}
+
+.pipelineRunMeta {
+    padding-left: 0.85rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
 
 @keyframes shimmer {
     0% {
@@ -789,6 +967,73 @@
     text-decoration: none;
 }
 
+.pipelineSection {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    scroll-margin-top: 7rem;
+    position: relative;
+}
+
+.pipelineSection::before {
+    content: "";
+    position: absolute;
+    inset: -0.6rem;
+    border-radius: 22px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.pipelineSection[data-spotlight="true"]::before {
+    border-color: rgba(37, 104, 255, 0.35);
+    box-shadow: 0 0 0 1px rgba(37, 104, 255, 0.35), 0 18px 36px -30px rgba(37, 104, 255, 0.6);
+    opacity: 1;
+    animation: pipelinePulse 1.4s ease;
+}
+
+.pipelineSectionHeader {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 46rem;
+    margin-bottom: 1.4rem;
+}
+
+.pipelineSectionKicker {
+    margin: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-text-deemphasized);
+}
+
+.pipelineSectionTitle {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.pipelineSectionText {
+    margin: 0;
+    color: var(--color-text-deemphasized);
+    font-size: 0.95rem;
+}
+
+@keyframes pipelinePulse {
+    0% {
+        opacity: 0.2;
+        transform: scale(0.995);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.01);
+    }
+}
+
 .linksRow {
     display: flex;
     flex-wrap: wrap;
@@ -926,5 +1171,10 @@
 
     .skeleton {
         animation: none;
+    }
+
+    .pipelineSection[data-spotlight="true"]::before {
+        animation: none;
+        transform: none;
     }
 }

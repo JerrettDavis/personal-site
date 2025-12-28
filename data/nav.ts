@@ -27,8 +27,8 @@ export const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'Pipelines',
-        href: '/pipelines',
-        description: 'GitHub Actions pipeline status across active repos.',
+        href: '/projects#pipeline-metrics',
+        description: 'GitHub Actions pipeline status and repo metrics overview.',
         keywords: ['ci', 'actions', 'builds'],
         showInNav: false,
     },

@@ -87,7 +87,7 @@ order: 6
     <span class="doc-card-title">Project details</span>
     <p class="doc-card-text">Test the expandable card interactions.</p>
   </a>
-  <a class="doc-card" href="/pipelines">
+  <a class="doc-card" href="/projects#pipeline-metrics">
     <span class="doc-card-kicker">Telemetry</span>
     <span class="doc-card-title">Pipeline status</span>
     <p class="doc-card-text">Validate live status and mock data flows.</p>

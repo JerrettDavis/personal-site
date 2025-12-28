@@ -20,11 +20,15 @@ import {
 } from '../../lib/cacheStore';
 
 type WorkflowRun = {
+    id: number;
     name: string;
     status: string;
     conclusion: string | null;
     html_url: string;
+    created_at?: string;
     updated_at: string;
+    event?: string;
+    head_branch?: string;
 };
 
 type WorkflowRunsResponse = {
@@ -65,6 +69,8 @@ const parseRateLimit = (headers: Headers) => {
     return Date.now() + 5 * 60 * 1000;
 };
 
+const RUNS_PER_REPO = 5;
+
 const fetchRepoStatus = async (
     repo: GitHubRepo,
     headers: Record<string, string>,
@@ -83,9 +89,10 @@ const fetchRepoStatus = async (
             runConclusion: null,
             updatedAt: null,
             note: 'Rate limited. Skipping additional requests.',
+            runs: [],
         };
     }
-    const url = `https://api.github.com/repos/${repo.full_name}/actions/runs?per_page=1`;
+    const url = `https://api.github.com/repos/${repo.full_name}/actions/runs?per_page=${RUNS_PER_REPO}`;
     try {
         const response = await fetch(url, {headers});
         const limitReset = parseRateLimit(response.headers);
@@ -111,7 +118,8 @@ const fetchRepoStatus = async (
             };
         }
         const data = (await response.json()) as WorkflowRunsResponse;
-        const run = data.workflow_runs?.[0];
+        const runs = Array.isArray(data.workflow_runs) ? data.workflow_runs : [];
+        const run = runs[0];
         if (!run) {
             return {
                 id: repo.id,
@@ -127,6 +135,26 @@ const fetchRepoStatus = async (
                 note: 'No workflow runs found.',
             };
         }
+        const runSummaries = [];
+        const seenKeys = new Set<string>();
+        for (const item of runs) {
+            const name = item.name ?? 'Workflow run';
+            const dedupeKey = item.name ? `name:${item.name}` : `id:${item.id}`;
+            if (seenKeys.has(dedupeKey)) continue;
+            seenKeys.add(dedupeKey);
+            runSummaries.push({
+                id: item.id,
+                name,
+                status: item.status ?? null,
+                conclusion: item.conclusion ?? null,
+                url: item.html_url ?? null,
+                updatedAt: item.updated_at ?? null,
+                createdAt: item.created_at ?? null,
+                branch: item.head_branch ?? null,
+                event: item.event ?? null,
+            });
+            if (runSummaries.length >= RUNS_PER_REPO) break;
+        }
         return {
             id: repo.id,
             name: repo.name,
@@ -138,6 +166,7 @@ const fetchRepoStatus = async (
             runStatus: run.status ?? null,
             runConclusion: run.conclusion ?? null,
             updatedAt: run.updated_at ?? null,
+            runs: runSummaries,
         };
     } catch (error) {
         return {

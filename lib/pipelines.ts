@@ -1,5 +1,17 @@
 export type PipelineState = 'running' | 'passing' | 'failing' | 'unknown';
 
+export interface PipelineRunSummary {
+    id: number;
+    name: string;
+    status: string | null;
+    conclusion: string | null;
+    url: string | null;
+    updatedAt: string | null;
+    createdAt?: string | null;
+    branch?: string | null;
+    event?: string | null;
+}
+
 export interface PipelineRepoStatus {
     id: number;
     name: string;
@@ -12,6 +24,7 @@ export interface PipelineRepoStatus {
     runConclusion: string | null;
     updatedAt: string | null;
     note?: string | null;
+    runs?: PipelineRunSummary[];
 }
 
 export interface PipelineSummary {
