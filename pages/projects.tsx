@@ -5,7 +5,7 @@ import styles from "./projects.module.css";
 import pipelineStyles from "./pipelines.module.css";
 import {GetStaticProps} from "next";
 import {getActiveRepos, GitHubRepo} from "../lib/github";
-import {GITHUB_USERNAME, PROJECT_ACTIVITY_DAYS, PROJECT_OVERRIDES} from "../data/projects";
+import {GITHUB_USERNAME, PROJECT_ACTIVITY_DAYS, PROJECTS} from "../data/projects";
 import type {ProjectLink, ProjectMeta} from "../data/projects";
 import DateStamp from "../components/date";
 import {getSortedPostsData} from "../lib/posts";
@@ -20,6 +20,7 @@ import {usePipelineStatus} from "../lib/hooks/usePipelineStatus";
 import type {PipelineRepoStatus, PipelineState} from "../lib/pipelines";
 import type {ProjectDetailResponse} from "../lib/projectDetails";
 import {useGithubMetrics} from "../lib/hooks/useGithubMetrics";
+import {useNugetMetrics} from "../lib/hooks/useNugetMetrics";
 import type {GithubRepoMetricSummary} from "../lib/githubMetricsTypes";
 import {useRouter} from "next/router";
 
@@ -115,14 +116,6 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     const errorSummary = isDev ? githubError : 'GitHub data is temporarily unavailable.';
     const lede = 'Everything here has seen GitHub activity in the last year. Each card blends stats with my own notes, topics, and relevant writing.';
     const totalStars = projects.reduce((sum, project) => sum + (project.repo.stargazers_count ?? 0), 0);
-    const featuredCount = projects.filter((project) => project.meta?.featured).length;
-    const latestPushedAt = projects[0]?.repo?.pushed_at;
-    const stats = [
-        {id: 'active', label: 'Active repos', value: projects.length},
-        {id: 'featured', label: 'Featured', value: featuredCount},
-        {id: 'stars', label: 'Stars', value: totalStars},
-        {id: 'latest', label: 'Latest push', value: latestPushedAt ? <DateStamp dateString={latestPushedAt} /> : '---'},
-    ];
     const {
         data: pipelineData,
         state: pipelineState,
@@ -138,6 +131,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         refresh: refreshMetrics,
         refreshLockedUntil: metricsRefreshLockedUntil,
     } = useGithubMetrics();
+    const {data: nugetData} = useNugetMetrics();
     const pipelineSummary = pipelineData?.summary;
     const pipelineRepos = pipelineData?.repos ?? [];
     const pipelineError = pipelineData?.error ?? null;
@@ -145,6 +139,14 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     const metricsUpdate = metricsData?.update;
     const metricsRepos = metricsData?.repos ?? [];
     const metricsError = metricsData?.error ?? null;
+    const nugetPackageCount = nugetData?.packages?.length ?? 0;
+    const nugetDownloadsValue = !nugetData
+        ? 'Loading'
+        : nugetData.error
+            ? 'Unavailable'
+            : nugetPackageCount > 0
+                ? formatNumber(nugetData.totalDownloads ?? 0)
+                : 'No packages';
     const metricsStats = [
         {
             id: 'metrics-commits-week',
@@ -166,8 +168,13 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         },
         {
             id: 'metrics-stars',
-            label: 'Stars',
+            label: 'Stars on my repos',
             value: formatNumber(metricsSummary?.stars ?? totalStars),
+        },
+        {
+            id: 'metrics-nuget-downloads',
+            label: 'NuGet downloads',
+            value: nugetDownloadsValue,
         },
     ];
     const pipelineOverviewStats = [
@@ -202,12 +209,22 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         },
         {
             id: 'stars',
-            label: 'Stars',
+            label: 'Stars on my repos',
             value: formatNumber(metricsSummary?.stars ?? totalStars),
         },
         {
+            id: 'nuget-downloads',
+            label: 'NuGet downloads',
+            value: nugetDownloadsValue,
+        },
+        {
+            id: 'repos',
+            label: 'Repos started',
+            value: formatNumber(metricsSummary?.repos ?? projects.length),
+        },
+        {
             id: 'active',
-            label: 'Active repos',
+            label: 'Active repos (30d)',
             value: formatNumber(metricsSummary?.activeRepos ?? projects.length),
         },
     ];
@@ -487,6 +504,34 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     }, [expandedId]);
 
     useEffect(() => {
+        if (expandedId === null) return;
+        const panel = document.querySelector('[data-detail-active="true"]');
+        if (!panel) return;
+
+        const handlePointer = (event: MouseEvent | TouchEvent) => {
+            const target = event.target as Node | null;
+            if (!target) return;
+            if (panel.contains(target)) return;
+            setExpandedId(null);
+        };
+
+        const handleKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setExpandedId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handlePointer);
+        document.addEventListener('touchstart', handlePointer);
+        document.addEventListener('keydown', handleKey);
+        return () => {
+            document.removeEventListener('mousedown', handlePointer);
+            document.removeEventListener('touchstart', handlePointer);
+            document.removeEventListener('keydown', handleKey);
+        };
+    }, [expandedId]);
+
+    useEffect(() => {
         if (typeof window === 'undefined') return;
         if (!router.asPath.includes(`#${PIPELINE_ANCHOR_ID}`)) return;
         const target = document.getElementById(PIPELINE_ANCHOR_ID);
@@ -515,75 +560,70 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                 <p className={styles.lede}>
                     {lede}
                 </p>
-                <StatGrid
-                    items={stats}
-                    gridClassName={styles.statsGrid}
-                    itemClassName={`${styles.statCard} glowable`}
-                    valueClassName={styles.statValue}
-                    labelClassName={styles.statLabel}
-                />
-                {pipelineSummary && (
-                    <div className={styles.pipelineCallout}>
-                        <div>
-                            <p className={styles.pipelineKicker}>Pipelines</p>
-                            <h2 className={styles.pipelineTitle}>Build telemetry</h2>
-                            <p className={styles.pipelineText}>
-                                Live status across active repos. Tap in when builds are moving.
-                            </p>
+                <div className={styles.heroCallouts}>
+                    {pipelineSummary && (
+                        <div className={styles.pipelineCallout}>
+                            <div>
+                                <p className={styles.pipelineKicker}>Pipelines</p>
+                                <h2 className={styles.pipelineTitle}>Build telemetry</h2>
+                                <p className={styles.pipelineText}>
+                                    Live status across active repos. Tap in when builds are moving.
+                                </p>
+                            </div>
+                            <div className={styles.pipelineStats}>
+                                <span className={styles.pipelineStat} data-state="running">
+                                    Running {pipelineSummary.running}
+                                </span>
+                                <span className={styles.pipelineStat} data-state="passing">
+                                    Passing {pipelineSummary.passing}
+                                </span>
+                                <span className={styles.pipelineStat} data-state="failing">
+                                    Failing {pipelineSummary.failing}
+                                </span>
+                            </div>
+                            <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.pipelineLink} glowable`}>
+                                View pipeline metrics
+                            </Link>
                         </div>
-                        <div className={styles.pipelineStats}>
-                            <span className={styles.pipelineStat} data-state="running">
-                                Running {pipelineSummary.running}
-                            </span>
-                            <span className={styles.pipelineStat} data-state="passing">
-                                Passing {pipelineSummary.passing}
-                            </span>
-                            <span className={styles.pipelineStat} data-state="failing">
-                                Failing {pipelineSummary.failing}
-                            </span>
+                    )}
+                    <div className={styles.metricsCallout}>
+                        <div className={styles.metricsHeader}>
+                            <div>
+                                <p className={styles.metricsKicker}>GitHub metrics</p>
+                            <h2 className={styles.metricsTitle}>Commits, stars, LOC, and NuGet</h2>
+                                <p className={styles.metricsText}>
+                                    Weekly activity trends across owned public repos.
+                                </p>
+                            </div>
+                            <div className={styles.metricsMeta}>
+                                <span className={styles.metricsMetaLabel}>Snapshot</span>
+                                <span className={styles.metricsMetaValue}>
+                                    {metricsData?.historyUpdatedAt ? (
+                                        <DateStamp dateString={metricsData.historyUpdatedAt} />
+                                    ) : metricsUpdate?.inProgress ? (
+                                        'Updating'
+                                    ) : (
+                                        'Pending'
+                                    )}
+                                </span>
+                                {metricsUpdate?.inProgress && metricsUpdate.totalRepos > 0 && (
+                                    <span className={styles.metricsMetaBadge}>
+                                        {metricsUpdate.processedRepos}/{metricsUpdate.totalRepos} repos
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.pipelineLink} glowable`}>
-                            View pipeline metrics
+                        <StatGrid
+                            items={metricsStats}
+                            gridClassName={styles.metricsGrid}
+                            itemClassName={`${styles.statCard} glowable`}
+                            valueClassName={styles.statValue}
+                            labelClassName={styles.statLabel}
+                        />
+                        <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.metricsLink} glowable`}>
+                            View metrics detail
                         </Link>
                     </div>
-                )}
-                <div className={styles.metricsCallout}>
-                    <div className={styles.metricsHeader}>
-                        <div>
-                            <p className={styles.metricsKicker}>GitHub metrics</p>
-                            <h2 className={styles.metricsTitle}>Commits, stars, and LOC</h2>
-                            <p className={styles.metricsText}>
-                                Weekly activity trends tied to my contributions.
-                            </p>
-                        </div>
-                        <div className={styles.metricsMeta}>
-                            <span className={styles.metricsMetaLabel}>Snapshot</span>
-                            <span className={styles.metricsMetaValue}>
-                                {metricsData?.historyUpdatedAt ? (
-                                    <DateStamp dateString={metricsData.historyUpdatedAt} />
-                                ) : metricsUpdate?.inProgress ? (
-                                    'Updating'
-                                ) : (
-                                    'Pending'
-                                )}
-                            </span>
-                            {metricsUpdate?.inProgress && metricsUpdate.totalRepos > 0 && (
-                                <span className={styles.metricsMetaBadge}>
-                                    {metricsUpdate.processedRepos}/{metricsUpdate.totalRepos} repos
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    <StatGrid
-                        items={metricsStats}
-                        gridClassName={styles.metricsGrid}
-                        itemClassName={`${styles.statCard} glowable`}
-                        valueClassName={styles.statValue}
-                        labelClassName={styles.statLabel}
-                    />
-                    <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.metricsLink} glowable`}>
-                        View metrics detail
-                    </Link>
                 </div>
             </section>
             <div className={styles.densityToggle}>
@@ -700,6 +740,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                         const openPulls = detailPayload?.openPulls ?? null;
                         const latestRelease = detailPayload?.latestRelease ?? null;
                         const readme = detailPayload?.readme ?? null;
+                        const nugetPackages = detailPayload?.nugetPackages ?? null;
                         const detailFetchedAt = detailPayload?.fetchedAt ?? null;
                         const rateLimitedUntil = detailPayload?.rateLimitedUntil ?? null;
                         const repoIssuesUrl = `${repo.html_url}/issues`;
@@ -817,6 +858,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                     aria-label={`${displayName} details`}
                                     aria-hidden={!isExpanded}
                                     data-detail-panel="true"
+                                    data-detail-active={isExpanded ? 'true' : undefined}
                                 >
                                     <div className={styles.detailInner}>
                                         <div className={styles.detailHeader}>
@@ -843,7 +885,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                         {isDetailLoading ? (
                                             <>
                                                 <div className={styles.detailGrid}>
-                                                    {Array.from({length: 4}).map((_, index) => (
+                                                    {Array.from({length: 6}).map((_, index) => (
                                                         <div
                                                             className={`${styles.detailItem} ${styles.detailSkeletonCard}`}
                                                             key={`detail-skeleton-${repo.id}-${index}`}
@@ -969,117 +1011,162 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                                     </a>
                                                 </div>
                                                 <div className={styles.detailTelemetryGrid}>
-                                                    <div className={styles.detailTelemetryCard}>
-                                                        <span className={styles.detailLabel}>Pipeline run stats</span>
-                                                        {pipelineStatus?.runUrl ? (
-                                                            <a
-                                                                href={pipelineStatus.runUrl}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className={styles.detailLink}
-                                                            >
-                                                                {pipelineDetailLabel}
-                                                            </a>
-                                                        ) : (
-                                                            <span className={styles.detailValue}>
-                                                                {pipelineDetailLabel}
-                                                            </span>
-                                                        )}
-                                                        {pipelineRunMeta ? (
-                                                            <span className={styles.detailMeta}>
-                                                                {pipelineRunMeta}
-                                                            </span>
-                                                        ) : (
-                                                            <span className={styles.detailMeta}>No workflow metadata</span>
-                                                        )}
-                                                        {pipelineUpdatedAt ? (
-                                                            <span className={styles.detailMeta}>
-                                                                Updated <DateStamp dateString={pipelineUpdatedAt} />
-                                                            </span>
-                                                        ) : (
-                                                            <span className={styles.detailMeta}>No workflow run</span>
-                                                        )}
-                                                        {runItems.length > 0 ? (
-                                                            <ul className={styles.pipelineRunList}>
-                                                                {runItems.map((run) => {
-                                                                    const runState = getRunState(run.status, run.conclusion);
-                                                                    return (
-                                                                        <li
-                                                                            key={run.id}
-                                                                            className={styles.pipelineRunItem}
-                                                                            data-state={runState}
-                                                                        >
-                                                                            {run.url ? (
-                                                                                <a
-                                                                                    href={run.url}
-                                                                                    target="_blank"
-                                                                                    rel="noreferrer"
-                                                                                    className={styles.pipelineRunLink}
-                                                                                >
-                                                                                    {run.name}
-                                                                                </a>
-                                                                            ) : (
-                                                                                <span className={styles.pipelineRunLink}>{run.name}</span>
-                                                                            )}
-                                                                            <span className={styles.pipelineRunMeta}>
-                                                                                {run.status ?? 'unknown'}
-                                                                                {run.conclusion ? ` · ${run.conclusion}` : ''}
-                                                                            </span>
-                                                                            <span className={styles.pipelineRunMeta}>
-                                                                                {run.updatedAt ? (
-                                                                                    <DateStamp dateString={run.updatedAt} />
+                                                    <div className={styles.detailTelemetryColumn}>
+                                                        <div className={styles.detailTelemetryCard}>
+                                                            <span className={styles.detailLabel}>Pipeline run stats</span>
+                                                            {pipelineStatus?.runUrl ? (
+                                                                <a
+                                                                    href={pipelineStatus.runUrl}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className={styles.detailLink}
+                                                                >
+                                                                    {pipelineDetailLabel}
+                                                                </a>
+                                                            ) : (
+                                                                <span className={styles.detailValue}>
+                                                                    {pipelineDetailLabel}
+                                                                </span>
+                                                            )}
+                                                            {pipelineRunMeta ? (
+                                                                <span className={styles.detailMeta}>
+                                                                    {pipelineRunMeta}
+                                                                </span>
+                                                            ) : (
+                                                                <span className={styles.detailMeta}>No workflow metadata</span>
+                                                            )}
+                                                            {pipelineUpdatedAt ? (
+                                                                <span className={styles.detailMeta}>
+                                                                    Updated <DateStamp dateString={pipelineUpdatedAt} />
+                                                                </span>
+                                                            ) : (
+                                                                <span className={styles.detailMeta}>No workflow run</span>
+                                                            )}
+                                                            {runItems.length > 0 ? (
+                                                                <ul className={styles.pipelineRunList}>
+                                                                    {runItems.map((run) => {
+                                                                        const runState = getRunState(run.status, run.conclusion);
+                                                                        return (
+                                                                            <li
+                                                                                key={run.id}
+                                                                                className={styles.pipelineRunItem}
+                                                                                data-state={runState}
+                                                                            >
+                                                                                {run.url ? (
+                                                                                    <a
+                                                                                        href={run.url}
+                                                                                        target="_blank"
+                                                                                        rel="noreferrer"
+                                                                                        className={styles.pipelineRunLink}
+                                                                                    >
+                                                                                        {run.name}
+                                                                                    </a>
                                                                                 ) : (
-                                                                                    'n/a'
+                                                                                    <span className={styles.pipelineRunLink}>{run.name}</span>
                                                                                 )}
-                                                                            </span>
-                                                                        </li>
-                                                                    );
-                                                                })}
-                                                            </ul>
-                                                        ) : (
-                                                            <p className={styles.detailMuted}>No recent runs.</p>
-                                                        )}
+                                                                                <span className={styles.pipelineRunMeta}>
+                                                                                    {run.status ?? 'unknown'}
+                                                                                    {run.conclusion ? ` · ${run.conclusion}` : ''}
+                                                                                </span>
+                                                                                <span className={styles.pipelineRunMeta}>
+                                                                                    {run.updatedAt ? (
+                                                                                        <DateStamp dateString={run.updatedAt} />
+                                                                                    ) : (
+                                                                                        'n/a'
+                                                                                    )}
+                                                                                </span>
+                                                                            </li>
+                                                                        );
+                                                                    })}
+                                                                </ul>
+                                                            ) : (
+                                                                <p className={styles.detailMuted}>No recent runs.</p>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className={`${styles.detailTelemetryCard} ${styles.detailTelemetryCardFixed}`}>
-                                                        <span className={styles.detailLabel}>Commit activity</span>
-                                                        {metrics ? (
-                                                            <>
-                                                                <div className={styles.detailTrendWrap}>
-                                                                    <div className={styles.detailTrendGrid}>
-                                                                        <MetricTrend
-                                                                            label="Commits (12w)"
-                                                                            values={metrics.commitTrend}
-                                                                            variant="commits"
-                                                                        />
-                                                                        <MetricTrend
-                                                                            label="Lines changed (12w)"
-                                                                            values={metrics.lineTrend}
-                                                                            variant="lines"
-                                                                        />
+                                                    <div className={styles.detailTelemetryColumn}>
+                                                        <div className={`${styles.detailTelemetryCard} ${styles.detailTelemetryCardFixed}`}>
+                                                            <span className={styles.detailLabel}>Commit activity</span>
+                                                            {metrics ? (
+                                                                <>
+                                                                    <div className={styles.detailTrendWrap}>
+                                                                        <div className={styles.detailTrendGrid}>
+                                                                            <MetricTrend
+                                                                                label="Commits (12w)"
+                                                                                values={metrics.commitTrend}
+                                                                                variant="commits"
+                                                                            />
+                                                                            <MetricTrend
+                                                                                label="Lines changed (12w)"
+                                                                                values={metrics.lineTrend}
+                                                                                variant="lines"
+                                                                            />
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div className={styles.detailTelemetryFooter}>
-                                                                    <span className={styles.detailTelemetryStat}>
-                                                                        7d {formatNumber(metrics.commits.week)} commits
-                                                                    </span>
-                                                                    <span className={styles.detailTelemetryStat}>
-                                                                        30d {formatNumber(metrics.commits.month)} commits
-                                                                    </span>
-                                                                    <span className={styles.detailTelemetryStat}>
-                                                                        365d {formatNumber(metrics.commits.year)} commits
-                                                                    </span>
-                                                                    <span className={styles.detailTelemetryStat}>
-                                                                        30d {formatDelta(metrics.additions.month, metrics.deletions.month)} lines
-                                                                    </span>
-                                                                </div>
-                                                            </>
-                                                        ) : (
-                                                            <p className={styles.detailMuted}>Metrics pending.</p>
-                                                        )}
-                                                        {metrics?.metricsUpdatedAt && (
-                                                            <span className={styles.detailMeta}>
-                                                                Updated <DateStamp dateString={metrics.metricsUpdatedAt} />
-                                                            </span>
+                                                                    <div className={styles.detailTelemetryFooter}>
+                                                                        <span className={styles.detailTelemetryStat}>
+                                                                            7d {formatNumber(metrics.commits.week)} commits
+                                                                        </span>
+                                                                        <span className={styles.detailTelemetryStat}>
+                                                                            30d {formatNumber(metrics.commits.month)} commits
+                                                                        </span>
+                                                                        <span className={styles.detailTelemetryStat}>
+                                                                            365d {formatNumber(metrics.commits.year)} commits
+                                                                        </span>
+                                                                        <span className={styles.detailTelemetryStat}>
+                                                                            30d {formatDelta(metrics.additions.month, metrics.deletions.month)} lines
+                                                                        </span>
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <p className={styles.detailMuted}>Metrics pending.</p>
+                                                            )}
+                                                            {metrics?.metricsUpdatedAt && (
+                                                                <span className={styles.detailMeta}>
+                                                                    Updated <DateStamp dateString={metrics.metricsUpdatedAt} />
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {nugetPackages !== null && (
+                                                            <div className={`${styles.detailTelemetryCard} ${styles.detailTelemetryCardScroll}`}>
+                                                                <span className={styles.detailLabel}>NuGet packages</span>
+                                                                {nugetPackages.length > 0 ? (
+                                                                    <>
+                                                                        <span className={styles.detailMeta}>
+                                                                            {nugetPackages.length} package
+                                                                            {nugetPackages.length === 1 ? '' : 's'}
+                                                                        </span>
+                                                                        <div className={styles.detailListScroll}>
+                                                                            <div className={styles.detailList}>
+                                                                                {nugetPackages.map((pkg) => (
+                                                                                    <div className={styles.detailListItem} key={pkg.id}>
+                                                                                        {pkg.url ? (
+                                                                                            <a
+                                                                                                href={pkg.url}
+                                                                                                target="_blank"
+                                                                                                rel="noreferrer"
+                                                                                                className={styles.detailLink}
+                                                                                            >
+                                                                                                {pkg.id}
+                                                                                            </a>
+                                                                                        ) : (
+                                                                                            <span className={styles.detailValue}>{pkg.id}</span>
+                                                                                        )}
+                                                                                        <span className={styles.detailMeta}>
+                                                                                            {formatNumber(pkg.totalDownloads)} downloads
+                                                                                        </span>
+                                                                                        <span className={styles.detailMeta}>
+                                                                                            {pkg.version ? `v${pkg.version}` : 'Version n/a'}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <span className={styles.detailValue}>NuGet data unavailable</span>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -1366,7 +1453,7 @@ export const getStaticProps: GetStaticProps<ProjectsProps> = async () => {
     ]);
 
     const metaMap = new Map<string, ProjectMeta>(
-        PROJECT_OVERRIDES.map((meta) => [meta.repo.toLowerCase(), meta])
+        PROJECTS.map((meta) => [meta.repo.toLowerCase(), meta])
     );
 
     const projects = repos

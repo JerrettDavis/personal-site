@@ -1,9 +1,10 @@
 import {test, expect} from '@playwright/test';
-import {mockPipelineStatus, mockSiteBuildStatus} from './mocks';
+import {mockNugetMetrics, mockPipelineStatus, mockSiteBuildStatus} from './mocks';
 
 test.beforeEach(async ({page}) => {
     await mockPipelineStatus(page);
     await mockSiteBuildStatus(page);
+    await mockNugetMetrics(page);
 });
 
 test('pipelines overview shows telemetry summary', async ({page}) => {

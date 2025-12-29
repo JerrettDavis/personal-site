@@ -1,7 +1,7 @@
 ---
 title: Syndication
 description: Automated cross-posting to Hashnode and Dev.to with canonical URLs.
-order: 6
+order: 9
 ---
 <div class="doc-callout">
   <div class="doc-callout-title">Publish once, syndicate everywhere</div>
@@ -147,6 +147,7 @@ syndicate: false  # Prevents syndication regardless of filters
 When omitted, configuration filters determine eligibility.
 
 ## How it works
+For CI/CD wiring, see <a href="/docs/automation">Automation and CI/CD</a>.
 
 ### Workflow trigger
 

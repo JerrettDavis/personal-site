@@ -29,18 +29,18 @@ export default function DocsIndex({intro, docs}: DocsIndexProps) {
                     <p className={styles.subtitle}>{intro.description}</p>
                 )}
             </section>
-            <section className={styles.page}>
+            <section className={styles.page} data-layout="index">
+                <div className={`${styles.sectionHeader} ${styles.indexHeader}`}>
+                    <h2 className={styles.sectionTitle}>Documentation map</h2>
+                    <p className={styles.sectionLead}>
+                        Each page covers a specific slice of the architecture and tooling.
+                    </p>
+                </div>
                 <div
-                    className={styles.content}
+                    className={`${styles.content} ${styles.indexContent}`}
                     dangerouslySetInnerHTML={{__html: intro.contentHtml}}
                 />
-                <div>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Documentation map</h2>
-                        <p className={styles.sectionLead}>
-                            Each page covers a specific slice of the architecture and tooling.
-                        </p>
-                    </div>
+                <div className={styles.indexGrid}>
                     <div className={styles.docGrid}>
                         {docs.map((doc) => (
                             <Link

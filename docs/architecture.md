@@ -100,6 +100,7 @@ order: 2
 - <code>posts/</code> stores markdown-based blog posts.
 - <code>docs/</code> stores markdown documentation that is published to the site.
 - <code>data/</code> holds structured content for projects, tools, navigation, and hobbies.
+See <a href="/docs/repository-map">Repository map</a> for the full directory guide.
 
 ## Consistency conventions
 - Prefer declarative, data-driven rendering from <code>data/</code> and <code>lib/</code> helpers.

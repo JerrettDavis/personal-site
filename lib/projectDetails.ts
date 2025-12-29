@@ -1,3 +1,5 @@
+import type {NugetPackageSnapshot} from './nuget';
+
 export interface ProjectReadmeSnapshot {
     contentHtml: string;
     truncated: boolean;
@@ -16,6 +18,7 @@ export interface ProjectDetailResponse {
     openIssues: number | null;
     openPulls: number | null;
     latestRelease: ProjectReleaseSnapshot | null;
+    nugetPackages: NugetPackageSnapshot[] | null;
     fetchedAt: string;
     error?: string | null;
     rateLimitedUntil?: string | null;

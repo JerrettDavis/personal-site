@@ -4,15 +4,15 @@
 
 .kicker {
     margin: 0 0 0.6rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
 
 .title {
     margin: 0 0 0.8rem;
-    font-size: 2.6rem;
+    font-size: 2.8rem;
 }
 
 .lede {
@@ -23,7 +23,7 @@
 
 .statsGrid {
     display: grid;
-    gap: 0.8rem;
+    gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     margin-top: 1.6rem;
 }
@@ -32,13 +32,13 @@
     margin-top: 1.2rem;
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .densityLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -51,12 +51,12 @@
 
 .densityButton {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
 }
@@ -70,10 +70,10 @@
     display: grid;
     gap: 0.35rem;
     padding: 0.85rem 1rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 16px 30px -28px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-card);
 }
 
 .statValue {
@@ -83,8 +83,8 @@
 }
 
 .statLabel {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -129,11 +129,11 @@
     display: flex;
     flex-direction: column;
     padding: 1.4rem;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     overflow: visible;
-    box-shadow: 0 14px 30px -26px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card);
     min-height: 360px;
     height: 100%;
     z-index: 0;
@@ -152,7 +152,7 @@
 .projectCardExpanded {
     grid-column: 1 / -1;
     transform: translateY(-6px);
-    box-shadow: 0 26px 50px -36px rgba(0, 0, 0, 0.7);
+    box-shadow: var(--shadow-card-strong);
     z-index: 3;
     scroll-margin-top: 6rem;
     will-change: transform, box-shadow;
@@ -178,7 +178,7 @@
 
 .projectCardFeatured {
     border-color: var(--accent);
-    box-shadow: 0 24px 40px -30px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card-strong);
 }
 
 .cardHeader {
@@ -198,7 +198,7 @@
 
 .cardTitle {
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 1.45rem;
 }
 
 .cardTitle a {
@@ -211,20 +211,20 @@
 }
 
 .cardFlag {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     color: var(--color-text-deemphasized);
 }
 
 .detailToggle {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.25rem 0.65rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
     white-space: nowrap;
@@ -280,8 +280,8 @@
 
 .detailKicker {
     margin: 0;
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -294,19 +294,19 @@
 .detailStamp {
     display: block;
     margin-top: 0.3rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
 
 .detailClose {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.25rem 0.6rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: none;
     background: transparent;
     color: var(--color-text-deemphasized);
     cursor: pointer;
@@ -316,7 +316,7 @@
 .detailGrid {
     display: grid;
     gap: 0.9rem;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     margin-bottom: 0.8rem;
 }
 
@@ -324,14 +324,14 @@
     display: grid;
     gap: 0.35rem;
     padding: 0.7rem 0.8rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
 }
 
 .detailLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -356,8 +356,18 @@
 .detailMeta {
     font-size: 0.7rem;
     color: var(--color-text-deemphasized);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.detailList {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.detailListItem {
+    display: grid;
+    gap: 0.15rem;
 }
 
 .detailReadme {
@@ -365,7 +375,7 @@
     display: grid;
     gap: 0.4rem;
     padding: 0.7rem 0.8rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     margin-bottom: 0.8rem;
@@ -474,12 +484,12 @@
     display: inline-flex;
     align-items: center;
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     text-decoration: none;
     white-space: nowrap;
@@ -494,7 +504,7 @@
 .skeleton {
     display: inline-block;
     width: 100%;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: linear-gradient(
         90deg,
         rgba(100, 100, 100, 0.12) 0%,
@@ -537,7 +547,7 @@
 .detailSkeletonPill {
     width: 4.2rem;
     height: 0.9rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
 }
 
 .detailNote {
@@ -553,11 +563,18 @@
     margin-bottom: 0.8rem;
 }
 
+.detailTelemetryColumn {
+    display: grid;
+    gap: 0.8rem;
+    align-content: start;
+    min-height: 0;
+}
+
 .detailTelemetryCard {
     display: grid;
     gap: 0.5rem;
     padding: 0.7rem 0.8rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
 }
@@ -565,6 +582,18 @@
 .detailTelemetryCardFixed {
     height: 260px;
     grid-template-rows: auto 1fr auto auto;
+}
+
+.detailTelemetryCardScroll {
+    max-height: min(80vh, 360px);
+    min-height: 0;
+    overflow: hidden;
+    grid-template-rows: auto auto 1fr;
+}
+
+.detailListScroll {
+    min-height: 0;
+    overflow: auto;
 }
 
 .detailTrendGrid {
@@ -588,7 +617,7 @@
 
 .detailTelemetryStat {
     font-size: 0.65rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -605,7 +634,7 @@
     display: grid;
     gap: 0.2rem;
     padding: 0.5rem 0.6rem;
-    border-radius: 10px;
+    border-radius: var(--radius-xs);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     position: relative;
@@ -619,7 +648,7 @@
     top: 0.6rem;
     width: 6px;
     height: 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-text-deemphasized);
 }
 
@@ -654,7 +683,7 @@
 .pipelineRunMeta {
     padding-left: 0.85rem;
     font-size: 0.7rem;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -685,11 +714,11 @@
 }
 
 .badge {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-pill);
     background: var(--color-surface-2);
     border: 1px solid var(--color-border);
     color: var(--color-text-deemphasized);
@@ -726,10 +755,10 @@
     min-width: 180px;
     max-width: 260px;
     padding: 0.6rem;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 14px 28px -20px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card);
     opacity: 0;
     pointer-events: none;
     transform: translateY(-6px);
@@ -771,14 +800,14 @@
     align-items: center;
     gap: 0.4rem;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
 }
 
 .pipelineDot {
     width: 6px;
     height: 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-text-deemphasized);
 }
 
@@ -803,16 +832,16 @@
     display: grid;
     gap: 0.8rem;
     padding: 0.9rem 1rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-card);
 }
 
 .pipelineKicker {
     margin: 0 0 0.2rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -832,8 +861,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.16em;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -842,8 +871,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
 }
@@ -867,14 +896,14 @@
     justify-self: flex-start;
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-primary);
-    font-size: 0.7rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
     text-decoration: none;
 }
 
@@ -883,10 +912,34 @@
     display: grid;
     gap: 0.8rem;
     padding: 1rem 1.1rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 16px 28px -26px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-card);
+}
+
+.heroCallouts {
+    margin-top: 1.6rem;
+    display: grid;
+    gap: 1.4rem;
+}
+
+@media screen and (min-width: 62rem) {
+    .heroCallouts {
+        display: flex;
+        align-items: stretch;
+        gap: 1.6rem;
+    }
+
+    .pipelineCallout {
+        flex: 1 1 0;
+        margin-top: 0;
+    }
+
+    .metricsCallout {
+        flex: 1.5 1 0;
+        margin-top: 0;
+    }
 }
 
 .metricsHeader {
@@ -898,8 +951,8 @@
 
 .metricsKicker {
     margin: 0 0 0.2rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -924,8 +977,8 @@
 }
 
 .metricsMetaLabel {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
@@ -936,12 +989,12 @@
 .metricsMetaBadge {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -956,14 +1009,14 @@
     justify-self: flex-start;
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-primary);
-    font-size: 0.7rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
     text-decoration: none;
 }
 
@@ -978,7 +1031,7 @@
     content: "";
     position: absolute;
     inset: -0.6rem;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
     border: 1px solid transparent;
     box-shadow: none;
     opacity: 0;
@@ -997,13 +1050,13 @@
     display: grid;
     gap: 0.5rem;
     max-width: 46rem;
-    margin-bottom: 1.4rem;
+    margin-bottom: 0.9rem;
 }
 
 .pipelineSectionKicker {
     margin: 0;
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -1043,12 +1096,12 @@
 .linkButton {
     display: inline-flex;
     align-items: center;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-primary);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     text-decoration: none;
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
@@ -1066,9 +1119,9 @@
 }
 
 .relatedLabel {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.12em;
     color: var(--color-text-deemphasized);
     display: block;
     margin-bottom: 0.4rem;
@@ -1142,7 +1195,7 @@
 .notice {
     margin-top: 1.5rem;
     padding: 1.25rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface-2);
 }
@@ -1154,7 +1207,7 @@
 .emptyState {
     margin-top: 2rem;
     padding: 1.5rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px dashed var(--color-border);
     background: var(--color-surface-2);
 }

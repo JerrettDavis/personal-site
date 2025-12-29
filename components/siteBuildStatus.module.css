@@ -3,21 +3,22 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.7rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: var(--color-surface);
     color: var(--color-text-primary);
-    font-size: 0.65rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
     text-decoration: none;
     white-space: nowrap;
+    font-weight: 600;
 }
 
 .dot {
     width: 8px;
     height: 8px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-text-deemphasized);
     box-shadow: 0 0 0 0 rgba(227, 179, 65, 0);
 }
@@ -33,16 +34,16 @@
 
 .status {
     color: var(--color-text-deemphasized);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
 }
 
 .previewCount {
     padding: 0.15rem 0.45rem;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    font-size: 0.55rem;
-    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
 }
 
 .cached {
@@ -73,10 +74,10 @@
     bottom: 1.5rem;
     width: min(360px, calc(100vw - 3rem));
     padding: 0.9rem 1rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: 0 18px 40px -26px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-card-strong);
     z-index: 30;
     display: grid;
     gap: 0.75rem;
@@ -90,8 +91,8 @@
 }
 
 .toastTitle {
-    font-size: 0.85rem;
-    letter-spacing: 0.16em;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-secondary);
 }
@@ -110,12 +111,12 @@
 
 .toastLink {
     border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    background: var(--color-surface-2);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
     text-decoration: none;
@@ -173,8 +174,8 @@
 
     .badge[data-variant="menu"] {
         padding: 0.3rem 0.55rem;
-        font-size: 0.6rem;
-        letter-spacing: 0.12em;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
     }
 
     .badge[data-variant="menu"] .status,
@@ -183,8 +184,8 @@
     }
 
     .badge[data-variant="menu"] .previewCount {
-        font-size: 0.55rem;
-        letter-spacing: 0.14em;
+        font-size: 0.6rem;
+        letter-spacing: 0.1em;
         padding: 0.15rem 0.35rem;
     }
 }

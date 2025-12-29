@@ -161,6 +161,35 @@ export const mockProjectDetails = async (page: Page) => {
                     url: 'https://github.com/jerrettdavis/personal-site/releases/tag/v1.2.3',
                     publishedAt: '2025-01-15T09:00:00Z',
                 },
+                nugetPackages: [
+                    {
+                        id: 'JD.Efcpt.Build',
+                        totalDownloads: 12840,
+                        version: '0.9.2',
+                        url: 'https://www.nuget.org/packages/JD.Efcpt.Build',
+                    },
+                ],
+                fetchedAt: '2025-02-01T12:15:00Z',
+            }),
+        });
+    });
+};
+
+export const mockNugetMetrics = async (page: Page) => {
+    await page.route('**/api/nuget-metrics**', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                packages: [
+                    {
+                        id: 'JD.Efcpt.Build',
+                        totalDownloads: 12840,
+                        version: '0.9.2',
+                        url: 'https://www.nuget.org/packages/JD.Efcpt.Build',
+                    },
+                ],
+                totalDownloads: 12840,
                 fetchedAt: '2025-02-01T12:15:00Z',
             }),
         });

@@ -1,18 +1,8 @@
 # Release process
+Releases are automated via GitHub Actions and semantic-release. See the full workflow details in
+`/docs/automation` and commit conventions in `/docs/decisions`.
 
-Releases are fully automated on every merge to `main` via GitHub Actions and semantic-release.
-
-## What happens on merge to main
-- The workflow analyzes conventional commits since the last tag.
-- It computes the next SemVer version.
-- It tags the release on `main` and creates a GitHub Release with generated notes.
-
-## Requirements
-- Commits merged to `main` must follow Conventional Commits so the version bump is correct.
-- The GitHub Actions workflow must have `contents: write` permission (already configured).
-
-## Notes
-- The changelog lives in GitHub Releases; no files are written back to `main`.
-- Breaking changes or `feat` commits drive major/minor bumps; everything else defaults to a patch so every merge releases.
-
-No manual release commands are required.
+Quick summary:
+- Merges to `main` run semantic-release.
+- Conventional commits drive the SemVer bump.
+- GitHub Releases hold the changelog.

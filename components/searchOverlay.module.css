@@ -23,10 +23,10 @@
     width: min(760px, 100%);
     max-height: 80vh;
     max-height: 80dvh;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background: var(--color-bg-primary);
-    box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.8);
+    box-shadow: var(--shadow-card-strong);
     padding: 1.6rem;
     display: grid;
     gap: 1.2rem;
@@ -44,7 +44,7 @@
 .kicker {
     margin: 0 0 0.3rem;
     font-size: 0.65rem;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -60,9 +60,9 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: var(--color-surface);
     color: var(--color-text-primary);
     cursor: pointer;
 }
@@ -71,7 +71,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     padding: 0.6rem 0.8rem;
@@ -104,7 +104,7 @@
 
 .sectionTitle {
     font-size: 0.65rem;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-text-deemphasized);
 }
@@ -118,7 +118,7 @@
     display: grid;
     gap: 0.2rem;
     padding: 0.7rem 0.85rem;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     text-decoration: none;
@@ -143,7 +143,7 @@
 
 .emptyState {
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     border: 1px dashed var(--color-border);
     background: var(--color-surface-2);
     color: var(--color-text-deemphasized);

@@ -8,6 +8,7 @@ import type {
     PipelineStatusResponse,
     PipelineSummary,
 } from '../../lib/pipelines';
+import {resolveCacheConfig, resolveCacheMs} from '../../lib/cacheConfig';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -38,9 +39,18 @@ type WorkflowRunsResponse = {
 
 const CACHE_KEY = 'pipeline-status';
 const PROVIDER = 'github';
-const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
-const ACTIVE_CACHE_TTL_MS = 60 * 1000;
-const STALE_TTL_MS = 15 * 60 * 1000;
+const {ttlMs: DEFAULT_CACHE_TTL_MS, staleMs: STALE_TTL_MS} = resolveCacheConfig(
+    'PIPELINE_CACHE_TTL_MS',
+    'PIPELINE_CACHE_STALE_MS',
+);
+const ACTIVE_CACHE_TTL_MS = resolveCacheMs(
+    'PIPELINE_ACTIVE_CACHE_TTL_MS',
+    60 * 1000,
+);
+const buildCacheControl = (ttlMs: number) =>
+    `public, s-maxage=${Math.ceil(ttlMs / 1000)}, stale-while-revalidate=${Math.ceil(
+        STALE_TTL_MS / 1000,
+    )}`;
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
 
 const buildHeaders = () => {
@@ -268,6 +278,10 @@ export default async function handler(
 
         if (rateLimit) {
             if (cacheEntry && now < cacheEntry.staleUntil) {
+                const ttlMs = cacheEntry.data.summary?.running > 0
+                    ? ACTIVE_CACHE_TTL_MS
+                    : DEFAULT_CACHE_TTL_MS;
+                res.setHeader('Cache-Control', buildCacheControl(ttlMs));
                 res.setHeader('Retry-After', Math.ceil((rateLimit.until - now) / 1000));
                 return res.status(200).json({
                     ...cacheEntry.data,
@@ -285,7 +299,10 @@ export default async function handler(
         }
 
         if (!forceRefresh && cacheEntry && now < cacheEntry.expiresAt) {
-            res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+            const ttlMs = cacheEntry.data.summary?.running > 0
+                ? ACTIVE_CACHE_TTL_MS
+                : DEFAULT_CACHE_TTL_MS;
+            res.setHeader('Cache-Control', buildCacheControl(ttlMs));
             return res.status(200).json(cacheEntry.data);
         }
 
@@ -294,6 +311,10 @@ export default async function handler(
             if (!refresh.allowed) {
                 const refreshLockedUntil = new Date(refresh.nextAllowedAt).toISOString();
                 if (cacheEntry) {
+                    const ttlMs = cacheEntry.data.summary?.running > 0
+                        ? ACTIVE_CACHE_TTL_MS
+                        : DEFAULT_CACHE_TTL_MS;
+                    res.setHeader('Cache-Control', buildCacheControl(ttlMs));
                     return res.status(200).json({
                         ...cacheEntry.data,
                         refreshLockedUntil,
@@ -325,10 +346,18 @@ export default async function handler(
             });
         setInFlight(CACHE_KEY, promise);
         const payload = await promise;
+        const ttlMs = payload.summary.running > 0
+            ? ACTIVE_CACHE_TTL_MS
+            : DEFAULT_CACHE_TTL_MS;
+        res.setHeader('Cache-Control', buildCacheControl(ttlMs));
         return res.status(200).json(payload);
     } catch (error) {
         const cacheEntry = getCacheEntry<PipelineStatusResponse>(CACHE_KEY);
         if (cacheEntry && Date.now() < cacheEntry.staleUntil) {
+            const ttlMs = cacheEntry.data.summary?.running > 0
+                ? ACTIVE_CACHE_TTL_MS
+                : DEFAULT_CACHE_TTL_MS;
+            res.setHeader('Cache-Control', buildCacheControl(ttlMs));
             return res.status(200).json(cacheEntry.data);
         }
         return res.status(200).json({

@@ -1,7 +1,7 @@
 ---
 title: Decisions and tradeoffs
 description: Why the site favors static generation and file-based content.
-order: 4
+order: 5
 ---
 <div class="doc-callout">
   <div class="doc-callout-title">Design principles</div>

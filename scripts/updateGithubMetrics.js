@@ -71,13 +71,49 @@ const fetchJson = async (url, init) => {
     return data;
 };
 
+const resolveLoginFromEnv = () => {
+    if (process.env.METRICS_GITHUB_OWNER) {
+        return process.env.METRICS_GITHUB_OWNER;
+    }
+    if (process.env.GITHUB_REPOSITORY_OWNER) {
+        return process.env.GITHUB_REPOSITORY_OWNER;
+    }
+    if (process.env.GITHUB_ACTOR) {
+        return process.env.GITHUB_ACTOR;
+    }
+    if (process.env.GITHUB_REPOSITORY) {
+        const [owner] = process.env.GITHUB_REPOSITORY.split('/');
+        if (owner) return owner;
+    }
+    return null;
+};
+
 const fetchUser = async (headers) => fetchJson('https://api.github.com/user', {headers});
 
-const fetchRepos = async (headers) => {
+const resolveLogin = async (headers) => {
+    const envLogin = resolveLoginFromEnv();
+    if (envLogin) return envLogin;
+    try {
+        const user = await fetchUser(headers);
+        if (user?.login) return user.login;
+    } catch (error) {
+        throw new Error(
+            `Unable to resolve GitHub login. Set METRICS_GITHUB_OWNER or use a user token. (${error?.message ?? error})`,
+        );
+    }
+    throw new Error('Unable to resolve GitHub login. Set METRICS_GITHUB_OWNER or use a user token.');
+};
+
+const fetchRepos = async (login, headers) => {
+    if (!login) {
+        throw new Error('Missing GitHub login for repository lookup.');
+    }
     const repos = [];
     let page = 1;
     while (true) {
-        const url = `https://api.github.com/user/repos?per_page=100&affiliation=owner&visibility=public&sort=updated&direction=desc&page=${page}`;
+        const url = `https://api.github.com/users/${encodeURIComponent(
+            login,
+        )}/repos?per_page=100&type=owner&sort=updated&direction=desc&page=${page}`;
         const pageData = await fetchJson(url, {headers});
         if (!Array.isArray(pageData) || pageData.length === 0) break;
         repos.push(...pageData);
@@ -294,9 +330,8 @@ const updateGithubMetrics = async (options = {}) => {
             Accept: 'application/vnd.github+json',
             Authorization: `Bearer ${token}`,
         };
-        const user = await fetchUser(headers);
-        const login = user.login;
-        const repos = await fetchRepos(headers);
+        const login = await resolveLogin(headers);
+        const repos = await fetchRepos(login, headers);
         const now = new Date();
         const snapshotDate = now.toISOString().slice(0, 10);
         const snapshotCutoff = now.getTime() - 400 * 24 * 60 * 60 * 1000;
