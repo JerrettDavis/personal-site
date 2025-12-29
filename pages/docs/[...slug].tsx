@@ -3,8 +3,7 @@ import Link from 'next/link';
 import Layout from '../../components/layout';
 import dynamic from 'next/dynamic';
 import {GetStaticPaths, GetStaticProps} from 'next';
-import {useRouter} from 'next/router';
-import {useCallback, useEffect, useRef, useState, type CSSProperties} from 'react';
+import {memo, useEffect, useRef, useState, type CSSProperties, type RefObject} from 'react';
 import {DocData, DocSummary, getAllDocSlugs, getAllDocSummaries, getDocBySlug} from '../../lib/docs';
 import {PIPELINE_EDGES, PIPELINE_LANES, PIPELINE_NODES, PIPELINE_STEPS} from '../../data/pipelineFlow';
 import {useHeadingIndex} from '../../lib/hooks/useHeadingIndex';
@@ -13,7 +12,6 @@ import styles from './docs.module.css';
 interface DocPageProps {
     doc: DocData;
     navItems: DocNavItem[];
-    docLookup: Record<string, DocData>;
 }
 
 interface DocNavItem {
@@ -91,11 +89,22 @@ const PipelineFlow = dynamic(() => import('../../components/pipelineFlow'), {
     ssr: false,
 });
 
-export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
-    const router = useRouter();
-    const [docState, setDocState] = useState(doc);
-    const description = buildDescription(docState);
-    const isPipelineDoc = docState.slug.join('/') === 'content-pipeline';
+const DocContent = memo(
+    ({contentHtml, contentRef}: {contentHtml: string; contentRef: RefObject<HTMLDivElement>}) => (
+        <div
+            ref={contentRef}
+            className={styles.content}
+            dangerouslySetInnerHTML={{__html: contentHtml}}
+        />
+    ),
+    (prev, next) => prev.contentHtml === next.contentHtml,
+);
+
+DocContent.displayName = 'DocContent';
+
+export default function DocPage({doc, navItems}: DocPageProps) {
+    const description = buildDescription(doc);
+    const isPipelineDoc = doc.slug.join('/') === 'content-pipeline';
     const [activeStepIndex, setActiveStepIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
     const activeStep = PIPELINE_STEPS[activeStepIndex];
@@ -103,7 +112,7 @@ export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
     const {items: headingItems, activeId} = useHeadingIndex(
         contentRef,
         {selector: 'h2, h3', targetRatio: 0.22},
-        [docState.slug.join('/')],
+        [doc.slug.join('/')],
     );
     useEffect(() => {
         if (!isPipelineDoc || !isPlaying) return;
@@ -112,65 +121,16 @@ export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
         }, 4200);
         return () => window.clearInterval(interval);
     }, [isPipelineDoc, isPlaying]);
-    useEffect(() => {
-        setDocState(doc);
-    }, [doc.route]);
-    const handleDocSelect = useCallback((route: string | null) => {
-        if (!route) return;
-        const targetPath = route.replace(/\/$/, '') || '/docs';
-        const cachedDoc = docLookup[targetPath];
-        if (cachedDoc) {
-            setDocState(cachedDoc);
-        }
-        if (typeof window !== 'undefined') {
-            window.history.pushState({}, '', route);
-        }
-    }, [docLookup]);
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const handleLocationChange = () => {
-            const rawPath = window.location.pathname ?? '';
-            const targetPath = rawPath.replace(/\/$/, '') || '/docs';
-            if (!targetPath.startsWith('/docs') || targetPath === docState.route) {
-                return;
-            }
-            const cachedDoc = docLookup[targetPath];
-            if (cachedDoc) {
-                setDocState(cachedDoc);
-                return;
-            }
-            const slugPath = targetPath.replace(/^\/docs\/?/, '');
-            if (!slugPath) return;
-            const requestPath = `/api/docs?slug=${encodeURIComponent(slugPath)}`;
-            fetch(requestPath)
-                .then((response) => (response.ok ? response.json() : null))
-                .then((payload) => {
-                    if (payload?.doc) {
-                        setDocState(payload.doc as DocData);
-                    }
-                })
-                .catch((error) => {
-                    if (error?.name !== 'AbortError') {
-                        console.warn('Doc refresh failed.', error);
-                    }
-                });
-        };
-        window.addEventListener('popstate', handleLocationChange);
-        handleLocationChange();
-        return () => {
-            window.removeEventListener('popstate', handleLocationChange);
-        };
-    }, [docLookup, docState.route]);
     return (
-        <Layout description={description} showSectionIndex={false} key={docState.route}>
+        <Layout description={description} showSectionIndex={false}>
             <Head>
-                <title>{`${docState.title} - Jerrett Davis`}</title>
+                <title>{`${doc.title} - Jerrett Davis`}</title>
             </Head>
             <section className={styles.hero}>
                 <p className={styles.kicker}>Docs</p>
-                <h1 className={styles.title}>{docState.title}</h1>
-                {docState.description && (
-                    <p className={styles.subtitle}>{docState.description}</p>
+                <h1 className={styles.title}>{doc.title}</h1>
+                {doc.description && (
+                    <p className={styles.subtitle}>{doc.description}</p>
                 )}
                 <div className={styles.heroActions}>
                     <Link href="/docs" className={`${styles.primaryLink} glowable`}>
@@ -180,16 +140,16 @@ export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
                         Home
                     </Link>
                 </div>
-                {docState.updated && (
+                {doc.updated && (
                     <div className={styles.metaRow}>
                         <div className={styles.metaItem}>
                             <span className={styles.metaLabel}>Last updated</span>
-                            <span className={styles.metaValue}>{docState.updated}</span>
+                            <span className={styles.metaValue}>{doc.updated}</span>
                         </div>
                     </div>
                 )}
             </section>
-            <section className={styles.docLayout} key={docState.route}>
+            <section className={styles.docLayout}>
                 <aside className={styles.docNav} aria-label="Documentation navigation">
                     <div className={styles.docNavTitle}>Docs</div>
                     <Link href="/docs" className={styles.docNavHome}>
@@ -201,9 +161,8 @@ export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
                                 <DocNavNode
                                     key={item.slug.join('/')}
                                     item={item}
-                                    activeSlug={docState.slug}
+                                    activeSlug={doc.slug}
                                     depth={0}
-                                    onSelect={handleDocSelect}
                                 />
                             ))}
                         </ul>
@@ -283,12 +242,7 @@ export default function DocPage({doc, navItems, docLookup}: DocPageProps) {
                         </section>
                     )}
                     <section className={styles.page}>
-                        <div
-                            ref={contentRef}
-                            className={styles.content}
-                            dangerouslySetInnerHTML={{__html: docState.contentHtml}}
-                            key={docState.route}
-                        />
+                        <DocContent contentHtml={doc.contentHtml} contentRef={contentRef} />
                     </section>
                 </div>
                 <aside className={styles.docToc} aria-label="On this page">
@@ -339,20 +293,12 @@ export const getStaticProps: GetStaticProps<DocPageProps> = async ({params}) => 
         getDocBySlug(slug),
         getAllDocSummaries(),
     ]);
-    const docs = await Promise.all(
-        summaries.map((summary) => getDocBySlug(summary.slug)),
-    );
-    const docLookup = docs.reduce<Record<string, DocData>>((acc, entry) => {
-        acc[entry.route] = entry;
-        return acc;
-    }, {});
     const navItems = buildDocTree(summaries);
 
     return {
         props: {
             doc,
             navItems,
-            docLookup,
         },
     };
 };
@@ -361,12 +307,10 @@ const DocNavNode = ({
     item,
     depth,
     activeSlug,
-    onSelect,
 }: {
     item: DocNavItem;
     depth: number;
     activeSlug: string[];
-    onSelect?: (route: string | null) => void;
 }) => {
     const activeKey = activeSlug.join('/');
     const itemKey = item.slug.join('/');
@@ -382,28 +326,13 @@ const DocNavNode = ({
             style={{'--doc-depth': depth} as CSSProperties}
         >
             {item.route ? (
-                <a
+                <Link
                     href={item.route}
                     className={styles.docNavLink}
                     aria-current={isActive ? 'page' : undefined}
-                    onClick={(event) => {
-                        if (!onSelect) return;
-                        if (
-                            event.defaultPrevented
-                            || event.button !== 0
-                            || event.metaKey
-                            || event.altKey
-                            || event.ctrlKey
-                            || event.shiftKey
-                        ) {
-                            return;
-                        }
-                        event.preventDefault();
-                        onSelect(item.route);
-                    }}
                 >
                     {item.title}
-                </a>
+                </Link>
             ) : (
                 <span className={styles.docNavGroup}>{item.title}</span>
             )}

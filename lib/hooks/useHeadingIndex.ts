@@ -32,7 +32,7 @@ export const useHeadingIndex = (
         if (!container || typeof window === 'undefined') return;
 
         let rafId = 0;
-        let observer: MutationObserver | null = null;
+        let resizeObserver: ResizeObserver | null = null;
 
         const refreshHeadings = () => {
             const headings = Array.from(container.querySelectorAll(selector))
@@ -82,35 +82,38 @@ export const useHeadingIndex = (
             setActiveId(nextId);
         };
 
-        const onScroll = () => {
+        const scheduleUpdate = () => {
             if (rafId) return;
             rafId = window.requestAnimationFrame(updateActive);
         };
 
         refreshHeadings();
+        scheduleUpdate();
 
         const scrollTargets: Array<Window | HTMLElement> = [window];
         if (container.scrollHeight > container.clientHeight) {
             scrollTargets.push(container);
         }
         scrollTargets.forEach((target) => {
-            target.addEventListener('scroll', onScroll, {passive: true});
+            target.addEventListener('scroll', scheduleUpdate, {passive: true});
         });
-        window.addEventListener('resize', onScroll);
+        window.addEventListener('resize', scheduleUpdate);
+        window.addEventListener('load', scheduleUpdate);
 
-        if ('MutationObserver' in window) {
-            observer = new MutationObserver(() => {
-                refreshHeadings();
+        if ('ResizeObserver' in window) {
+            resizeObserver = new ResizeObserver(() => {
+                scheduleUpdate();
             });
-            observer.observe(container, {childList: true, subtree: true});
+            resizeObserver.observe(container);
         }
 
         return () => {
             scrollTargets.forEach((target) => {
-                target.removeEventListener('scroll', onScroll);
+                target.removeEventListener('scroll', scheduleUpdate);
             });
-            window.removeEventListener('resize', onScroll);
-            if (observer) observer.disconnect();
+            window.removeEventListener('resize', scheduleUpdate);
+            window.removeEventListener('load', scheduleUpdate);
+            if (resizeObserver) resizeObserver.disconnect();
             if (rafId) window.cancelAnimationFrame(rafId);
         };
     }, [containerRef, selector, targetRatio, ...deps]);

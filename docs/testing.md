@@ -1,7 +1,7 @@
 ---
 title: Testing
 description: Browser and unit test coverage for the site.
-order: 6
+order: 10
 ---
 <div class="doc-callout">
   <div class="doc-callout-title">Confidence loop</div>
@@ -23,7 +23,9 @@ order: 6
 
 ## Running tests
 - <code>npm run test</code> for Jest.
+- <code>npm run test:coverage</code> for Jest coverage reports.
 - <code>npm run test:e2e</code> for Playwright (spins up <code>npm run dev</code> unless <code>PLAYWRIGHT_BASE_URL</code> is set).
+- <code>npm run test:e2e:ui</code> to debug Playwright runs interactively.
 - First time only: <code>npx playwright install</code> to fetch browsers.
 
 <ul class="doc-steps">
@@ -65,9 +67,19 @@ order: 6
       <td>Fast feedback for shared helpers.</td>
     </tr>
     <tr>
+      <td>npm run test:coverage</td>
+      <td>Coverage report</td>
+      <td>Outputs HTML to <code>coverage/</code>.</td>
+    </tr>
+    <tr>
       <td>npm run test:e2e</td>
       <td>Browser flows</td>
       <td>Uses fixtures for telemetry APIs.</td>
+    </tr>
+    <tr>
+      <td>npm run test:e2e:ui</td>
+      <td>Playwright UI mode</td>
+      <td>Interactive explorer for debugging.</td>
     </tr>
   </tbody>
 </table>

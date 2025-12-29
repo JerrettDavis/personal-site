@@ -1,3 +1,5 @@
+import {PROJECTS_GENERATED} from './projects.generated';
+
 export const GITHUB_USERNAME = 'jerrettdavis';
 export const PROJECT_ACTIVITY_DAYS = 365;
 
@@ -17,9 +19,26 @@ export interface ProjectMeta {
     relatedTags?: string[];
     relatedPosts?: string[];
     links?: ProjectLink[];
+    nugetPackages?: string[];
     accent?: string;
     featured?: boolean;
 }
+
+const mergeProjects = (primary: ProjectMeta[], secondary: ProjectMeta[]) => {
+    const seen = new Set<string>();
+    const merged: ProjectMeta[] = [];
+    const add = (items: ProjectMeta[]) => {
+        items.forEach((item) => {
+            const key = (item.repo || '').toLowerCase();
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            merged.push(item);
+        });
+    };
+    add(primary);
+    add(secondary);
+    return merged;
+};
 
 export const PROJECT_OVERRIDES: ProjectMeta[] = [
     {
@@ -56,6 +75,12 @@ export const PROJECT_OVERRIDES: ProjectMeta[] = [
         links: [
             {label: 'NuGet', url: 'https://www.nuget.org/packages/JD.Efcpt.Build'},
         ],
+        nugetPackages: ['JD.Efcpt.Build'],
         accent: '#2a6a87',
     },
 ];
+
+export const PROJECTS: ProjectMeta[] = mergeProjects(
+    PROJECT_OVERRIDES,
+    PROJECTS_GENERATED as ProjectMeta[],
+);

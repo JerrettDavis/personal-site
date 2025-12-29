@@ -1,7 +1,7 @@
 ---
 title: Content pipeline
 description: How markdown becomes pages, feeds, and search data.
-order: 3
+order: 4
 ---
 <div class="doc-callout">
   <div class="doc-callout-title">Content in, experiences out</div>

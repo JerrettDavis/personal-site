@@ -1,10 +1,11 @@
 import {test, expect} from '@playwright/test';
-import {mockPipelineStatus, mockProjectDetails, mockSiteBuildStatus} from './mocks';
+import {mockNugetMetrics, mockPipelineStatus, mockProjectDetails, mockSiteBuildStatus} from './mocks';
 
 test.beforeEach(async ({page}) => {
     await mockPipelineStatus(page);
     await mockSiteBuildStatus(page);
     await mockProjectDetails(page);
+    await mockNugetMetrics(page);
 });
 
 test('project cards expand and render markdown readme', async ({page}) => {
@@ -24,5 +25,25 @@ test('project cards expand and render markdown readme', async ({page}) => {
 
     const collapseButton = card.getByRole('button', {name: 'Collapse'});
     await collapseButton.click();
+    await expect(card).not.toHaveAttribute('data-expanded', 'true');
+});
+
+test('project details close on escape and outside click', async ({page}) => {
+    await page.goto('/projects');
+    const card = page
+        .locator('article')
+        .filter({has: page.getByRole('link', {name: 'Personal Site'})})
+        .first();
+
+    await card.click();
+    await expect(card).toHaveAttribute('data-expanded', 'true');
+
+    await page.keyboard.press('Escape');
+    await expect(card).not.toHaveAttribute('data-expanded', 'true');
+
+    await card.click();
+    await expect(card).toHaveAttribute('data-expanded', 'true');
+
+    await page.mouse.click(5, 5);
     await expect(card).not.toHaveAttribute('data-expanded', 'true');
 });

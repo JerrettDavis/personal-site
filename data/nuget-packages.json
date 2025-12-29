@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2025-12-29T03:06:19.870Z",
+  "repos": {
+    "jerrettdavis/pkcechallenge": [
+      "PkceChallenge"
+    ],
+    "jerrettdavis/tinybdd": [
+      "TinyBDD",
+      "TinyBDD.MSTest",
+      "TinyBDD.NUnit",
+      "TinyBDD.Tests.Common",
+      "TinyBDD.Xunit",
+      "TinyBDD.Xunit.v3"
+    ],
+    "jerrettdavis/patternkit": [
+      "PatternKit.Core",
+      "PatternKit.Examples",
+      "PatternKit.Generators"
+    ],
+    "jerrettdavis/jd.efcpt.build": [
+      "JD.Efcpt.Build",
+      "JD.Efcpt.Sdk"
+    ],
+    "jerrettdavis/myqdotnet": [
+      "MyQDotNet"
+    ],
+    "jerrettdavis/experimentframework": [
+      "ExperimentFramework",
+      "ExperimentFramework.Admin",
+      "ExperimentFramework.Audit",
+      "ExperimentFramework.AutoStop",
+      "ExperimentFramework.Bandit",
+      "ExperimentFramework.Configuration",
+      "ExperimentFramework.Data",
+      "ExperimentFramework.Distributed",
+      "ExperimentFramework.Distributed.Redis",
+      "ExperimentFramework.FeatureManagement",
+      "ExperimentFramework.Generators",
+      "ExperimentFramework.Metrics.Exporters",
+      "ExperimentFramework.OpenFeature",
+      "ExperimentFramework.PluginHostSample",
+      "ExperimentFramework.Plugins.Generators",
+      "ExperimentFramework.Resilience",
+      "ExperimentFramework.Rollout",
+      "ExperimentFramework.SamplePlugin",
+      "ExperimentFramework.Science",
+      "ExperimentFramework.StickyRouting",
+      "ExperimentFramework.Targeting"
+    ],
+    "jerrettdavis/slncs": [
+      "Slncs",
+      "Slncs.Sdk",
+      "Slncs.Tool"
+    ]
+  }
+}

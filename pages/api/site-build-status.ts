@@ -4,6 +4,7 @@ import type {
     BuildStatus,
     SiteBuildStatusResponse,
 } from '../../lib/siteBuild';
+import {resolveCacheConfig, resolveCacheMs} from '../../lib/cacheConfig';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -43,9 +44,18 @@ type VercelDeploymentsResponse = {
 const VERCEL_API_BASE = 'https://api.vercel.com';
 const CACHE_KEY = 'site-build-status';
 const PROVIDER = 'vercel';
-const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
-const ACTIVE_CACHE_TTL_MS = 25 * 1000;
-const STALE_TTL_MS = 20 * 60 * 1000;
+const {ttlMs: DEFAULT_CACHE_TTL_MS, staleMs: STALE_TTL_MS} = resolveCacheConfig(
+    'SITE_BUILD_CACHE_TTL_MS',
+    'SITE_BUILD_CACHE_STALE_MS',
+);
+const ACTIVE_CACHE_TTL_MS = resolveCacheMs(
+    'SITE_BUILD_ACTIVE_CACHE_TTL_MS',
+    25 * 1000,
+);
+const buildCacheControl = (ttlMs: number, staleMs = STALE_TTL_MS) =>
+    `public, s-maxage=${Math.ceil(ttlMs / 1000)}, stale-while-revalidate=${Math.ceil(
+        staleMs / 1000,
+    )}`;
 const MANUAL_REFRESH_COOLDOWN_MS = 45 * 1000;
 
 const getEnv = () => ({
@@ -241,6 +251,10 @@ export default async function handler(
 
         if (rateLimit) {
             if (cacheEntry && now < cacheEntry.staleUntil) {
+                const ttlMs = cacheEntry.data.summary?.inProgress > 0
+                    ? ACTIVE_CACHE_TTL_MS
+                    : DEFAULT_CACHE_TTL_MS;
+                res.setHeader('Cache-Control', buildCacheControl(ttlMs));
                 res.setHeader('Retry-After', Math.ceil((rateLimit.until - now) / 1000));
                 return res.status(200).json({
                     ...cacheEntry.data,
@@ -259,7 +273,10 @@ export default async function handler(
         }
 
         if (!forceRefresh && cacheEntry && now < cacheEntry.expiresAt) {
-            res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+            const ttlMs = cacheEntry.data.summary?.inProgress > 0
+                ? ACTIVE_CACHE_TTL_MS
+                : DEFAULT_CACHE_TTL_MS;
+            res.setHeader('Cache-Control', buildCacheControl(ttlMs));
             return res.status(200).json(cacheEntry.data);
         }
 
@@ -268,6 +285,10 @@ export default async function handler(
             if (!refresh.allowed) {
                 const refreshLockedUntil = new Date(refresh.nextAllowedAt).toISOString();
                 if (cacheEntry) {
+                    const ttlMs = cacheEntry.data.summary?.inProgress > 0
+                        ? ACTIVE_CACHE_TTL_MS
+                        : DEFAULT_CACHE_TTL_MS;
+                    res.setHeader('Cache-Control', buildCacheControl(ttlMs));
                     return res.status(200).json({
                         ...cacheEntry.data,
                         refreshLockedUntil,
@@ -300,15 +321,18 @@ export default async function handler(
             });
         setInFlight(CACHE_KEY, promise);
         const payload = await promise;
-        const ttl = payload.summary.inProgress > 0
-            ? Math.ceil(ACTIVE_CACHE_TTL_MS / 1000)
-            : Math.ceil(DEFAULT_CACHE_TTL_MS / 1000);
-        res.setHeader('Cache-Control', `public, s-maxage=${ttl}, stale-while-revalidate=600`);
+        const ttlMs = payload.summary.inProgress > 0
+            ? ACTIVE_CACHE_TTL_MS
+            : DEFAULT_CACHE_TTL_MS;
+        res.setHeader('Cache-Control', buildCacheControl(ttlMs));
         return res.status(200).json(payload);
     } catch (error) {
         const cacheEntry = getCacheEntry<SiteBuildStatusResponse>(CACHE_KEY);
         if (cacheEntry && Date.now() < cacheEntry.staleUntil) {
-            res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+            const ttlMs = cacheEntry.data.summary?.inProgress > 0
+                ? ACTIVE_CACHE_TTL_MS
+                : DEFAULT_CACHE_TTL_MS;
+            res.setHeader('Cache-Control', buildCacheControl(ttlMs));
             return res.status(200).json(cacheEntry.data);
         }
         return res.status(200).json({

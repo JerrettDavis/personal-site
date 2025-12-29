@@ -5,8 +5,10 @@ import {getActiveRepos} from '../../lib/github';
 import {
     GITHUB_USERNAME,
     PROJECT_ACTIVITY_DAYS,
-    PROJECT_OVERRIDES,
+    PROJECTS,
 } from '../../data/projects';
+import {fetchNugetPackageSnapshots, getNugetPackagesForRepo} from '../../lib/nuget';
+import {resolveCacheConfig} from '../../lib/cacheConfig';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -17,6 +19,10 @@ import {
     setInFlight,
     setRateLimit,
 } from '../../lib/cacheStore';
+import {
+    getProjectDetailCacheStore,
+    type ProjectDetailCacheEntry,
+} from '../../lib/projectDetailCache';
 
 type RepoPayload = {
     open_issues_count: number;
@@ -44,8 +50,13 @@ type ReleasePayload = {
 
 const CACHE_PREFIX = 'project-detail';
 const PROVIDER = 'github';
-const DEFAULT_CACHE_TTL_MS = 10 * 60 * 1000;
-const STALE_TTL_MS = 60 * 60 * 1000;
+const {ttlMs: DEFAULT_CACHE_TTL_MS, staleMs: STALE_TTL_MS} = resolveCacheConfig(
+    'PROJECT_DETAIL_CACHE_TTL_MS',
+    'PROJECT_DETAIL_CACHE_STALE_MS',
+);
+const CACHE_CONTROL_HEADER = `public, s-maxage=${Math.ceil(
+    DEFAULT_CACHE_TTL_MS / 1000,
+)}, stale-while-revalidate=${Math.ceil(STALE_TTL_MS / 1000)}`;
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
 const ALLOWLIST_CACHE_KEY = 'project-detail-allowlist';
 const ALLOWLIST_TTL_MS = 10 * 60 * 1000;
@@ -66,11 +77,12 @@ type AllowlistResult = {
     error: string | null;
 };
 
+const resolveOverrideName = (repo: string) =>
+    repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
+
 const buildAllowlist = async (): Promise<AllowlistResult> => {
-    const resolveOverrideName = (repo: string) =>
-        repo.includes('/') ? repo : `${GITHUB_USERNAME}/${repo}`;
     const allowlist = new Set(
-        PROJECT_OVERRIDES.map(
+        PROJECTS.map(
             (project) => resolveOverrideName(project.repo).toLowerCase(),
         ),
     );
@@ -350,6 +362,7 @@ const buildPayload = async (
             openIssues: null,
             openPulls: null,
             latestRelease: null,
+            nugetPackages: null,
             fetchedAt: new Date().toISOString(),
             error: 'GitHub rate limit reached.',
             rateLimitedUntil: new Date(rateLimit.until).toISOString(),
@@ -364,11 +377,13 @@ const buildPayload = async (
             openIssues: null,
             openPulls: null,
             latestRelease: null,
+            nugetPackages: null,
             fetchedAt: new Date().toISOString(),
             error: 'Repository is private.',
         };
     }
     let readme: ProjectDetailResponse['readme'] = null;
+    let nugetPackages: ProjectDetailResponse['nugetPackages'] = null;
     let openPulls: number | null = null;
     let latestRelease: ProjectDetailResponse['latestRelease'] = null;
 
@@ -390,6 +405,15 @@ const buildPayload = async (
         latestRelease = null;
     }
 
+    try {
+        const nugetIds = getNugetPackagesForRepo(fullName);
+        nugetPackages = nugetIds.length > 0
+            ? await fetchNugetPackageSnapshots(nugetIds)
+            : null;
+    } catch {
+        nugetPackages = null;
+    }
+
     const openIssues = openPulls === null
         ? repoPayload.open_issues_count
         : Math.max(repoPayload.open_issues_count - openPulls, 0);
@@ -401,6 +425,7 @@ const buildPayload = async (
         openIssues,
         openPulls,
         latestRelease,
+        nugetPackages,
         fetchedAt: new Date().toISOString(),
         rateLimitedUntil: rateLimitedUntil ? new Date(rateLimitedUntil).toISOString() : null,
     };
@@ -419,6 +444,7 @@ export default async function handler(
                 openIssues: null,
                 openPulls: null,
                 latestRelease: null,
+                nugetPackages: null,
                 fetchedAt: new Date().toISOString(),
                 error: 'Missing repo query parameter.',
             });
@@ -434,6 +460,7 @@ export default async function handler(
                 openIssues: null,
                 openPulls: null,
                 latestRelease: null,
+                nugetPackages: null,
                 fetchedAt: new Date().toISOString(),
                 error: 'Repository is not available.',
             });
@@ -444,22 +471,69 @@ export default async function handler(
         const forceRefresh = req.query.refresh === '1';
         const cacheEntry = getCacheEntry<ProjectDetailResponse>(cacheKey);
         const rateLimit = getRateLimit(PROVIDER);
+        const cacheStore = await getProjectDetailCacheStore();
+        let persistentEntry: ProjectDetailCacheEntry | null = null;
+        let persistentEntryLoaded = false;
+
+        const loadPersistentEntry = async () => {
+            if (!cacheStore) return null;
+            if (persistentEntryLoaded) return persistentEntry;
+            persistentEntryLoaded = true;
+            try {
+                persistentEntry = await cacheStore.get(cacheKey);
+            } catch (error) {
+                console.warn(`Project detail cache lookup failed: ${error}`);
+                persistentEntry = null;
+            }
+            return persistentEntry;
+        };
+
+        const hydrateCacheEntry = (
+            entry: ProjectDetailCacheEntry,
+            nowMs: number,
+        ) => {
+            const ttlMs = Math.max(entry.expiresAt - nowMs, 0);
+            const staleMs = Math.max(entry.staleUntil - entry.expiresAt, 0);
+            if (ttlMs > 0 || staleMs > 0) {
+                setCacheEntry(cacheKey, entry.data, ttlMs, staleMs);
+            }
+        };
 
         if (rateLimit) {
             if (cacheEntry && now < cacheEntry.staleUntil) {
+                res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
                 res.setHeader('Retry-After', Math.ceil((rateLimit.until - now) / 1000));
                 return res.status(200).json({
                     ...cacheEntry.data,
                     rateLimitedUntil: new Date(rateLimit.until).toISOString(),
                 });
             }
-            res.setHeader('Retry-After', Math.ceil((rateLimit.until - now) / 1000));
+            const persistent = await loadPersistentEntry();
+            if (persistent && now < persistent.staleUntil) {
+                if (now < persistent.expiresAt) {
+                    hydrateCacheEntry(persistent, now);
+                }
+                res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
+                res.setHeader(
+                    'Retry-After',
+                    Math.ceil((rateLimit.until - now) / 1000),
+                );
+                return res.status(200).json({
+                    ...persistent.data,
+                    rateLimitedUntil: new Date(rateLimit.until).toISOString(),
+                });
+            }
+            res.setHeader(
+                'Retry-After',
+                Math.ceil((rateLimit.until - now) / 1000),
+            );
             return res.status(200).json({
                 repoFullName: repo,
                 readme: null,
                 openIssues: null,
                 openPulls: null,
                 latestRelease: null,
+                nugetPackages: null,
                 fetchedAt: new Date().toISOString(),
                 error: 'GitHub rate limit reached.',
                 rateLimitedUntil: new Date(rateLimit.until).toISOString(),
@@ -467,17 +541,43 @@ export default async function handler(
         }
 
         if (!forceRefresh && cacheEntry && now < cacheEntry.expiresAt) {
-            res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=1200');
+            res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
             return res.status(200).json(cacheEntry.data);
         }
 
+        if (!forceRefresh) {
+            const persistent = await loadPersistentEntry();
+            if (persistent && now < persistent.expiresAt) {
+                hydrateCacheEntry(persistent, now);
+                res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
+                return res.status(200).json(persistent.data);
+            }
+        }
+
         if (forceRefresh) {
-            const refresh = checkManualRefresh(cacheKey, MANUAL_REFRESH_COOLDOWN_MS);
+            const refresh = checkManualRefresh(
+                cacheKey,
+                MANUAL_REFRESH_COOLDOWN_MS,
+            );
             if (!refresh.allowed) {
-                const refreshLockedUntil = new Date(refresh.nextAllowedAt).toISOString();
+                const refreshLockedUntil = new Date(
+                    refresh.nextAllowedAt,
+                ).toISOString();
                 if (cacheEntry) {
+                    res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
                     return res.status(200).json({
                         ...cacheEntry.data,
+                        refreshLockedUntil,
+                    });
+                }
+                const persistent = await loadPersistentEntry();
+                if (persistent && now < persistent.staleUntil) {
+                    if (now < persistent.expiresAt) {
+                        hydrateCacheEntry(persistent, now);
+                    }
+                    res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
+                    return res.status(200).json({
+                        ...persistent.data,
                         refreshLockedUntil,
                     });
                 }
@@ -487,6 +587,7 @@ export default async function handler(
                     openIssues: null,
                     openPulls: null,
                     latestRelease: null,
+                    nugetPackages: null,
                     fetchedAt: new Date().toISOString(),
                     refreshLockedUntil,
                 });
@@ -500,8 +601,22 @@ export default async function handler(
         }
 
         const promise = buildPayload(repo)
-            .then((payload) => {
-                setCacheEntry(cacheKey, payload, DEFAULT_CACHE_TTL_MS, STALE_TTL_MS);
+            .then(async (payload) => {
+                const entry = setCacheEntry(
+                    cacheKey,
+                    payload,
+                    DEFAULT_CACHE_TTL_MS,
+                    STALE_TTL_MS,
+                );
+                if (cacheStore) {
+                    try {
+                        await cacheStore.set(cacheKey, entry);
+                    } catch (error) {
+                        console.warn(
+                            `Project detail cache update failed: ${error}`,
+                        );
+                    }
+                }
                 return payload;
             })
             .finally(() => {
@@ -509,7 +624,7 @@ export default async function handler(
             });
         setInFlight(cacheKey, promise);
         const payload = await promise;
-        res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=1200');
+        res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
         return res.status(200).json(payload);
     } catch (error) {
         return res.status(200).json({
@@ -518,6 +633,7 @@ export default async function handler(
             openIssues: null,
             openPulls: null,
             latestRelease: null,
+            nugetPackages: null,
             fetchedAt: new Date().toISOString(),
             error: `Project detail error: ${error}`,
         });

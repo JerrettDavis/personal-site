@@ -10,6 +10,7 @@ import type {
 } from '../../lib/githubMetricsTypes';
 import {getMetricsStore} from '../../lib/metricsStore';
 import type {MetricsStore} from '../../lib/metricsStore';
+import {resolveCacheConfig} from '../../lib/cacheConfig';
 import {
     checkManualRefresh,
     clearInFlight,
@@ -20,16 +21,24 @@ import {
 } from '../../lib/cacheStore';
 
 const CACHE_KEY = 'github-metrics';
-const CACHE_TTL_MS = 15 * 60 * 1000;
-const STALE_TTL_MS = 60 * 60 * 1000;
+const {ttlMs: CACHE_TTL_MS, staleMs: STALE_TTL_MS} = resolveCacheConfig(
+    'GITHUB_METRICS_CACHE_TTL_MS',
+    'GITHUB_METRICS_CACHE_STALE_MS',
+);
+const CACHE_CONTROL_HEADER = `public, s-maxage=${Math.ceil(
+    CACHE_TTL_MS / 1000,
+)}, stale-while-revalidate=${Math.ceil(STALE_TTL_MS / 1000)}`;
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
 const TREND_WEEKS = 12;
 const LOCK_STALE_MS = 4 * 60 * 60 * 1000;
 
 const emptyTotals = (): RangeTotals => ({week: 0, month: 0, year: 0});
 
-const isWithinRange = (weekSeconds: number, cutoffMs: number) =>
-    weekSeconds * 1000 >= cutoffMs;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const isWithinRange = (weekSeconds: number, cutoffMs: number) => {
+    const weekStart = weekSeconds * 1000;
+    return weekStart + WEEK_MS >= cutoffMs;
+};
 
 const sumRange = (
     weeks: GithubWeekMetrics[],
@@ -210,7 +219,7 @@ export default async function handler(
             if (historyUpdatedAt <= cacheUpdatedAt) {
                 res.setHeader(
                     'Cache-Control',
-                    'public, s-maxage=300, stale-while-revalidate=600',
+                    CACHE_CONTROL_HEADER,
                 );
                 return res.status(200).json({
                     ...cacheEntry.data,
@@ -252,10 +261,12 @@ export default async function handler(
 
         setInFlight(CACHE_KEY, promise);
         const payload = await promise;
+        res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
         return res.status(200).json(payload);
     } catch (error) {
         const cacheEntry = getCacheEntry<GithubMetricsResponse>(CACHE_KEY);
         if (cacheEntry && Date.now() < cacheEntry.staleUntil) {
+            res.setHeader('Cache-Control', CACHE_CONTROL_HEADER);
             return res.status(200).json(cacheEntry.data);
         }
         const store = await getMetricsStore();
