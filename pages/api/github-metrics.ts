@@ -5,6 +5,9 @@ import type {
     GithubMetricsUpdateState,
     GithubRepoMetricSummary,
     GithubMetricsSummary,
+    GithubMetricsContributionDay,
+    GithubMetricsTimelineMonth,
+    GithubMetricsWeeklyTotals,
     GithubWeekMetrics,
     RangeTotals,
 } from '../../lib/githubMetricsTypes';
@@ -31,10 +34,11 @@ const CACHE_CONTROL_HEADER = `public, s-maxage=${Math.ceil(
 const MANUAL_REFRESH_COOLDOWN_MS = 60 * 1000;
 const TREND_WEEKS = 12;
 const LOCK_STALE_MS = 4 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const emptyTotals = (): RangeTotals => ({week: 0, month: 0, year: 0});
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * DAY_MS;
 const isWithinRange = (weekSeconds: number, cutoffMs: number) => {
     const weekStart = weekSeconds * 1000;
     return weekStart + WEEK_MS >= cutoffMs;
@@ -127,6 +131,112 @@ const buildSummary = (repos: GithubRepoMetricSummary[], now: number): GithubMetr
     return summary;
 };
 
+const parseRetentionDays = () => {
+    const raw = process.env.GITHUB_METRICS_RETENTION_DAYS;
+    if (!raw) return 365;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        console.warn(
+            `Invalid GITHUB_METRICS_RETENTION_DAYS "${raw}". Using 365 days.`,
+        );
+        return 365;
+    }
+    return parsed;
+};
+
+const buildWeeklyTotals = (
+    repos: GithubMetricsHistory['repos'],
+    nowMs: number,
+    retentionDays: number,
+): GithubMetricsWeeklyTotals[] => {
+    const cutoffMs = retentionDays ? nowMs - retentionDays * DAY_MS : 0;
+    const totals = new Map<number, GithubMetricsWeeklyTotals>();
+    repos.forEach((repo) => {
+        (repo.weeks ?? []).forEach((week) => {
+            const weekStartMs = week.week * 1000;
+            if (cutoffMs && weekStartMs + WEEK_MS < cutoffMs) return;
+            const current = totals.get(week.week) ?? {
+                week: week.week,
+                commits: 0,
+                additions: 0,
+                deletions: 0,
+            };
+            current.commits += week.commits;
+            current.additions += week.additions;
+            current.deletions += week.deletions;
+            totals.set(week.week, current);
+        });
+    });
+    const allWeeks = Array.from(totals.values()).sort((a, b) => a.week - b.week);
+    if (!retentionDays) return allWeeks;
+    const retentionWeeks = Math.ceil(retentionDays / 7);
+    const maxWeeks = Math.min(retentionWeeks, 104);
+    return allWeeks.slice(-maxWeeks);
+};
+
+const buildMonthlyTimeline = (
+    repos: GithubMetricsHistory['repos'],
+    weeklyTotals: GithubMetricsWeeklyTotals[],
+    nowMs: number,
+    retentionDays: number,
+): GithubMetricsTimelineMonth[] => {
+    const cutoffMs = retentionDays ? nowMs - retentionDays * DAY_MS : 0;
+    const monthStars = new Map<string, number>();
+    repos.forEach((repo) => {
+        const monthLatest = new Map<string, {date: string; stars: number}>();
+        (repo.snapshots ?? []).forEach((snapshot) => {
+            const snapshotMs = Date.parse(snapshot.date);
+            if (cutoffMs && snapshotMs < cutoffMs) return;
+            const monthKey = snapshot.date.slice(0, 7);
+            const existing = monthLatest.get(monthKey);
+            if (!existing || snapshot.date > existing.date) {
+                monthLatest.set(monthKey, {
+                    date: snapshot.date,
+                    stars: snapshot.stars,
+                });
+            }
+        });
+        monthLatest.forEach((value, month) => {
+            monthStars.set(month, (monthStars.get(month) ?? 0) + value.stars);
+        });
+    });
+
+    const monthCommits = new Map<string, number>();
+    weeklyTotals.forEach((week) => {
+        const monthKey = new Date(week.week * 1000).toISOString().slice(0, 7);
+        monthCommits.set(monthKey, (monthCommits.get(monthKey) ?? 0) + week.commits);
+    });
+
+    const months = Array.from(
+        new Set([...monthStars.keys(), ...monthCommits.keys()]),
+    ).sort();
+    if (months.length === 0) return [];
+    if (!retentionDays) {
+        return months.map((month) => ({
+            month,
+            stars: monthStars.get(month) ?? 0,
+            commits: monthCommits.get(month) ?? 0,
+        }));
+    }
+    const retentionMonths = Math.max(1, Math.ceil(retentionDays / 30));
+    const maxMonths = Math.min(retentionMonths, 24);
+    const visibleMonths = months.slice(-maxMonths);
+    return visibleMonths.map((month) => ({
+        month,
+        stars: monthStars.get(month) ?? 0,
+        commits: monthCommits.get(month) ?? 0,
+    }));
+};
+
+const getContributionDays = (
+    history: GithubMetricsHistory | null,
+    retentionDays: number,
+): GithubMetricsContributionDay[] => {
+    const days = history?.contributions?.days ?? [];
+    if (!retentionDays) return days;
+    return days.slice(-retentionDays);
+};
+
 const buildUpdateState = async (
     store: MetricsStore,
     history: GithubMetricsHistory | null,
@@ -178,6 +288,7 @@ const buildPayloadFromHistory = (
                 deletions: emptyTotals(),
             },
             repos: [],
+            timeline: {months: [], weeks: [], days: []},
             update,
             error: 'GitHub metrics history is unavailable.',
         };
@@ -186,12 +297,26 @@ const buildPayloadFromHistory = (
     const visibleRepos = history.repos.filter((repo) => repo.visibility === 'public');
     const repoSummaries = visibleRepos.map((repo) => buildRepoSummary(repo, now));
     const summary = buildSummary(repoSummaries, now);
+    const retentionDays = parseRetentionDays();
+    const weeklyTotals = buildWeeklyTotals(visibleRepos, now, retentionDays);
+    const monthlyTimeline = buildMonthlyTimeline(
+        visibleRepos,
+        weeklyTotals,
+        now,
+        retentionDays,
+    );
+    const contributionDays = getContributionDays(history, retentionDays);
 
     return {
         fetchedAt: new Date().toISOString(),
         historyUpdatedAt: history.generatedAt,
         summary,
         repos: repoSummaries,
+        timeline: {
+            months: monthlyTimeline,
+            weeks: weeklyTotals,
+            days: contributionDays,
+        },
         update,
     };
 };

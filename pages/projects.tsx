@@ -74,6 +74,33 @@ const formatNumber = (value: number) => value.toLocaleString();
 const formatDelta = (additions: number, deletions: number) =>
     `${additions >= 0 ? '+' : ''}${additions.toLocaleString()} / -${deletions.toLocaleString()}`;
 
+const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', {month: 'short'});     
+const CONTRIBUTION_FORMATTER = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+});
+
+const formatMonthLabel = (value: string) => {
+    const date = new Date(`${value}-01T00:00:00Z`);
+    if (Number.isNaN(date.getTime())) return value;
+    return `${MONTH_FORMATTER.format(date)} ${String(date.getFullYear()).slice(-2)}`;
+};
+
+const parseContributionDate = (value: string) => {
+    if (!value) return null;
+    const normalized = value.includes('T') ? value : `${value}T00:00:00Z`;
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+};
+
+const formatContributionDate = (value: string) => {
+    const date = parseContributionDate(value);
+    if (!date) return value;
+    return CONTRIBUTION_FORMATTER.format(date);
+};
+
 const PIPELINE_ANCHOR_ID = 'pipeline-metrics';
 const DENSITY_STORAGE_KEY = 'projects-density';
 type DensityMode = 'tiny' | 'normal' | 'roomy';
@@ -273,6 +300,112 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         });
         return map;
     }, [metricsRepos]);
+    const timelineMonths = metricsData?.timeline?.months ?? [];
+    const timelineDays = metricsData?.timeline?.days ?? [];
+    const timelineMaxStars = useMemo(
+        () => Math.max(...timelineMonths.map((month) => month.stars), 1),
+        [timelineMonths],
+    );
+    const timelineMaxCommits = useMemo(
+        () => Math.max(...timelineMonths.map((month) => month.commits), 1),
+        [timelineMonths],
+    );
+    const heatmapDays = useMemo(
+        () => timelineDays.slice(-365),
+        [timelineDays],
+    );
+    const heatmapMax = useMemo(
+        () => Math.max(...heatmapDays.map((day) => day.count), 1),
+        [heatmapDays],
+    );
+    const heatmapStartOffset = useMemo(() => {
+        if (heatmapDays.length === 0) return 0;
+        const date = parseContributionDate(heatmapDays[0].date);
+        return date ? date.getUTCDay() : 0;
+    }, [heatmapDays]);
+    const heatmapCells = useMemo(() => {
+        if (heatmapDays.length === 0) return [];
+        const pads = Array.from({length: heatmapStartOffset}, (_, index) => ({
+            key: `pad-${index}`,
+            type: 'pad' as const,
+        }));
+        const days = heatmapDays.map((day, index) => ({
+            key: `${day.date}-${index}`,
+            type: 'day' as const,
+            day,
+        }));
+        return [...pads, ...days];
+    }, [heatmapDays, heatmapStartOffset]);
+    const releaseCadence = useMemo(() => {
+        const nowMs = Date.now();
+        const entries = projects
+            .map(({repo, meta}) => {
+                const detail = detailData[repo.id];
+                const releaseDate = detail?.latestRelease?.publishedAt ?? null;
+                const metricsRepo = metricsMap.get(repo.full_name.toLowerCase());
+                const pushDate = metricsRepo?.pushedAt ?? repo.pushed_at ?? null;
+                const date = releaseDate ?? pushDate;
+                if (!date) return null;
+                const timestamp = Date.parse(date);
+                if (!Number.isFinite(timestamp)) return null;
+                return {
+                    id: repo.id,
+                    name: meta?.displayName ?? repo.name,
+                    date,
+                    timestamp,
+                    type: releaseDate ? 'Release' : 'Push',
+                };
+            })
+            .filter(
+                (entry): entry is NonNullable<typeof entry> => Boolean(entry),
+            )
+            .sort((a, b) => b.timestamp - a.timestamp);
+        const maxAgeMs = entries.length
+            ? Math.max(...entries.map((entry) => nowMs - entry.timestamp))
+            : 1;
+        return entries.slice(0, 8).map((entry) => {
+            const ageDays = Math.max(
+                1,
+                Math.round((nowMs - entry.timestamp) / (24 * 60 * 60 * 1000)),
+            );
+            const ratio = maxAgeMs ? 1 - (nowMs - entry.timestamp) / maxAgeMs : 1;
+            return {
+                ...entry,
+                ageDays,
+                barPct: Math.max(0.15, ratio) * 100,
+            };
+        });
+    }, [projects, detailData, metricsMap]);
+    const stackBuckets = useMemo(() => {
+        const counts = new Map<string, number>();
+        const labels = new Map<string, string>();
+        projects.forEach(({repo, meta}) => {
+            const values = new Set<string>([
+                ...(meta?.topics ?? []),
+                ...(repo.topics ?? []),
+                ...(repo.language ? [repo.language] : []),
+            ]);
+            values.forEach((value) => {
+                const trimmed = value.trim();
+                if (!trimmed) return;
+                const key = trimmed.toLowerCase();
+                if (!labels.has(key)) labels.set(key, trimmed);
+                counts.set(key, (counts.get(key) ?? 0) + 1);
+            });
+        });
+        return Array.from(counts.entries())
+            .map(([key, count]) => ({
+                key,
+                label: labels.get(key) ?? key,
+                count,
+            }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 8);
+    }, [projects]);
+    const stackMax = useMemo(
+        () => Math.max(...stackBuckets.map((bucket) => bucket.count), 1),
+        [stackBuckets],
+    );
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -281,6 +414,7 @@ export default function Projects({projects, githubError, projectPosts}: Projects
             setDensityMode(stored);
         }
     }, []);
+
 
     const handleDensityChange = (next: DensityMode) => {
         setDensityMode(next);
@@ -570,20 +704,22 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                     Live status across active repos. Tap in when builds are moving.
                                 </p>
                             </div>
-                            <div className={styles.pipelineStats}>
-                                <span className={styles.pipelineStat} data-state="running">
-                                    Running {pipelineSummary.running}
-                                </span>
-                                <span className={styles.pipelineStat} data-state="passing">
-                                    Passing {pipelineSummary.passing}
-                                </span>
-                                <span className={styles.pipelineStat} data-state="failing">
-                                    Failing {pipelineSummary.failing}
-                                </span>
+                            <div className={styles.pipelineStatsRow}>
+                                <div className={styles.pipelineStats}>
+                                    <span className={styles.pipelineStat} data-state="running">
+                                        Running {pipelineSummary.running}
+                                    </span>
+                                    <span className={styles.pipelineStat} data-state="passing">
+                                        Passing {pipelineSummary.passing}
+                                    </span>
+                                    <span className={styles.pipelineStat} data-state="failing">
+                                        Failing {pipelineSummary.failing}
+                                    </span>
+                                </div>
+                                <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.pipelineLink} glowable`}>
+                                    View pipeline metrics
+                                </Link>
                             </div>
-                            <Link href={`/projects#${PIPELINE_ANCHOR_ID}`} className={`${styles.pipelineLink} glowable`}>
-                                View pipeline metrics
-                            </Link>
                         </div>
                     )}
                     <div className={styles.metricsCallout}>
@@ -626,6 +762,138 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                     </div>
                 </div>
             </section>
+            <section className={styles.storySection}>
+                <div className={styles.storyHeader}>
+                    <p className={styles.storyKicker}>Project pulse</p>
+                    <h2 className={styles.storyTitle}>Signals across the portfolio</h2>
+                    <p className={styles.storyText}>
+                        A few visual cues that show how the projects evolve: star growth,
+                        commit rhythm, and the tech stack mix behind the repos.
+                    </p>
+                </div>
+                <div className={styles.storyRow}>
+                    <div className={`${styles.storyPanel} ${styles.timelinePanel}`}>
+                        <div className={styles.panelHeader}>
+                            <div>
+                                <p className={styles.panelKicker}>Timeline ribbon</p>
+                                <h3 className={styles.panelTitle}>Stars + commits by month</h3>
+                            </div>
+                            {timelineMonths.length > 0 && (
+                                <span className={styles.panelMeta}>
+                                    {timelineMonths.length} months
+                                </span>
+                            )}
+                        </div>
+                        {timelineMonths.length === 0 ? (
+                            <div className={styles.panelEmpty}>Timeline data is still loading.</div>
+                        ) : (
+                            <div
+                                className={styles.timeline}
+                                role="img"
+                                aria-label="Monthly stars and commits timeline"
+                            >
+                                {timelineMonths.map((month) => {
+                                    const starHeight = Math.max(
+                                        12,
+                                        (month.stars / timelineMaxStars) * 90,
+                                    );
+                                    const dotScale = Math.max(
+                                        0.6,
+                                        (month.commits / timelineMaxCommits) * 1.2,
+                                    );
+                                    return (
+                                        <div
+                                            key={month.month}
+                                            className={styles.timelineItem}
+                                            title={`${formatMonthLabel(month.month)} · ${formatNumber(month.stars)} stars · ${formatNumber(month.commits)} commits`}
+                                        >
+                                            <span
+                                                className={styles.timelineBar}
+                                                style={{height: `${starHeight}px`}}
+                                            />
+                                            <span
+                                                className={styles.timelineDot}
+                                                style={{transform: `scale(${dotScale})`}}
+                                            />
+                                            <span className={styles.timelineLabel}>
+                                                {formatMonthLabel(month.month)}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                    <div className={`${styles.storyPanel} ${styles.heatmapPanel}`}>
+                        <div className={styles.panelHeader}>
+                            <div>
+                                <p className={styles.panelKicker}>Commit heatmap</p>
+                                <h3 className={styles.panelTitle}>365-day contribution rhythm</h3>
+                            </div>
+                        </div>
+                        {heatmapDays.length === 0 ? (
+                            <div className={styles.panelEmpty}>Daily contribution data is still loading.</div>
+                        ) : (
+                            <div
+                                className={styles.heatmap}
+                                role="img"
+                                aria-label="365-day contribution heatmap"
+                            >
+                                {heatmapCells.map((cell) => {
+                                    if (cell.type === 'pad') {
+                                        return (
+                                            <span
+                                                key={cell.key}
+                                                className={`${styles.heatmapCell} ${styles.heatmapEmpty}`}
+                                                aria-hidden="true"
+                                            />
+                                        );
+                                    }
+                                    const count = cell.day.count ?? 0;
+                                    const intensity = count / heatmapMax;
+                                    const opacity = Math.min(1, 0.12 + intensity * 0.88);
+                                    return (
+                                        <span
+                                            key={cell.key}
+                                            className={styles.heatmapCell}
+                                            style={{opacity}}
+                                            title={`${formatContributionDate(cell.day.date)} · ${formatNumber(count)} contributions`}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className={styles.storyRowSingle}>
+                    <div className={`${styles.storyPanel} ${styles.storyPanelWide}`}>
+                        <div className={styles.panelHeader}>
+                            <div>
+                                <p className={styles.panelKicker}>Tech stack mix</p>
+                                <h3 className={styles.panelTitle}>Languages + topics in active repos</h3>
+                            </div>
+                        </div>
+                        {stackBuckets.length === 0 ? (
+                            <div className={styles.panelEmpty}>Stack coverage is still loading.</div>
+                        ) : (
+                            <div className={styles.stackList}>
+                                {stackBuckets.map((bucket) => (
+                                    <div key={bucket.key} className={styles.stackRow}>
+                                        <span className={styles.stackLabel}>{bucket.label}</span>
+                                        <div className={styles.stackBarWrap}>
+                                            <span
+                                                className={styles.stackBar}
+                                                style={{width: `${(bucket.count / stackMax) * 100}%`}}
+                                            />
+                                        </div>
+                                        <span className={styles.stackValue}>{bucket.count}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
             <div className={styles.densityToggle}>
                 <span className={styles.densityLabel}>Density</span>
                 <div className={styles.densityButtons} role="group" aria-label="Project grid density">
@@ -664,12 +932,13 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                     </p>
                 </div>
             ) : (
-                <section
-                    className={styles.grid}
-                    data-expanded={expandedId ? 'true' : undefined}
-                    data-density={densityMode}
-                >
-                    {projects.map(({repo, meta, relatedPosts}) => {
+                <>
+                    <section
+                        className={styles.grid}
+                        data-expanded={expandedId ? 'true' : undefined}
+                        data-density={densityMode}
+                    >
+                        {projects.map(({repo, meta, relatedPosts}) => {
                         const displayName = meta?.displayName ?? repo.name;
                         const summary = meta?.summary ?? repo.description ?? 'No description yet.';
                         const topics = Array.from(
@@ -1273,8 +1542,47 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                                 </div>
                             </article>
                         );
-                    })}
-                </section>
+                        })}
+                    </section>
+                    <section className={styles.cadenceSection}>
+                    <div className={styles.storyHeader}>
+                        <p className={styles.storyKicker}>Release cadence</p>
+                        <h2 className={styles.storyTitle}>Latest shipping moments</h2>
+                        <p className={styles.storyText}>
+                            The most recent releases across active repositories. When a release
+                            is missing, the latest push timestamp fills in.
+                        </p>
+                    </div>
+                    <div className={styles.storyPanel}>
+                        {releaseCadence.length === 0 ? (
+                            <div className={styles.panelEmpty}>Release cadence is still loading.</div>
+                        ) : (
+                            <div className={styles.cadenceList}>
+                                {releaseCadence.map((entry) => (
+                                    <div key={entry.id} className={styles.cadenceRow}>
+                                        <div className={styles.cadenceTop}>
+                                            <span className={styles.cadenceName}>{entry.name}</span>
+                                            <span className={styles.cadenceMeta}>
+                                                <DateStamp dateString={entry.date} />
+                                                <span className={styles.cadenceTag}>{entry.type}</span>
+                                            </span>
+                                        </div>
+                                        <div className={styles.cadenceTrack}>
+                                            <span
+                                                className={styles.cadenceBar}
+                                                style={{width: `${entry.barPct}%`}}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <p className={styles.panelNote}>
+                            Release dates show when available; otherwise the most recent push is used.
+                        </p>
+                    </div>
+                    </section>
+                </>
             )}
             <section
                 id={PIPELINE_ANCHOR_ID}

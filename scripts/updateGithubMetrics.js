@@ -43,7 +43,8 @@ const loadEnv = async () => {
     }
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));        
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const requestJson = async (url, init) => {
     const response = await fetch(url, init);
@@ -69,6 +70,29 @@ const requestJson = async (url, init) => {
 const fetchJson = async (url, init) => {
     const {data} = await requestJson(url, init);
     return data;
+};
+
+const requestGraphql = async (query, variables, headers) => {
+    const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({query, variables}),
+    });
+    const body = await response.text();
+    if (!response.ok) {
+        throw new Error(`GitHub GraphQL failed ${response.status}: ${body}`);
+    }
+    if (!body) {
+        throw new Error('GitHub GraphQL response empty.');
+    }
+    const parsed = JSON.parse(body);
+    if (parsed?.errors?.length) {
+        throw new Error(`GitHub GraphQL error: ${JSON.stringify(parsed.errors)}`);
+    }
+    return parsed?.data ?? null;
 };
 
 const resolveLoginFromEnv = () => {
@@ -124,7 +148,7 @@ const fetchRepos = async (login, headers) => {
 };
 
 const fetchContributorStats = async (fullName, headers) => {
-    const url = `https://api.github.com/repos/${fullName}/stats/contributors`;
+    const url = `https://api.github.com/repos/${fullName}/stats/contributors`;  
     for (let attempt = 0; attempt < 4; attempt += 1) {
         const {status, data, headers: responseHeaders} = await requestJson(url, {headers});
         if (status === 202) {
@@ -143,6 +167,42 @@ const fetchContributorStats = async (fullName, headers) => {
     return [];
 };
 
+const fetchContributionDays = async (login, fromIso, toIso, headers) => {
+    const query = `
+        query($login: String!, $from: DateTime!, $to: DateTime!) {
+            user(login: $login) {
+                contributionsCollection(from: $from, to: $to) {
+                    contributionCalendar {
+                        weeks {
+                            contributionDays {
+                                date
+                                contributionCount
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `;
+    const data = await requestGraphql(query, {login, from: fromIso, to: toIso}, headers);
+    const weeks =
+        data?.user?.contributionsCollection?.contributionCalendar?.weeks ?? [];
+    const days = [];
+    weeks.forEach((week) => {
+        const contributionDays = Array.isArray(week?.contributionDays)
+            ? week.contributionDays
+            : [];
+        contributionDays.forEach((day) => {
+            if (!day?.date) return;
+            days.push({
+                date: day.date,
+                count: day.contributionCount ?? 0,
+            });
+        });
+    });
+    return days.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+};
+
 const loadExisting = async () => {
     try {
         const raw = await fs.readFile(METRICS_PATH, 'utf8');
@@ -154,6 +214,23 @@ const loadExisting = async () => {
 
 const trimSnapshots = (snapshots, cutoffMs) =>
     snapshots.filter((snapshot) => new Date(snapshot.date).getTime() >= cutoffMs);
+
+const WEEK_MS = 7 * DAY_MS;
+const trimWeeks = (weeks, cutoffMs) =>
+    weeks.filter((week) => week.week * 1000 + WEEK_MS >= cutoffMs);
+
+const parseRetentionDays = () => {
+    const raw = process.env.GITHUB_METRICS_RETENTION_DAYS;
+    if (!raw) return 365;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        console.warn(
+            `Invalid GITHUB_METRICS_RETENTION_DAYS "${raw}". Using 365 days.`,
+        );
+        return 365;
+    }
+    return parsed;
+};
 
 const writePayload = async (payload) => {
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
@@ -255,7 +332,7 @@ const resolveAdapterModule = async (adapterPath) => {
 };
 
 const resolveStore = async () => {
-    const mode = process.env.METRICS_STORE || 'file';
+    const mode = process.env.METRICS_STORE;
     const adapterPath = resolveAdapterPath();
     const useAdapter = mode !== 'file' && (mode === 'custom' || Boolean(adapterPath));
     if (useAdapter) {
@@ -334,7 +411,34 @@ const updateGithubMetrics = async (options = {}) => {
         const repos = await fetchRepos(login, headers);
         const now = new Date();
         const snapshotDate = now.toISOString().slice(0, 10);
-        const snapshotCutoff = now.getTime() - 400 * 24 * 60 * 60 * 1000;
+        const retentionDays = parseRetentionDays();
+        const snapshotCutoff = retentionDays
+            ? now.getTime() - retentionDays * 24 * 60 * 60 * 1000
+            : 0;
+        const contributionWindowDays =
+            retentionDays && retentionDays > 0 ? retentionDays : 365;
+        const contributionsFrom = new Date(
+            now.getTime() - contributionWindowDays * DAY_MS,
+        ).toISOString();
+        const contributionsTo = now.toISOString();
+        let contributions = existing?.contributions ?? null;
+        try {
+            const days = await fetchContributionDays(
+                login,
+                contributionsFrom,
+                contributionsTo,
+                headers,
+            );
+            if (days.length > 0) {
+                contributions = {
+                    from: contributionsFrom,
+                    to: contributionsTo,
+                    days: days.slice(-contributionWindowDays),
+                };
+            }
+        } catch (error) {
+            console.warn(`GitHub contributions fetch failed: ${error}`);
+        }
         const existingMap = new Map(
             Array.isArray(existing?.repos)
                 ? existing.repos.map((repo) => [repo.fullName, repo])
@@ -360,6 +464,7 @@ const updateGithubMetrics = async (options = {}) => {
             generatedAt: now.toISOString(),
             user: login,
             progress,
+            contributions: contributions ?? undefined,
             repos: ownedRepos.map((repo) => {
                 const previous = existingMap.get(repo.full_name);
                 return {
@@ -399,13 +504,18 @@ const updateGithubMetrics = async (options = {}) => {
                       deletions: week.d,
                   }))
                 : [];
+            const trimmedWeeks = retentionDays
+                ? trimWeeks(weeks, snapshotCutoff)
+                : weeks;
             const previous = existingMap.get(fullName);
             const previousSnapshots = Array.isArray(previous?.snapshots)
                 ? previous.snapshots
                 : [];
-            const trimmedSnapshots = trimSnapshots(previousSnapshots, snapshotCutoff).filter(
-                (snapshot) => snapshot.date !== snapshotDate,
-            );
+            const trimmedSnapshots = retentionDays
+                ? trimSnapshots(previousSnapshots, snapshotCutoff).filter(
+                      (snapshot) => snapshot.date !== snapshotDate,
+                  )
+                : previousSnapshots.filter((snapshot) => snapshot.date !== snapshotDate);
             const snapshots = [
                 ...trimmedSnapshots,
                 {
@@ -426,7 +536,7 @@ const updateGithubMetrics = async (options = {}) => {
                 forks: repo.forks_count ?? 0,
                 pushedAt: repo.pushed_at ?? null,
                 visibility: repo.private ? 'private' : 'public',
-                weeks,
+                weeks: trimmedWeeks,
                 snapshots,
                 updatedAt: new Date().toISOString(),
             };
