@@ -74,7 +74,7 @@ const formatNumber = (value: number) => value.toLocaleString();
 const formatDelta = (additions: number, deletions: number) =>
     `${additions >= 0 ? '+' : ''}${additions.toLocaleString()} / -${deletions.toLocaleString()}`;
 
-const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', {month: 'short'});     
+const MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', {month: 'short'});
 const CONTRIBUTION_FORMATTER = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
