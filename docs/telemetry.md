@@ -307,6 +307,11 @@ Use these variables to control where metrics are stored and how refreshes are th
       <td>Bearer token for <code>/api/github-metrics-update</code>.</td>
     </tr>
     <tr>
+      <td>GITHUB_METRICS_RETENTION_DAYS</td>
+      <td>History retention</td>
+      <td>Days of metrics history to keep (default 365; 0 keeps everything).</td>
+    </tr>
+    <tr>
       <td>METRICS_UPDATE_MIN_INTERVAL_MS</td>
       <td>Refresh throttle</td>
       <td>Minimum delay between full metrics updates.</td>

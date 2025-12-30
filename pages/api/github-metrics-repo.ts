@@ -57,8 +57,28 @@ const isLockActive = async (store: MetricsStore) => {
     return Date.now() - startedAt < LOCK_STALE_MS;
 };
 
-const trimSnapshots = (snapshots: GithubMetricsHistory['repos'][number]['snapshots'], cutoffMs: number) =>
-    snapshots.filter((snapshot) => new Date(snapshot.date).getTime() >= cutoffMs);
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const trimSnapshots = (
+    snapshots: GithubMetricsHistory['repos'][number]['snapshots'],
+    cutoffMs: number,
+) => snapshots.filter((snapshot) => new Date(snapshot.date).getTime() >= cutoffMs);
+const trimWeeks = (
+    weeks: GithubMetricsHistory['repos'][number]['weeks'],
+    cutoffMs: number,
+) => weeks.filter((week) => week.week * 1000 + WEEK_MS >= cutoffMs);
+
+const parseRetentionDays = () => {
+    const raw = process.env.GITHUB_METRICS_RETENTION_DAYS;
+    if (!raw) return 365;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        console.warn(
+            `Invalid GITHUB_METRICS_RETENTION_DAYS "${raw}". Using 365 days.`,
+        );
+        return 365;
+    }
+    return parsed;
+};
 
 export default async function handler(
     req: NextApiRequest,
@@ -182,10 +202,17 @@ export default async function handler(
         }
 
         const snapshotDate = new Date().toISOString().slice(0, 10);
-        const snapshotCutoff = Date.now() - 400 * 24 * 60 * 60 * 1000;
-        const trimmedSnapshots = trimSnapshots(repoEntry.snapshots ?? [], snapshotCutoff).filter(
-            (snapshot) => snapshot.date !== snapshotDate,
-        );
+        const retentionDays = parseRetentionDays();
+        const snapshotCutoff = retentionDays
+            ? Date.now() - retentionDays * 24 * 60 * 60 * 1000
+            : 0;
+        const trimmedSnapshots = retentionDays
+            ? trimSnapshots(repoEntry.snapshots ?? [], snapshotCutoff).filter(
+                  (snapshot) => snapshot.date !== snapshotDate,
+              )
+            : (repoEntry.snapshots ?? []).filter(
+                  (snapshot) => snapshot.date !== snapshotDate,
+              );
         const snapshots = [
             ...trimmedSnapshots,
             {
@@ -195,11 +222,14 @@ export default async function handler(
                 pushedAt: repoData.pushedAt ?? null,
             },
         ];
+        const trimmedWeeks = retentionDays
+            ? trimWeeks(weeks, snapshotCutoff)
+            : weeks;
 
         const updatedAt = new Date().toISOString();
         history.repos[repoIndex] = {
             ...repoData,
-            weeks,
+            weeks: trimmedWeeks,
             snapshots,
             updatedAt,
         };

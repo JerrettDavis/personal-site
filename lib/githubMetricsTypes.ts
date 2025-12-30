@@ -12,6 +12,30 @@ export type GithubRepoSnapshot = {
     pushedAt: string | null;
 };
 
+export type GithubMetricsWeeklyTotals = {
+    week: number;
+    commits: number;
+    additions: number;
+    deletions: number;
+};
+
+export type GithubMetricsContributionDay = {
+    date: string;
+    count: number;
+};
+
+export type GithubMetricsContributionWindow = {
+    from: string;
+    to: string;
+    days: GithubMetricsContributionDay[];
+};
+
+export type GithubMetricsTimelineMonth = {
+    month: string;
+    stars: number;
+    commits: number;
+};
+
 export type GithubRepoMetrics = {
     id: number;
     name: string;
@@ -31,6 +55,7 @@ export type GithubMetricsHistory = {
     generatedAt: string | null;
     user: string;
     repos: GithubRepoMetrics[];
+    contributions?: GithubMetricsContributionWindow;
     progress?: GithubMetricsProgress;
 };
 
@@ -81,6 +106,11 @@ export type GithubMetricsResponse = {
     historyUpdatedAt: string | null;
     summary: GithubMetricsSummary;
     repos: GithubRepoMetricSummary[];
+    timeline?: {
+        months: GithubMetricsTimelineMonth[];
+        weeks: GithubMetricsWeeklyTotals[];
+        days?: GithubMetricsContributionDay[];
+    };
     update?: GithubMetricsUpdateState | null;
     error?: string | null;
     rateLimitedUntil?: string | null;
