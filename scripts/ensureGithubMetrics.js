@@ -120,7 +120,7 @@ const resolveAdapterModule = async (adapterPath) => {
 };
 
 const resolveStore = async () => {
-    const mode = process.env.METRICS_STORE || 'file';
+    const mode = process.env.METRICS_STORE;
     const adapterPath = resolveAdapterPath();
     const useAdapter = mode !== 'file' && (mode === 'custom' || Boolean(adapterPath));
     if (useAdapter) {

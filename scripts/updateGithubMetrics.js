@@ -250,6 +250,8 @@ const writePayload = async (payload) => {
     }
 };
 
+const DEFAULT_MIN_INTERVAL_MS = 60 * 60 * 1000;
+
 const readLock = async () => {
     try {
         const raw = await fs.readFile(LOCK_PATH, 'utf8');
@@ -390,8 +392,19 @@ const updateGithubMetrics = async (options = {}) => {
             return {status: 'in_progress'};
         }
         const existing = await store.getHistory();
-        const minIntervalMs = Number(process.env.METRICS_UPDATE_MIN_INTERVAL_MS ?? '');
-        if (!forceUpdate && Number.isFinite(minIntervalMs) && minIntervalMs > 0) {
+        const minIntervalRaw = process.env.METRICS_UPDATE_MIN_INTERVAL_MS ?? '';
+        let minIntervalMs = DEFAULT_MIN_INTERVAL_MS;
+        if (String(minIntervalRaw).trim() !== '') {
+            const parsed = Number.parseInt(minIntervalRaw, 10);
+            if (Number.isFinite(parsed) && parsed >= 0) {
+                minIntervalMs = parsed;
+            } else {
+                console.warn(
+                    `Invalid METRICS_UPDATE_MIN_INTERVAL_MS "${minIntervalRaw}". Using default ${DEFAULT_MIN_INTERVAL_MS}ms.`,
+                );
+            }
+        }
+        if (!forceUpdate && minIntervalMs > 0) {
             const updatedAt = existing?.generatedAt ? Date.parse(existing.generatedAt) : 0;
             if (updatedAt && Date.now() - updatedAt < minIntervalMs) {
                 return {

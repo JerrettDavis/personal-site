@@ -208,7 +208,11 @@ const buildMonthlyTimeline = (
     });
 
     const months = Array.from(
-        new Set([...monthStars.keys(), ...monthCommits.keys()]),
+        new Set(
+            Array.from(monthStars.keys()).concat(
+                Array.from(monthCommits.keys()),
+            ),
+        ),
     ).sort();
     if (months.length === 0) return [];
     if (!retentionDays) {
