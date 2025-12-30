@@ -43,7 +43,7 @@ const loadEnv = async () => {
     }
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));        
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const requestJson = async (url, init) => {
