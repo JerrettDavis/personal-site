@@ -303,11 +303,17 @@ export default function Projects({projects, githubError, projectPosts}: Projects
     const timelineMonths = metricsData?.timeline?.months ?? [];
     const timelineDays = metricsData?.timeline?.days ?? [];
     const timelineMaxStars = useMemo(
-        () => Math.max(...timelineMonths.map((month) => month.stars), 1),
+        () =>
+            timelineMonths.length > 0
+                ? Math.max(...timelineMonths.map((month) => month.stars))
+                : 1,
         [timelineMonths],
     );
     const timelineMaxCommits = useMemo(
-        () => Math.max(...timelineMonths.map((month) => month.commits), 1),
+        () =>
+            timelineMonths.length > 0
+                ? Math.max(...timelineMonths.map((month) => month.commits))
+                : 1,
         [timelineMonths],
     );
     const heatmapDays = useMemo(
