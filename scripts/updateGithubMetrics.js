@@ -148,7 +148,7 @@ const fetchRepos = async (login, headers) => {
 };
 
 const fetchContributorStats = async (fullName, headers) => {
-    const url = `https://api.github.com/repos/${fullName}/stats/contributors`;  
+    const url = `https://api.github.com/repos/${fullName}/stats/contributors`;
     for (let attempt = 0; attempt < 4; attempt += 1) {
         const {status, data, headers: responseHeaders} = await requestJson(url, {headers});
         if (status === 202) {
