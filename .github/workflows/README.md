@@ -20,11 +20,13 @@ Create a Personal Access Token (PAT) with bypass permissions:
    - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
    - Click "Generate new token (classic)"
    - Give it a descriptive name like "Metrics Update Token"
-   - Select expiration (recommend "No expiration" for automation)
+   - Set expiration (recommend 1 year or less, with calendar reminders to rotate)
    - Grant the following scopes:
      - **repo** (Full control of private repositories)
+     - **Note**: The `repo` scope is required because bypassing branch protection requires admin-level access. Fine-grained tokens with more restrictive scopes cannot bypass branch protection rules.
    - Generate the token and copy it
-   - **Important**: The token must belong to a user with admin access to the repository
+   - **Important**: The token must belong to a user with admin access to the repository to bypass branch protection
+   - **Security Note**: Store this token securely and rotate it before expiration
 
 2. **Add the token as a repository secret**:
    - Go to your repository Settings → Secrets and variables → Actions
