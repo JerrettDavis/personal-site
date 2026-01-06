@@ -29,16 +29,11 @@ jobs:
           DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
           METRICS_UPDATE_MIN_INTERVAL_MS: 21600000
       - name: Commit updated metrics
-        env:
-          HAS_DATABASE: ${{ secrets.DATABASE_URL != '' || secrets.DATABASE_URL_UNPOOLED != '' }}
         run: |
-          # Check if we're using database storage
-          if [ "$HAS_DATABASE" = "true" ]; then
-            echo "Using database storage, no file commit needed."
-            exit 0
-          fi
+          # The updateGithubMetrics.js script automatically uses database storage 
+          # if DATABASE_URL secrets are configured. If database is used, the file
+          # won't be modified, so this step will skip the commit.
           
-          # Only proceed if the file exists and has changes
           METRICS_FILE="data/githubMetricsHistory.json"
           if [ ! -f "$METRICS_FILE" ]; then
             echo "Metrics file not found, nothing to commit."
