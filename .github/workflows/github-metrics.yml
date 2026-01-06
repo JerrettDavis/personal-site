@@ -30,9 +30,15 @@ jobs:
           METRICS_UPDATE_MIN_INTERVAL_MS: 21600000
       - name: Commit updated metrics
         run: |
-          # Only commit if using file storage (not database)
-          if [ ! -f "data/githubMetricsHistory.json" ]; then
+          # Check if we're using database storage
+          if [ -n "${{ secrets.DATABASE_URL }}" ] || [ -n "${{ secrets.DATABASE_URL_UNPOOLED }}" ]; then
             echo "Using database storage, no file commit needed."
+            exit 0
+          fi
+          
+          # Only proceed if the file exists and has changes
+          if [ ! -f "data/githubMetricsHistory.json" ]; then
+            echo "Metrics file not found, nothing to commit."
             exit 0
           fi
           

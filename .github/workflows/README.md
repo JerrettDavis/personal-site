@@ -10,7 +10,7 @@ The workflow fails with the error "Changes must be made through a pull request" 
 
 ### Solutions
 
-There are two ways to fix this issue:
+There are three ways to fix this issue:
 
 #### Option 1: Use a Personal Access Token (Recommended)
 
@@ -78,5 +78,5 @@ If you have a PostgreSQL database available, you can store metrics there instead
 **Error: "Custom metrics store load failed"**
 - This is a warning that database connection failed
 - Workflow will fall back to file storage
-- If you want to use database storage, ensure `DATABASE_URL` secret is properly configured
+- If you want to use database storage, ensure `DATABASE_URL` or `DATABASE_URL_UNPOOLED` secret is properly configured with a valid PostgreSQL connection string
 
