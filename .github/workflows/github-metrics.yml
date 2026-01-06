@@ -12,6 +12,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.METRICS_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -28,12 +30,26 @@ jobs:
           METRICS_UPDATE_MIN_INTERVAL_MS: 21600000
       - name: Commit updated metrics
         run: |
+          # The updateGithubMetrics.js script automatically uses database storage 
+          # if any PostgreSQL connection environment variables are configured
+          # (DATABASE_URL, DATABASE_URL_UNPOOLED, POSTGRES_URL, etc.).
+          # If database is used, the file won't be modified, so git diff will
+          # detect no changes and this step will skip the commit.
+          
+          METRICS_FILE="data/githubMetricsHistory.json"
+          if [ ! -f "$METRICS_FILE" ]; then
+            echo "Metrics file not found, nothing to commit."
+            exit 0
+          fi
+          
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/githubMetricsHistory.json
+          git add "$METRICS_FILE"
+          
           if git diff --cached --quiet; then
             echo "No metrics changes to commit."
             exit 0
           fi
+          
           git commit -m "chore(metrics): update GitHub metrics"
           git push
