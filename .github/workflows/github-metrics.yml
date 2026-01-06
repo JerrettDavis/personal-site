@@ -31,8 +31,10 @@ jobs:
       - name: Commit updated metrics
         run: |
           # The updateGithubMetrics.js script automatically uses database storage 
-          # if DATABASE_URL secrets are configured. If database is used, the file
-          # won't be modified, so this step will skip the commit.
+          # if any PostgreSQL connection environment variables are configured
+          # (DATABASE_URL, DATABASE_URL_UNPOOLED, POSTGRES_URL, etc.).
+          # If database is used, the file won't be modified, so git diff will
+          # detect no changes and this step will skip the commit.
           
           METRICS_FILE="data/githubMetricsHistory.json"
           if [ ! -f "$METRICS_FILE" ]; then

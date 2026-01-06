@@ -54,10 +54,15 @@ If you prefer not to use a PAT, you can configure repository rules to allow the 
 
 If you have a PostgreSQL database available, you can store metrics there instead of committing to git, which completely avoids the branch protection issue:
 
-1. Set up the following secrets in your repository:
-   - `DATABASE_URL` or `DATABASE_URL_UNPOOLED`: Your PostgreSQL connection string
+1. Set up one of the following repository secrets with your PostgreSQL connection string:
+   - `DATABASE_URL` or `DATABASE_URL_UNPOOLED` (recommended for Vercel/Neon)
+   - `POSTGRES_URL` or `POSTGRES_URL_NON_POOLING`
+   - `POSTGRES_PRISMA_URL`
+   - `METRICS_PG_URL`
+   - `PG_CONNECTION_STRING`
+   - Or configure individual connection parameters: `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
 
-2. The workflow will automatically use database storage when these secrets are configured
+2. The workflow will automatically use database storage when any of these secrets are configured
 3. No git commits will be made, so branch protection is not an issue
 
 ### Workflow Behavior
@@ -80,5 +85,5 @@ If you have a PostgreSQL database available, you can store metrics there instead
 **Error: "Custom metrics store load failed"**
 - This is a warning that database connection failed
 - Workflow will fall back to file storage
-- If you want to use database storage, ensure `DATABASE_URL` or `DATABASE_URL_UNPOOLED` secret is properly configured with a valid PostgreSQL connection string
+- If you want to use database storage, ensure one of the supported PostgreSQL environment variable secrets is properly configured: `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_PRISMA_URL`, `METRICS_PG_URL`, `PG_CONNECTION_STRING`, or individual connection parameters (`PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`)
 
