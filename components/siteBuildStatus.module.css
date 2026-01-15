@@ -69,7 +69,7 @@
 }
 
 .toast {
-    position: absolute;
+    position: fixed;
     right: 1.5rem;
     top: calc(100% + 0.75rem);
     width: min(360px, calc(100vw - 3rem));

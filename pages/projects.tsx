@@ -421,7 +421,6 @@ export default function Projects({projects, githubError, projectPosts}: Projects
         }
     }, []);
 
-
     const handleDensityChange = (next: DensityMode) => {
         setDensityMode(next);
         if (typeof window !== 'undefined') {

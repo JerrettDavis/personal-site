@@ -334,7 +334,7 @@ const resolveAdapterModule = async (adapterPath) => {
 };
 
 const resolveStore = async () => {
-    const mode = process.env.METRICS_STORE;
+    const mode = process.env.METRICS_STORE || 'file';
     const adapterPath = resolveAdapterPath();
     const useAdapter = mode !== 'file' && (mode === 'custom' || Boolean(adapterPath));
     if (useAdapter) {
@@ -426,7 +426,7 @@ const updateGithubMetrics = async (options = {}) => {
         const snapshotDate = now.toISOString().slice(0, 10);
         const retentionDays = parseRetentionDays();
         const snapshotCutoff = retentionDays
-            ? now.getTime() - retentionDays * 24 * 60 * 60 * 1000
+            ? now.getTime() - retentionDays * DAY_MS
             : 0;
         const contributionWindowDays =
             retentionDays && retentionDays > 0 ? retentionDays : 365;
