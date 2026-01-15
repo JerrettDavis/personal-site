@@ -20,6 +20,7 @@ type RepoRefreshResponse = {
 const LOCK_STALE_MS = 4 * 60 * 60 * 1000;
 const LOCAL_COOLDOWN_MS = 60 * 1000;
 const PROD_COOLDOWN_MS = 5 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const requestJson = async (url: string, headers: Record<string, string>) => {
     const response = await fetch(url, {headers});
@@ -204,7 +205,7 @@ export default async function handler(
         const snapshotDate = new Date().toISOString().slice(0, 10);
         const retentionDays = parseRetentionDays();
         const snapshotCutoff = retentionDays
-            ? Date.now() - retentionDays * 24 * 60 * 60 * 1000
+            ? Date.now() - retentionDays * DAY_MS
             : 0;
         const trimmedSnapshots = retentionDays
             ? trimSnapshots(repoEntry.snapshots ?? [], snapshotCutoff).filter(
