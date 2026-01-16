@@ -1,0 +1,1272 @@
+---
+title: 'Vibe Engineering: Solving Small Cross-Cutting Concerns'
+description: 'A long-form essay on using AI agents to identify, extract, and maintain cross-cutting concerns, with a focus on tools-over-decisions, declarative code, and validation-first workflows.'
+date: '2026-01-15'
+useToc: true
+tags:
+  [
+    'ai',
+    'agents',
+    'software-architecture',
+    'software-design',
+    'cross-cutting-concerns',
+    'tooling',
+    'automation',
+    'testing',
+    'documentation'
+  ]
+categories: ['Programming', 'Software Engineering', 'Architecture']
+---
+
+# Vibe Engineering: Solving Small Cross-Cutting Concerns
+
+I've been enamored by AI technologies far before the current generation of generative large language and diffusion image models hit widespread popularity in the early 2020s. Early in my career, I worked as a developer for a local Oil & Gas focused software company. One of the wings that they ultimately spun off into its own organization revolved around performing predictive data analytics on the massive datasets we'd accumulated across our various customers. Eye-opening stuff. Through properly trained models, the company was able to predict all sorts of failure modes, workflow trigger-points, and actionable business insights. The types of decisions that could be made off of these seemingly meaningless data streams changed how I thought about what software could do.
+
+After I left that company, I joined a local healthcare organization. We built incredibly insightful visualizations, reports, and dashboards with our wealth of data. We only dipped our toes into training models for actionable predictions, but even those small exercises proved worthwhile. Outbreak forecasting built atop our wide-reaching care network let us glean and plan for valuable resource allocations months in advance.
+
+A few years later, I found myself working back in oil and gas, this time at a company in a different sector of the field. They too were leveraging AI, training models on pipeline defects, failures, and inspections. This was their bread and butter. Every advancement yielded dividends.
+
+As the clock ticked ever forward, I landed at yet another organization right as the first real generations of AI-assisted coding tools hit our IDEs. Software focused, this company planted its stake alongside giants like OpenAI's ChatGPT with our own growing suite of AI-assisted offerings. Once again, the capability of these technologies captivated me.
+
+Around this same time, I started really tinkering with local Large Language Models and diffusion-based image generation. Ollama. Stable Diffusion. Anything I could get my hands on. I was excited enough about the possibilities that I built myself a new PC: a GeForce RTX 4090, 128gb RAM, an Intel i9 14900k (ouch), and a whole bag of other goodies.
+
+I spared no time getting the machine setup with tooling, utilities, frameworks, and libraries. As the various coding models grew more capable, I found myself leaning into them more, allocating larger and more nebulous tasks their way. For the most part, I used them like a friendlier, more interactive StackOverflow compatriot. I still performed the vast majority of the actual work.
+
+Then came the last quarter of 2025. I received an offer from another local company. I wasn't exactly looking, but I'd heard great things about the organization. They serenaded me with songs detailing near-endless problems in need of targeted, efficient solutions. Never one to shy away from an interesting challenge, I took the plunge. I quickly found myself back in the office, up to the eyeballs in new codebases and problems I'd never quite encountered before. Sure, the ingredients were familiar. I'd seen variations of these problems throughout my career. But rather than cooking exquisite enterprise dishes, I found myself staring at gas station spaghetti.
+
+To my coworkers' surprise, I love spaghetti. Paradoxically, perhaps. It was one of my favorite dishes growing up. Unless there was lasagna on the menu, you could rest assured I was getting spaghetti. I loved it so much that I learned to cook it from scratch before I could competently solo-read a Harry Potter novel. Unsurprisingly, spaghetti code was also my first approach to programming, many moons ago. And here I was, hailing from the hometown of the late Tulsa Spaghetti Warehouse, staring back at an all-you-can-eat buffet.
+
+So I got to chomping.
+
+Bite after bite, I picked up forks-full of noodles and slurped them up. Meticulously. I started putting names to the dishes. Angel-hair. Spaghettini. Spaghettoni. At the risk of beating an already horrifically abused metaphor, I continued tearing apart one dish at a time. Every second of downtime between onboarding tasks became an opportunity to absorb as much as possible. Not just from the business perspective, but more importantly, from the architectural view.
+
+The software was home-grown, home-cooked, home-eaten. We had to internally digest it all. The team had mostly come up through the company, many having been there for 15, 20, 30+ years. The code had evolved alongside the company and the individuals who shaped it. Invaluable knowledge lived within those repositories. But it was unstructured. Unrefined.
+
+There were (and still are) hundreds of codebases comprising the enterprise stack. They're managed by separate and overlapping teams, all focused on propelling the business forward. As the company grew, so did the code. As requirements changed, so did the implementations.
+
+Littered throughout various repos, you'll find comments. Some truthful. Many lying. All purporting to guide you through a forest of overlapping, stateful, static, threaded operations that seem to have sprouted at random. You clone. You touch. You grep. You cry. You prototype. You bargain. You claw your way through discombobulated systems until, slowly, light begins to shine through the ever-thinning limbs.
+
+And you start to make sense of what you're looking at.
+
+Not a forest. No. Something similar, but different. Something closer to a series of massive, interconnected, cautiously cohabitating fungal colonies. Myriad mycological monstrosities expanding into every suitable niche upon which their spores land. As you delicately disentangle their interwoven mycelium, the operation turns into something like a vivisection. Laid bare on the table, the endless nerve-like tendrils begin to make some semblance of sense.
+
+Slowly but surely, different domain concerns start growing defined boundaries. Lists upon lists are made of identified cross-cutting concerns, domains, state mechanisms, authoritative sources of truth. Chaos soon begins to look a lot like patterns...
+
+---
+
+## Little Architectural Building Blocks
+
+Architectural building blocks and design patterns are nothing new. Hundreds, if not thousands, have been coined over the years. One of the "bibles" on the subject, *Design Patterns* by Erich Gamma, Richard Helm, Ralph Johnson, and John Vissides, came out while I was still largely quadrupedal. I was probably just taking my first few steps.
+
+Despite the antiquity of such wisdom, employing these practices isn't the default operating mode for most developers. This continues to surprise me. Most people don't work in the field of their passion. They don't go home and continue thinking and dreaming about their topic of study. Instead, they chase the highest paying fields or follow whatever aptitudes they happen to possess. Silly things like that.
+
+For better or worse, I was never instilled with such predeterminations.
+
+Ever since discovering programming in my pre-tweens, I've been intent on wielding that hammer to sink every nail I can find. Over that multi-decade endeavor, I've hit a lot of nails. Also screws. Staples. Thumbs. Drywall. And other imperfect targets. Through that repeated practice (and self-injury), I've managed to beat in a few hard-earned lessons:
+
+1. "Good code" is an ever-moving target, but good architecture is eternal.
+2. You cannot truthfully and confidently deliver a unit of work without pre-defined and validated inputs and outputs.
+3. Design a system to solve a problem, not to do a task.
+
+### "Good code" is an ever-moving target, but good architecture is eternal
+
+Anyone who's been writing code for longer than an industry-standard release cycle knows things change fast. One week everyone's shoveling the latest ECMAScript hotness down your throat. The next, you're in an intense battle between Rust, Zig, and a bottle of dark liquor. Frameworks, languages, and libraries are a bit like running down to your local big-box hardware store trying to settle on power tools. Certain tools are fantastic for specific problems. You'll find more or less capable versions of similar tools across different brands. The choice matters, but not as much as people think.
+
+It's often stated that premature optimization is the root of all evil. Agree or disagree with that sentiment, I believe most can agree on one thing: a problem solved via an imperfect solution beats the problem existing unabated.
+
+What hasn't changed in the 60+ year span of our field? The components of good architecture. From the earliest beginnings, our tooling, languages, and approaches grew around the problems code solved and the strategies used to solve them. Put whatever label you want on the organization: Clean, Hexagonal, Vertical Slice, Domain Driven. The core tenets of creating declarative, functional, problem-domain-centric solutions have held steady through a blustering whirlwind of technological innovation.
+
+I want to linger on "declarative" for a moment. It's become central to how I think about code quality.
+
+Declarative code describes *what* should happen, not *how* it happens. It reads like a specification rather than a set of instructions. It's flat rather than nested. Composable rather than procedural.
+
+Consider the difference:
+
+```csharp
+// Imperative: a sequence of instructions
+var user = GetUser(id);
+if (user != null)
+{
+    var permissions = GetPermissions(user.RoleId);
+    if (permissions != null && permissions.Contains("admin"))
+    {
+        var report = GenerateReport(user);
+        if (report != null)
+        {
+            await SendEmail(user.Email, report);
+            LogSuccess(user.Id);
+        }
+        else
+        {
+            LogFailure(user.Id, "Report generation failed");
+        }
+    }
+}
+```
+
+```csharp
+// Declarative: a description of what should happen
+await Given(userId)
+    .Select(GetUser)
+    .Where(user => user.HasPermission("admin"))
+    .Select(GenerateReport)
+    .Match(
+        some: report => SendEmail(report).Then(LogSuccess),
+        none: () => LogFailure("Report generation failed"));
+```
+
+The declarative version is flatter. No nesting. Each step is a transformation or filter. The flow reads top-to-bottom without branching into ever-deeper indentation levels. You can understand what it does by reading the method names. No need to trace through conditional logic.
+
+This isn't just aesthetic preference. Flat, declarative code is easier to test because each step is a pure function. Easier to modify because you can add a step without restructuring everything around it. And crucially for our purposes, it's easier for agents to produce correctly. An agent generating the imperative version has to track state, manage nesting levels, handle the combinatorial explosion of possible paths. An agent generating the declarative version? It just chains transformations.
+
+Package it however you like. As long as your solutions adhere to fundamental software engineering principles, your code can transcend whatever mortal coil its ecosystem imposes upon it.
+
+### You cannot truthfully and confidently deliver a unit of work without pre-defined and validated inputs and outputs
+
+How can one begin to design a system if they don't know what they're building?
+
+Too often I see developers blindly feeling their way through a codebase. They coordinate internal and external systems, real and simulated hardware, debuggers, and various other tooling just to pinpoint where they need to work. Then, once they've settled on their platform, they start blindly smashing atoms together hoping to yield something usable.
+
+Experimentation is great. It's one of the foundations of our field. But experimentation is not for production work.
+
+That's not to say you can't conduct experiments in production. I have an entire framework dedicated to that cross-cutting concern. But writing and performing experiments around the periphery of your implementations? That's the duty of your testing framework. If you find yourself probing instead of going directly to the test encapsulating your concern, you're working in a malignant, terrifying codebase. Rather than having a system shaped around external business concerns (business-provided inputs, service-provided outputs), you have a black box that requires action to validate. Like trying to guess the components of a modern art shadow projection by staring solely at its stain upon the wall.
+
+When a developer needs to write code within an application, be it a new feature, bug fix, or otherwise, it's their duty to ensure they have clearly laid out expectations. Paramount among these: expected inputs (configuration, user inputs, workflow steps) and expected outputs (actions performed, values returned, errors that can be thrown). If experimentation is necessary to determine these parameters, that experimentation should be specific, documented, time-bound, with concrete deliverables. Those deliverables should then be cemented through business-relevant behavior-driven tests that enshrine the knowledge gained and mirror the documented requirements.
+
+### Design a system to solve a problem, not to do a task
+
+I've learned a lot of skills over the years. Varying usefulness. If you need your floor tiled or your cat needs a crocheted vest, I may know a guy who can give some pointers.
+
+But despite my obsessive compulsion to absorb information like a precious commodity, I lack any desire to repeatedly do things. Don't get me wrong. I can. I've been writing code for decades. But repetitive, monotonous tasks bore me to tears. So I've always tried to learn how to do something, improve it in some way, quantify it, and then automate it as much as humanly possible.
+
+I'm prone to overusing metaphors. No exception here: I never want to do the digital equivalent of drywall.
+
+Placing, finishing, and painting drywall are all technically simple endeavors on their surface. Give a sufficiently motivated greenhorn a couple weekends and they'll put up work that competes visually with career tradesmen. That says nothing for their speed or accuracy, or their need to redo tasks as they learn. But the finished product can ultimately be indistinguishable to an end customer.
+
+Thing is, like many general contractors, I never set out to master one skill. I went out to solve problems and move onto the next. As I found more problems, my skills refined. My approaches improved. In isolation, that's a sustainable model. But over time, across many organizations and codebases, you'll invariably find yourself solving the same problems at a different place with a different toolset. You'll be putting up drywall, mud, and paint rather than selling and refining your new array of drywalling, mudding, and painting robots.
+
+When solving problems, the work is rarely done in a vacuum. Developers start to get an itch that they've seen something before. I implore you: don't ignore it. Don't just copy and paste the solution that worked last time into the new class with a couple tweaks. Step back. Solve the bigger problem.
+
+And this is where the modern era offers us something genuinely new.
+
+---
+
+## Enter Agents
+
+AI agents have amazing potential. But like overzealous, over-studious summer interns, they lack refinement, direction, and context.
+
+That load-bearing poster keeping this place standing for the last 20 years? To them, it's just ugly, dated decor of a bygone era, ripe for paving over to make their mark. Within their sponge-like monolith of training data, they've accumulated vast wealth of knowledge. But it's locked away behind ear worms, secret incantations, and raw willpower. These agents are dang near capable of solving any singular task. Unlike the fleshy meatbags that wrote them, though, they lack the criticality, forethought, and analysis paralysis that keeps us humble. That ongoing game of chicken with imposter syndrome? They don't play it.
+
+Once a problem becomes sufficiently large, it usually becomes multiple problems. Like a cancer metastasizing through the body, problems grow. They multiply. They cripple otherwise healthy solutions. Understanding how to leverage agents to break your problem down and distill it into its most basic essence? That's the key.
+
+You cannot let them behave like chemo, attempting to find and fix every issue at once. You have to create a single, solvable, provable domain. Then you set them to work there.
+
+The scope and scale of that domain will vary. Enterprise organizations have their own platforms. Their own logging wrappers, observability, configuration, options, feature flagging, messaging, and so much more. The second something leaks into multiple applications, it's time to figure out how to carve it out. Once a standard has been set, it's much easier to keep it contained, provable, and validated.
+
+### The Intern Analogy (Extended)
+
+I keep coming back to the intern metaphor because it's genuinely the most apt comparison I've found.
+
+A fresh intern shows up on day one with a head full of textbook knowledge. Four years of academic projects. And absolutely zero understanding of why your production database has a table called `tbl_Users_OLD_DONT_USE_2019`. They're capable. They're eager. They will absolutely demolish your carefully maintained naming conventions if you don't give them explicit guidance.
+
+Agents operate the same way.
+
+They've "read" more code than any human could in a lifetime. They know seventeen different ways to implement a repository pattern. They can recite the Gang of Four like scripture. But they don't know that your company uses `ICommandHandler<T>` instead of `IHandler<T>` because someone made that decision in 2017 and it stuck. They don't know that the `Utils` folder is actually load-bearing legacy powering three critical batch jobs. They don't know that Jerry from accounting will lose his mind if you rename the `GetReportData` stored procedure because he's been calling it directly from Excel for seven years.
+
+Context is everything. And context is precisely what agents lack until you give it to them.
+
+### Tools, Not Decisions
+
+There's a fundamental distinction in how you can leverage agents that took me longer to articulate than I'd like to admit.
+
+You want agents to build tools that you validate. Not to make decisions that you trust.
+
+The difference is subtle but profound. When an agent makes a decision directly (choosing an architecture, selecting a library, determining a business rule), you're trusting its judgment. As we've established, agents have plenty of knowledge but questionable judgment. They don't know your context. They can't weigh your constraints. They'll confidently recommend the "best practice" solution that's completely wrong for your situation.
+
+But when an agent builds a tool? The dynamic shifts entirely.
+
+The tool has inputs and outputs. It can be tested. Validated. Run against known cases and verified to produce correct results. You're not trusting the agent's judgment anymore. You're trusting your own ability to verify the tool's behavior.
+
+This is why I've become increasingly obsessed with having agents build source generators, analyzers, and code scaffolding rather than writing application code directly. A source generator is a tool. It takes input (your domain model, your configuration, your conventions) and produces output (the boilerplate code you'd otherwise write by hand). You can inspect that output. Test it. Verify the generator produces correct code for all your known cases.
+
+Compare this to having an agent write your repository implementations directly. Now you're reviewing each repository individually. Trusting that the agent understood your conventions for this specific case. Hoping it didn't introduce subtle bugs that won't surface until production.
+
+With a generator, you validate the generator once. Then it produces correct code forever, across all your entities, without additional review. The agent helped you build a tool, and the tool does the work. You validated the tool's logic, not the agent's judgment.
+
+This principle extends beyond source generators. Configuration validators. Migration scripts. Test scaffolds. Documentation generators. Any time you can have an agent build a tool that you validate rather than making decisions you trust, you're in a better position.
+
+The mantra I've adopted: "Agents build tools. Tools do work. I validate tools."
+
+### Scoping the Work
+
+The trick, then, is to scope your agent's work to a domain small enough that context can be fully provided, yet large enough that the work is meaningful. This is not unlike the advice given to junior developers: don't let them architect the whole system, but don't insult them with busywork either. Find the Goldilocks zone where they can produce real value with appropriate guardrails.
+
+For me, that zone tends to be cross-cutting concerns. Not the core business logic (that requires too much institutional knowledge), and not simple CRUD operations (those are usually faster to do yourself than to explain). The sweet spot lies in the infrastructure layer: the logging wrappers, the configuration abstractions, the messaging contracts, the feature flag interfaces. These are bounded problems with clear inputs and outputs, well-established patterns in the broader ecosystem, and minimal business-specific context required.
+
+And crucially, these concerns lend themselves to the "tools, not decisions" approach. A logging wrapper is a tool. A configuration binder is a tool. A message serializer is a tool. You can define what these tools should do, have an agent implement them, validate they work correctly, and then trust them going forward. You're not asking the agent to make business decisions. You're asking it to build infrastructure that you can verify.
+
+Consider a logging wrapper. Every enterprise application needs one. The requirements are almost universal: structured logging, correlation IDs, log levels, maybe some redaction for sensitive data. The problem is well-understood, the patterns are documented, and an agent can produce a solid implementation if you give it your specific constraints (target framework, existing dependencies, naming conventions, test requirements). More importantly, you can write tests that verify the wrapper behaves correctly: does it include correlation IDs? Does it redact sensitive fields? Does it respect log level configuration? These are all verifiable properties of a tool.
+
+Compare that to implementing a new pricing algorithm. The agent would need to understand your product catalog structure, your customer segmentation model, your promotional rules, your tax jurisdictions, your integration points with the billing system, and probably a dozen other things that live in the heads of people who've been there for a decade. That's not a bounded problem. That's a swamp. And worse, it's a decision problem, not a tool problem. The "correctness" of a pricing algorithm depends on business judgment, not technical verification.
+
+### The Vibe Engineering Workflow
+
+I've started calling my approach "vibe engineering" (somewhat tongue-in-cheek) because it's less about prescriptive methodology and more about cultivating the right relationship between human architect and AI assistant. The "vibe" is the combination of context, constraints, and creative latitude you establish before any code gets written.
+
+The workflow looks something like this:
+
+1. **Identify** a cross-cutting concern that appears in multiple places
+2. **Report** on its current state (how it's implemented, where it varies, what problems it causes)
+3. **Plan** the extraction (define boundaries, interfaces, contracts)
+4. **Build** the solution (iteratively, with human review at each stage)
+5. **Maintain** the solution (documentation, versioning, evolution)
+
+Each of these stages has its own dynamics when working with agents. The first two (identify and report) are where agents truly shine, because they can process vast amounts of code faster than any human. The middle stage (plan) requires heavy human involvement, because this is where architectural decisions get made. The build stage is collaborative, with the agent doing the heavy lifting under human supervision. And the maintenance stage is where the investment pays dividends, because a well-documented, well-tested solution can be maintained with minimal ongoing effort.
+
+Let's dig into each of these stages.
+
+---
+
+## Identifying Cross-Cutting Concerns
+
+The first step in any extraction effort is knowing what to extract. This sounds obvious, but in practice, cross-cutting concerns have a way of hiding in plain sight. They're the code patterns you've copied so many times they feel like native syntax. They're the utility classes that exist in seventeen different namespaces because everyone needed one and nobody thought to check if it already existed. They're the configuration patterns that vary just enough between applications to be annoying but not enough to be obviously wrong.
+
+### Teaching an Agent to See Patterns
+
+Agents are exceptionally good at this phase of the work. Give them access to a codebase (or several), provide some guidance on what you're looking for, and they can surface patterns faster than any human could through manual grep sessions.
+
+But here's a nuance that ties back to our "tools, not decisions" principle: for one-off analysis, having an agent describe what it finds is fine. For ongoing pattern detection, you want the agent to build you an analyzer that you can run repeatedly. The difference matters.
+
+If you ask an agent "what HTTP client patterns exist in this codebase?" you'll get an answer based on its current understanding of the code at this moment. If you ask an agent "build me a Roslyn analyzer that detects non-standard HTTP client instantiation patterns," you get a tool you can run in CI, that will catch new violations as they're introduced, and whose detection logic you can inspect and verify.
+
+For the initial discovery phase, conversational analysis is perfectly appropriate. But once you've identified a concern worth tracking, consider whether the detection logic should become a tool.
+
+The key is being specific about what constitutes a "cross-cutting concern" in your context. For a new codebase, I typically start with a prompt structure something like this:
+
+```
+Analyze the following repositories for cross-cutting concerns.
+A cross-cutting concern is any functionality that:
+1. Appears in multiple applications or services
+2. Is not core business logic
+3. Could reasonably be extracted into a shared library
+4. Currently has inconsistent implementations across the codebase
+
+Focus specifically on:
+- Logging and observability patterns
+- Configuration and options binding
+- Error handling and exception management
+- HTTP client usage and resilience patterns
+- Caching strategies
+- Validation approaches
+- Mapping and transformation utilities
+
+For each concern you identify, provide:
+- Where it appears (specific files/projects)
+- How implementations vary
+- What problems the inconsistency causes
+- A preliminary assessment of extraction complexity
+```
+
+The output from this kind of analysis is often illuminating. In one recent engagement, an agent identified that the organization had no fewer than twelve different approaches to HTTP client instantiation across their service fleet. Some used raw `HttpClient` (with all the socket exhaustion problems that entails). Some used `IHttpClientFactory` correctly. Some used it incorrectly. A few had hand-rolled retry logic. Others used Polly but configured it differently. One particularly creative implementation had a static `HttpClient` wrapped in a `lock` statement "for thread safety."
+
+None of this was visible from any single repository. It only became apparent when you looked across the portfolio. And that's exactly the kind of analysis that agents excel at.
+
+### The Enumeration Phase
+
+Once you've identified candidate concerns, the next step is enumeration: building a comprehensive inventory of where each concern appears and how it's currently implemented. This is tedious work for humans but trivial for agents.
+
+For the HTTP client example, the enumeration might look like:
+
+```
+HTTP Client Implementations Inventory:
+
+1. ServiceA/Infrastructure/HttpClientWrapper.cs
+   - Pattern: Static HttpClient with manual DNS refresh
+   - Retry logic: None
+   - Timeout: 30 seconds (hardcoded)
+   - Dependencies: None
+
+2. ServiceB/Clients/ExternalApiClient.cs
+   - Pattern: IHttpClientFactory via constructor injection
+   - Retry logic: Polly with 3 retries, exponential backoff
+   - Timeout: Configured via appsettings.json
+   - Dependencies: Polly, Microsoft.Extensions.Http
+
+3. ServiceC/Utilities/ApiHelper.cs
+   - Pattern: New HttpClient per request (!)
+   - Retry logic: Manual try-catch with Thread.Sleep
+   - Timeout: 100 seconds (default)
+   - Dependencies: None
+
+[... and so on for each occurrence ...]
+```
+
+This inventory becomes the foundation for the next phase. You can't plan an extraction without knowing what you're extracting from.
+
+### Categorizing by Extraction Complexity
+
+Not all cross-cutting concerns are equally amenable to extraction. Some are straightforward (everyone's doing roughly the same thing, just in different places). Others are deeply entangled with business logic or have subtle behavioral differences that must be preserved.
+
+I typically categorize concerns into three buckets:
+
+**Low complexity**: The implementations are nearly identical, differ only in configuration, and have no dependencies on application-specific types. These can often be extracted in a day or two.
+
+**Medium complexity**: The implementations share a common core but have legitimate variations that need to be accommodated through configuration, extension points, or strategy patterns. These might take a week or two to extract properly.
+
+**High complexity**: The implementations have diverged significantly, are entangled with business logic, or have undocumented behavioral quirks that applications depend on. These require careful analysis and potentially phased migration strategies.
+
+Agents can help with this categorization, but human judgment is essential. An agent might see two implementations that look different and assume high complexity, when in reality one is just a worse version of the other that can be safely replaced. Or it might see two implementations that look similar but miss subtle semantic differences that matter enormously in production.
+
+### Building the Concern Registry
+
+The output of this phase should be a structured registry of identified concerns, something that can be referenced throughout the extraction effort and maintained going forward. I like to keep these as markdown files in a dedicated repository:
+
+```markdown
+# Cross-Cutting Concerns Registry
+
+## HTTP Client Management
+- **Status**: Identified, awaiting prioritization
+- **Complexity**: Medium
+- **Occurrences**: 12 services
+- **Primary variations**: Retry policies, timeout configurations, authentication handling
+- **Proposed solution**: Shared library with configurable policies
+- **Estimated effort**: 2 weeks extraction, 4 weeks migration
+
+## Structured Logging
+- **Status**: In progress
+- **Complexity**: Low
+- **Occurrences**: 23 services
+- **Primary variations**: Log format, correlation ID propagation
+- **Proposed solution**: Thin wrapper over Serilog with standard enrichers
+- **Estimated effort**: 1 week extraction, 2 weeks migration
+
+[... additional concerns ...]
+```
+
+This registry serves multiple purposes. It documents what you've found. It helps prioritize extraction efforts. It provides a reference for developers who might otherwise duplicate these concerns yet again. And it becomes the basis for the architectural decision records you'll create in the planning phase.
+
+---
+
+## Reporting and Analysis
+
+Once you've identified and enumerated your cross-cutting concerns, the next challenge is communicating what you've found. This is where many technical initiatives die: not because the analysis was wrong, but because it never made it out of the developer's head and into a form that others could act on.
+
+### The Architecture Decision Record
+
+For each significant cross-cutting concern you plan to address, I strongly recommend creating an Architecture Decision Record (ADR). These documents serve as both analysis and proposal, capturing the current state, the problem it causes, the proposed solution, and the trade-offs involved.
+
+Agents are surprisingly good at drafting ADRs, particularly the background and analysis sections. They can synthesize the enumeration data you gathered earlier into a coherent narrative. The key is to review and refine their output, adding the organizational context and political considerations that agents can't know.
+
+A typical ADR structure might look like:
+
+```markdown
+# ADR-007: Standardize HTTP Client Management
+
+## Status
+Proposed
+
+## Context
+Our service portfolio currently contains 12 different approaches to HTTP
+client management. This inconsistency has led to:
+
+- Production incidents due to socket exhaustion (ServiceC, ServiceF)
+- Inconsistent retry behavior causing cascading failures
+- Security vulnerabilities from improper certificate validation
+- Developer confusion and duplicated effort
+
+Analysis of the current implementations reveals three main categories:
+[detailed breakdown follows]
+
+## Decision
+We will create a shared library (`Company.Http.Resilience`) that provides:
+
+1. Pre-configured HttpClient instances via IHttpClientFactory
+2. Standard retry policies with configurable parameters
+3. Circuit breaker integration
+4. Consistent timeout handling
+5. Structured logging of HTTP operations
+6. Health check integration
+
+## Consequences
+
+### Positive
+- Consistent behavior across all services
+- Reduced incident rate from HTTP-related issues
+- Faster onboarding for new developers
+- Single place to update security configurations
+
+### Negative
+- Migration effort required for existing services
+- Learning curve for teams unfamiliar with new patterns
+- Potential for breaking changes if not carefully managed
+
+### Neutral
+- Requires ongoing maintenance of shared library
+- Need to establish governance for library updates
+
+## Migration Strategy
+[phased approach details]
+```
+
+### Generating Reports for Different Audiences
+
+One of the underappreciated aspects of this work is that different stakeholders need different views of the same information. A detailed technical analysis is great for the architecture team, but it's not what you show in a sprint planning meeting or a budget request.
+
+Agents can help generate multiple views from the same underlying data:
+
+**Executive summary** (for leadership):
+```
+We've identified 12 inconsistent HTTP client implementations across our
+services. This inconsistency contributed to 3 production incidents last
+quarter and consumes approximately 40 developer-hours per month in
+debugging and maintenance. A 2-week investment to create a standardized
+library would eliminate this overhead and reduce incident risk.
+```
+
+**Technical summary** (for architecture review):
+```
+Cross-cutting concern: HTTP client management
+Current state: 12 implementations, 4 distinct patterns
+Risk level: High (socket exhaustion, retry storms)
+Proposed solution: Shared library with IHttpClientFactory, Polly policies
+Effort estimate: 80 hours extraction, 160 hours migration
+Dependencies: Microsoft.Extensions.Http, Polly
+```
+
+**Developer guide** (for implementation teams):
+```
+# Migrating to Company.Http.Resilience
+
+## Why are we doing this?
+[brief context]
+
+## What changes for me?
+[concrete before/after examples]
+
+## How do I migrate?
+[step-by-step instructions]
+
+## What if I need custom behavior?
+[extension points and configuration options]
+```
+
+### The Analysis Artifact Pipeline
+
+I've found it useful to establish a standard pipeline for producing these artifacts. When a new cross-cutting concern is identified, the pipeline kicks in:
+
+1. **Raw enumeration** (agent-generated): List of all occurrences with code snippets
+2. **Categorized analysis** (agent-generated, human-reviewed): Complexity assessment, variation analysis
+3. **ADR draft** (agent-generated, human-refined): Formal decision record
+4. **Executive summary** (agent-generated from ADR): One-page overview
+5. **Migration guide** (agent-generated after solution is built): Developer-facing documentation
+
+Each artifact builds on the previous ones, and the agent can be prompted to maintain consistency across them. If the ADR changes, the executive summary and migration guide should be regenerated to reflect those changes.
+
+### Maintaining the Paper Trail
+
+Documentation has a half-life. The moment you finish writing it, it starts decaying. Requirements change, implementations evolve, and that carefully crafted ADR becomes a historical curiosity rather than a living reference.
+
+This is where the combination of agents and good tooling pays dividends. If your analysis artifacts are stored in version control (and they should be), you can periodically prompt an agent to review them against the current codebase:
+
+```
+Review ADR-007 against the current state of our HTTP client implementations.
+Identify any drift between the documented decision and actual implementation.
+Flag any new services that haven't adopted the standard library.
+Suggest updates to the ADR if the decision should be revised.
+```
+
+This kind of maintenance review is exactly the sort of tedious, important work that humans tend to skip and agents can do reliably. Schedule it quarterly, tie it to your release cycles, or trigger it whenever significant changes are merged to the shared libraries.
+
+---
+
+## Planning the Solution
+
+This is where human judgment becomes essential. Agents can identify patterns, enumerate occurrences, and draft documentation, but they cannot make architectural decisions. They don't understand your organization's priorities, your team's capabilities, your deployment constraints, or the political landscape that determines what solutions are actually viable.
+
+Planning is collaborative, but the human must drive.
+
+### Defining Boundaries
+
+The first planning decision is scope: what exactly are you extracting, and what are you leaving behind?
+
+This sounds simple, but it's where most extraction efforts go wrong. The temptation is to solve everything at once. You start with "let's standardize HTTP client management" and end up with "let's create a comprehensive platform SDK that handles HTTP, logging, configuration, caching, authentication, and messaging." Six months later, you've built a framework that nobody wants to adopt because it's too opinionated, too complex, and too different from what teams are currently using.
+
+The antidote is aggressive scoping. For each cross-cutting concern, define:
+
+**What's in scope:**
+- The specific functionality being extracted
+- The configuration surface area
+- The extension points (if any)
+- The test coverage requirements
+
+**What's explicitly out of scope:**
+- Related functionality that could be added later
+- Integrations with other concerns
+- Business-specific customizations
+- Anything that would delay the initial release
+
+Write these boundaries down. Put them in the ADR. Refer back to them when you (or your agent) start gold-plating.
+
+### Designing the Interface Contract
+
+Before any implementation begins, you need to define the contract that consuming applications will depend on. This is the most important artifact you'll produce, because it's the hardest to change later.
+
+For a shared library, the contract includes:
+- Public types (interfaces, classes, records, enums)
+- Configuration schema (options classes, configuration sections)
+- Behavioral guarantees (what happens on failure, what gets logged, what metrics are emitted)
+- Dependencies (what NuGet packages are required, what framework versions are supported)
+
+I typically start by writing the consuming code first. Before any implementation exists, write how you want developers to use the library. This outside-in approach ensures that the interface is designed for the consumer, not for the implementer. It's the same philosophy that drives behavior-driven development: start with what you want to observe, then work backward to what you need to build.
+
+#### Fluent Over Nested
+
+When designing interfaces, I have a strong bias toward fluent APIs. A fluent API chains method calls, reads left-to-right (or top-to-bottom), and minimizes the cognitive load required to understand what's happening.
+
+Compare these two approaches to configuring an HTTP client:
+
+```csharp
+// Nested/Constructor-heavy approach
+var client = new ResilientHttpClient(
+    new HttpClientOptions(
+        baseAddress: "https://api.example.com",
+        timeout: TimeSpan.FromSeconds(30),
+        retryPolicy: new RetryPolicy(
+            maxRetries: 3,
+            backoffType: BackoffType.Exponential,
+            initialDelay: TimeSpan.FromMilliseconds(100)
+        ),
+        circuitBreaker: new CircuitBreakerOptions(
+            failureThreshold: 5,
+            samplingDuration: TimeSpan.FromMinutes(1),
+            breakDuration: TimeSpan.FromSeconds(30)
+        )
+    )
+);
+```
+
+```csharp
+// Fluent approach
+var client = ResilientHttpClient
+    .Create("https://api.example.com")
+    .WithTimeout(TimeSpan.FromSeconds(30))
+    .WithRetry(retry => retry
+        .MaxAttempts(3)
+        .ExponentialBackoff()
+        .InitialDelay(TimeSpan.FromMilliseconds(100)))
+    .WithCircuitBreaker(breaker => breaker
+        .TripAfter(5).FailuresIn(TimeSpan.FromMinutes(1))
+        .StayOpenFor(TimeSpan.FromSeconds(30)))
+    .Build();
+```
+
+The fluent version is longer in line count but dramatically easier to read. Each configuration concern is isolated to its own chain. You can understand the retry policy without mentally parsing nested constructor arguments. The indentation is shallow and consistent.
+
+This matters for agent-assisted development in two ways. First, when you ask an agent to implement a fluent API, it's forced to think about each configuration concern in isolation. It can't hide complexity in nested constructors. Second, when you ask an agent to *use* a fluent API, the resulting code is more likely to be correct because each step is self-documenting.
+
+I've built entire libraries around this philosophy. [PatternKit](https://github.com/JerrettDavis/PatternKit) provides fluent implementations of Gang of Four patterns precisely because the traditional examples are unnecessarily verbose and nested. [TinyBDD](https://github.com/JerrettDavis/TinyBDD) uses a fluent Given/When/Then syntax because test scenarios should read like specifications, not like procedural code.
+
+When planning your extracted libraries, default to fluent. Your future self (and your agents) will thank you.
+
+#### Design for Validation
+
+But there's another dimension to consider: design for validation. Every interface you create should be testable. Every behavior should be observable. Every configuration should be verifiable. If you can't write a test that proves the component works correctly, your interface is wrong.
+
+This is especially important when agents will be involved in the implementation. Remember: you want to validate tools, not trust decisions. That means your interfaces need to expose seams where validation can occur. Opaque interfaces that hide all internal state make it impossible to verify correct behavior. Transparent interfaces with clear inputs, outputs, and observable side effects make validation straightforward.
+
+```csharp
+// This is what we WANT the consuming code to look like
+
+public class MyService
+{
+    private readonly IResilientHttpClient _http;
+
+    public MyService(IResilientHttpClient http)
+    {
+        _http = http;
+    }
+
+    public async Task<CustomerData> GetCustomerAsync(string customerId)
+    {
+        // Simple case: just make the call, resilience is handled for us
+        return await _http.GetAsync<CustomerData>($"/customers/{customerId}");
+    }
+
+    public async Task<OrderResult> PlaceOrderAsync(Order order)
+    {
+        // Custom configuration for this specific call
+        var options = new HttpCallOptions
+        {
+            Timeout = TimeSpan.FromSeconds(60),
+            RetryPolicy = RetryPolicy.None  // Orders shouldn't auto-retry
+        };
+
+        return await _http.PostAsync<OrderResult>("/orders", order, options);
+    }
+}
+```
+
+And the registration:
+
+```csharp
+// In Startup or Program.cs
+services.AddResilientHttpClient(options =>
+{
+    options.BaseAddress = configuration["ApiBaseUrl"];
+    options.DefaultTimeout = TimeSpan.FromSeconds(30);
+    options.RetryPolicy = new RetryPolicyOptions
+    {
+        MaxRetries = 3,
+        BackoffType = BackoffType.Exponential
+    };
+    options.CircuitBreaker = new CircuitBreakerOptions
+    {
+        FailureThreshold = 5,
+        SamplingDuration = TimeSpan.FromMinutes(1),
+        BreakDuration = TimeSpan.FromSeconds(30)
+    };
+});
+```
+
+This "outside-in" approach ensures that the interface is designed for the consumer, not for the implementer. It's the same philosophy that drives behavior-driven development: start with what you want to observe, then work backward to what you need to build.
+
+### Leveraging Agents for Interface Exploration
+
+While the human defines the desired interface, agents can be invaluable for exploring the design space. Give them the proposed interface and ask:
+
+```
+Review this proposed interface for a resilient HTTP client library.
+Consider:
+- Usability: Is this intuitive for developers to use?
+- Flexibility: Can it accommodate the variations we found in our analysis?
+- Testability: Can consuming code easily mock or stub this?
+- Consistency: Does it follow .NET conventions and patterns?
+- Evolution: Can we extend this without breaking changes?
+
+Identify potential issues and suggest alternatives.
+```
+
+The agent might surface considerations you hadn't thought of:
+- "The `RetryPolicy.None` option might be confusing; consider `RetryPolicy.Disabled` for clarity."
+- "You're using a concrete `HttpCallOptions` class; an interface would improve testability."
+- "The circuit breaker configuration is complex; consider providing named presets like `CircuitBreaker.Aggressive` and `CircuitBreaker.Conservative`."
+
+Not all suggestions will be good, but the exploration is valuable. It's like having a code review before the code exists.
+
+### Creating the Behavior Specification
+
+Once the interface is defined, the next step is specifying its behavior. This is where TinyBDD (or your BDD framework of choice) shines. Write the scenarios that define what the library must do:
+
+```csharp
+[Feature("Resilient HTTP Client")]
+public class ResilientHttpClientScenarios : TinyBddXunitBase
+{
+    [Scenario("Successful request returns deserialized response")]
+    [Fact]
+    public async Task SuccessfulRequest()
+    {
+        await Given("a configured resilient HTTP client", () =>
+                CreateTestClient(respondWith: new CustomerData { Id = "123", Name = "Test" }))
+            .When("making a GET request", client =>
+                client.GetAsync<CustomerData>("/customers/123"))
+            .Then("the response is deserialized correctly", customer =>
+                customer.Id == "123" && customer.Name == "Test")
+            .AssertPassed();
+    }
+
+    [Scenario("Transient failure triggers retry")]
+    [Fact]
+    public async Task TransientFailureRetry()
+    {
+        await Given("a client configured with 3 retries", () =>
+                CreateTestClient(failTimes: 2, thenSucceed: true))
+            .When("making a request that fails twice then succeeds", client =>
+                client.GetAsync<CustomerData>("/customers/123"))
+            .Then("the request ultimately succeeds", customer =>
+                customer != null)
+            .And("exactly 3 attempts were made", () =>
+                GetAttemptCount() == 3)
+            .AssertPassed();
+    }
+
+    [Scenario("Circuit breaker opens after threshold")]
+    [Fact]
+    public async Task CircuitBreakerOpens()
+    {
+        await Given("a client with circuit breaker (threshold: 3 failures)", () =>
+                CreateTestClient(alwaysFail: true, circuitBreakerThreshold: 3))
+            .When("making 5 failing requests", async client =>
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    try { await client.GetAsync<CustomerData>("/customers/123"); }
+                    catch { /* expected */ }
+                }
+                return client;
+            })
+            .Then("the circuit breaker is open", client =>
+                client.IsCircuitBreakerOpen)
+            .And("later requests fail fast without attempting", async client =>
+            {
+                var sw = Stopwatch.StartNew();
+                try { await client.GetAsync<CustomerData>("/customers/123"); }
+                catch { /* expected */ }
+                return sw.ElapsedMilliseconds < 100;  // Should fail immediately
+            })
+            .AssertPassed();
+    }
+}
+```
+
+These scenarios become the acceptance criteria for your implementation. They define "done." They're the contract between you (the architect) and whoever implements the library (possibly an agent, possibly a developer, possibly you at 2 AM after too much coffee).
+
+### The Planning Artifact
+
+The output of the planning phase should be a comprehensive specification that can be handed to an implementer (human or otherwise):
+
+1. **Interface definitions** (the public API surface)
+2. **Behavior scenarios** (the BDD specs that define correctness)
+3. **Configuration schema** (what options are available and what they do)
+4. **Dependency list** (what packages are required)
+5. **Non-functional requirements** (performance targets, compatibility requirements)
+6. **Out-of-scope list** (what this version explicitly doesn't do)
+
+With these artifacts in hand, the implementation phase becomes almost mechanical. The creative work is done. The decisions are made. Now it's just a matter of making the scenarios pass.
+
+---
+
+## Building Domain-Specific Solutions
+
+With a clear specification in hand, implementation becomes the most straightforward phase of the entire process. This is where agents really earn their keep. They're not making architectural decisions (those are already made). They're not interpreting vague requirements (those are already specified as scenarios). They're simply writing code to make tests pass.
+
+### The Implementation Loop
+
+The implementation workflow follows a tight loop:
+
+1. Give the agent the interface definition and one or two scenarios
+2. Have it produce an implementation
+3. Run the scenarios
+4. If they fail, provide the failure output and iterate
+5. If they pass, move to the next batch of scenarios
+6. Repeat until all scenarios are green
+
+This is not unlike test-driven development, except the agent is doing most of the typing. You're still driving the process, reviewing the output, and making judgment calls when the agent gets stuck or produces something questionable.
+
+#### Guiding Toward Flat, Functional Implementations
+
+When prompting for implementations, I explicitly request flat, functional code. This isn't just stylistic preference; it directly impacts the quality of agent-generated code.
+
+Agents have a tendency to produce deeply nested, imperative code when left to their defaults. They've been trained on millions of lines of code, and unfortunately, a lot of that code is nested spaghetti. If you don't specify otherwise, you'll get `if` statements inside `try` blocks inside `foreach` loops inside `while` conditions.
+
+Counter this by being explicit in your prompts:
+
+```
+Implement the retry logic for IResilientHttpClient.
+
+Style requirements:
+- Prefer pure functions over stateful methods
+- Use early returns to avoid nesting
+- Chain operations rather than nesting them
+- Each method should do one thing
+- Avoid mutable state where possible
+- Use pattern matching over if/else chains
+
+Example of the style I want:
+[paste example of flat, functional code from your codebase]
+```
+
+The difference in output quality is stark. With explicit style guidance, you get code like:
+
+```csharp
+public async Task<T> ExecuteWithRetryAsync<T>(
+    Func<Task<T>> operation,
+    RetryPolicy policy,
+    CancellationToken ct = default)
+{
+    return await policy.Attempts
+        .Select(attempt => TryExecute(operation, attempt, ct))
+        .FirstSuccessOrThrowAggregate();
+}
+
+private async Task<Result<T>> TryExecute<T>(
+    Func<Task<T>> operation,
+    int attempt,
+    CancellationToken ct)
+{
+    try
+    {
+        var result = await operation();
+        return Result.Success(result);
+    }
+    catch (Exception ex) when (IsTransient(ex))
+    {
+        await DelayForAttempt(attempt, ct);
+        return Result.Failure<T>(ex);
+    }
+}
+```
+
+Without style guidance, you get:
+
+```csharp
+public async Task<T> ExecuteWithRetryAsync<T>(
+    Func<Task<T>> operation,
+    RetryPolicy policy,
+    CancellationToken ct = default)
+{
+    int attempts = 0;
+    List<Exception> exceptions = new List<Exception>();
+
+    while (attempts < policy.MaxAttempts)
+    {
+        try
+        {
+            return await operation();
+        }
+        catch (Exception ex)
+        {
+            if (IsTransient(ex))
+            {
+                exceptions.Add(ex);
+                attempts++;
+                if (attempts < policy.MaxAttempts)
+                {
+                    await Task.Delay(CalculateDelay(attempts), ct);
+                }
+            }
+            else
+            {
+                throw;
+            }
+        }
+    }
+
+    throw new AggregateException(exceptions);
+}
+```
+
+Both might work, but the first is easier to test, easier to modify, and easier to reason about. The functional version has clear data flow. Each function transforms input to output. The imperative version has hidden state (`attempts`, `exceptions`), multiple exit points, and nested control flow.
+
+A typical prompting session might look like:
+
+```
+Implement the IResilientHttpClient interface according to this specification.
+Start with the basic request/response flow - don't worry about retry logic yet.
+
+Interface:
+[paste interface definition]
+
+Scenario to satisfy:
+[paste the "Successful request returns deserialized response" scenario]
+
+Constraints:
+- Use System.Net.Http.HttpClient internally via IHttpClientFactory
+- Use System.Text.Json for serialization
+- Follow .NET naming conventions
+- Include XML documentation comments
+```
+
+The agent produces an implementation. You run the scenario. It passes (or doesn't). You iterate.
+
+### Handling Implementation Complexity
+
+Not all scenarios are equally straightforward. The basic happy path is usually trivial. The edge cases are where implementations get interesting.
+
+For complex scenarios like circuit breaker behavior, I've found it helpful to break the implementation into phases:
+
+**Phase 1: Core flow**
+- Basic request/response
+- Serialization/deserialization
+- Error handling
+
+**Phase 2: Retry logic**
+- Configurable retry policies
+- Exponential backoff
+- Jitter
+
+**Phase 3: Circuit breaker**
+- Failure tracking
+- State transitions (closed -> open -> half-open)
+- Recovery logic
+
+**Phase 4: Observability**
+- Structured logging
+- Metrics emission
+- Correlation ID propagation
+
+Each phase has its own scenarios, and each phase builds on the previous one. The agent doesn't need to solve everything at once. It just needs to make the current phase's scenarios pass without breaking the previous phases.
+
+### Code Review and Refinement
+
+Agent-generated code needs review. Always. Without exception.
+
+The good news is that reviewing code is much faster than writing it. And because you have comprehensive scenarios, you can focus your review on concerns that tests don't catch:
+
+- **Style and convention**: Does this match your existing codebase?
+- **Performance**: Are there obvious inefficiencies?
+- **Security**: Are there potential vulnerabilities?
+- **Maintainability**: Will future developers understand this?
+- **Edge cases**: Are there scenarios we didn't think to specify?
+
+I typically do a first pass looking for obvious issues, then run the code through any static analysis tools we use (Roslyn analyzers, SonarQube, etc.), then do a deeper read of any code that handles security or concurrency.
+
+The agent can help with refinement too:
+
+```
+Review this implementation for potential issues:
+[paste code]
+
+Specifically check for:
+- Thread safety concerns
+- Resource disposal issues
+- Potential for null reference exceptions
+- Adherence to .NET best practices
+
+Suggest improvements but don't rewrite the entire thing.
+```
+
+### Source Generators: The Ultimate Validation Target
+
+This is where the "tools, not decisions" philosophy really shines. Rather than having an agent write your boilerplate code directly, have it write a source generator that produces the boilerplate.
+
+Consider a common scenario: you have fifty entities that all need repository interfaces, implementations, and registration code. The traditional approach (even with agents) is to generate each one individually, review each one, and hope they're all consistent. The better approach is to have the agent build a source generator that examines your entities and emits the correct code for all of them.
+
+The prompt might look like:
+
+```
+Create a C# source generator that:
+1. Finds all classes decorated with [Repository]
+2. Generates an IXxxRepository interface with standard CRUD methods
+3. Generates an XxxRepository implementation using our base class
+4. Generates extension methods for DI registration
+
+Conventions to follow:
+- Interface goes in Abstractions namespace
+- Implementation goes in Infrastructure namespace
+- Use async/await throughout
+- Include XML documentation
+
+Here's an example of what the generated code should look like:
+[paste example of desired output]
+```
+
+The agent produces a source generator. You add it to a test project with a few decorated classes. You inspect the generated code. You verify it compiles, follows your conventions, and works correctly. You write tests against the generator itself:
+
+```csharp
+[Fact]
+public void Generator_Creates_Interface_For_Decorated_Class()
+{
+    var source = @"
+        [Repository]
+        public class Customer { public int Id { get; set; } }
+    ";
+
+    var generated = RunGenerator(source);
+
+    generated.ShouldContain("public interface ICustomerRepository");
+    generated.ShouldContain("Task<Customer?> GetByIdAsync(int id)");
+}
+
+[Fact]
+public void Generator_Follows_Namespace_Conventions()
+{
+    var source = @"
+        namespace MyApp.Domain
+        {
+            [Repository]
+            public class Order { }
+        }
+    ";
+
+    var generated = RunGenerator(source);
+
+    generated.ShouldContain("namespace MyApp.Abstractions");
+    generated.ShouldContain("namespace MyApp.Infrastructure");
+}
+```
+
+Now you've validated the tool. The generator is tested. It produces correct code for your test cases. And when you add your fifty entities, you don't need to review fifty repositories. You need to verify that your entities are properly decorated and let the (validated) generator do its work.
+
+This is a fundamentally different relationship with AI assistance. You're not trusting the agent to write correct code for each entity. You're trusting yourself to validate a tool that the agent helped you build. The agent's contribution is leverage (building the generator faster than you could), not judgment (deciding what the repositories should look like).
+
+The same pattern applies to:
+
+- **Analyzers**: Have the agent build Roslyn analyzers that enforce your conventions, rather than trusting it to follow them
+- **Scaffolding tools**: Build CLI tools that generate project structures, rather than having the agent create each project
+- **Migration generators**: Build tools that examine schema differences and emit migrations, rather than hand-writing each one
+- **Documentation generators**: Build tools that extract XML docs and produce markdown, rather than writing docs manually
+
+Each of these transforms "trust the agent's output" into "validate the agent's tool." It's the difference between hiring someone to do a task and hiring someone to build a machine that does the task. The machine can be tested. The machine is consistent. The machine doesn't have bad days.
+
+### Testing Beyond Scenarios
+
+BDD scenarios define the behavioral contract, but they're not the only tests you need. Implementation-level unit tests, integration tests with real dependencies, and performance tests all have their place.
+
+For a shared library, I typically want:
+
+**Scenario tests** (BDD): Define the behavioral contract from the consumer's perspective
+
+**Unit tests**: Cover implementation details that scenarios don't reach (edge cases in internal methods, etc.)
+
+**Integration tests**: Verify behavior against real dependencies (actual HTTP servers, actual circuit breakers under load)
+
+**Performance tests**: Ensure the implementation doesn't introduce unacceptable overhead
+
+Agents can generate all of these. The scenario tests exist by definition (you wrote them in the planning phase). Unit tests can be generated from the implementation:
+
+```
+Generate unit tests for the RetryPolicy class.
+Achieve >90% code coverage.
+Focus on edge cases: zero retries, maximum retries, invalid configurations.
+Use xUnit and FluentAssertions.
+```
+
+Integration and performance tests usually require more human guidance because they depend on your specific infrastructure, but agents can still do the heavy lifting once you provide the context.
+
+### Packaging and Publishing
+
+Once the implementation is complete and all tests pass, the library needs to be packaged for consumption. This typically means:
+
+- NuGet package configuration (.csproj settings, .nuspec if needed)
+- Version management (semantic versioning, changelog generation)
+- CI/CD pipeline (build, test, pack, publish)
+- Package documentation (README, API docs)
+
+Most of this is boilerplate that agents can generate from templates. The key decisions (version number, release notes, breaking change warnings) require human judgment, but the mechanical work doesn't.
+
+```
+Generate the NuGet package configuration for Company.Http.Resilience.
+Include:
+- Package metadata (description, authors, license, repository URL)
+- Dependency specifications
+- README inclusion
+- Source Link configuration for debugging
+
+Follow the conventions used in our existing packages:
+[paste example .csproj]
+```
+
+### The Implementation Artifact
+
+The output of the build phase is a functioning library with:
+
+1. **Source code** that implements the specified interface
+2. **Passing scenarios** that prove behavioral correctness
+3. **Unit tests** that cover implementation details
+4. **Integration tests** that verify real-world behavior
+5. **Package configuration** ready for publishing
+6. **Documentation** for consumers
+
+At this point, the concern is extracted. It exists as a standalone, versioned, tested artifact. The remaining work is migrating existing applications to use it and maintaining it going forward.
+
+---
+
+## Maintenance and Evolution
+
+This is the phase that everyone forgets about and nobody budgets for. The library is built. The first few applications have migrated. The project is declared a success and the team moves on to the next initiative.
+
+Six months later, someone files a bug report. A year later, a dependency releases a breaking change. Two years later, a new developer asks why the library does something a certain way and nobody remembers.
+
+Maintenance is not glamorous, but it's where the investment in good architecture pays dividends (or doesn't).
+
+### The Maintenance Mindset
+
+The goal of maintenance is not to keep the library frozen in amber. It's to keep it useful, secure, and aligned with the evolving needs of its consumers. This requires:
+
+**Proactive work**: Dependency updates, security patches, performance improvements
+
+**Reactive work**: Bug fixes, feature requests, compatibility updates
+
+**Communication**: Release notes, migration guides, deprecation warnings
+
+Agents can help with all of these, but they need context about what's changed and what matters.
+
+### Dependency Management
+
+Every library has dependencies, and dependencies evolve. At minimum, you need to:
+
+- Track dependency updates (major, minor, patch releases)
+- Assess the impact of updates (breaking changes, new features, security fixes)
+- Apply updates on a reasonable cadence
+- Test thoroughly before releasing
+
+I use agents to help with dependency triage:
+
+```
+Review the following dependency updates for Company.Http.Resilience:
+
+- Microsoft.Extensions.Http: 8.0.0 -> 8.0.1 (patch)
+- Polly: 8.2.0 -> 8.3.0 (minor)
+- System.Text.Json: 8.0.0 -> 9.0.0 (major)
+
+For each update:
+1. Summarize what changed (check release notes)
+2. Assess breaking change risk
+3. Recommend whether to update now, later, or skip
+4. Note any code changes required in our library
+```
+
+The agent's assessment isn't final, but it saves hours of manual research. For major version bumps especially, having a summary of breaking changes before diving into the release notes is invaluable.
+
+### Handling Feature Requests
+
+Consumers will want things your library doesn't do. This is healthy. It means people are using it. But not every feature request should be implemented.
+
+For each request, ask:
+
+1. **Is it within scope?** Does this align with the library's purpose, or should it be a separate concern?
+2. **How many consumers need it?** Is this a common need or a one-off?
+3. **Can it be done without breaking changes?** Will existing consumers be affected?
+4. **What's the maintenance burden?** Will this make the library harder to understand and maintain?
+
+Agents can help evaluate requests against these criteria:
+
+```
+Evaluate this feature request for Company.Http.Resilience:
+
+Request: Add support for request/response caching
+
+Consider:
+- Our stated scope: HTTP client resilience (retry, circuit breaker, timeout)
+- Caching is related but distinct from resilience
+- Adding caching would increase complexity significantly
+- Caching has its own configuration concerns (TTL, invalidation, storage)
+
+Recommendation: Accept, reject, or defer? Justify.
+```
+
+The recommendation might be: "Defer. Caching is related to HTTP concerns but orthogonal to resilience. Consider a separate `Company.Http.Caching` library that composes with this one. If multiple consumers request it, prioritize the separate library."
+
+### Version Evolution
+
+Libraries evolve through versions. Semantic versioning provides the framework (major.minor.patch), but the decisions about what goes into each version are human judgment calls.
+
+I maintain a version roadmap for each shared library:
+
+```markdown
+# Company.Http.Resilience Version Roadmap
+
+## Current: 1.2.0
+- Retry with exponential backoff
+- Circuit breaker
+- Configurable timeouts
+- Structured logging
+
+## Planned: 1.3.0 (Q2 2026)
+- Request hedging (speculative execution)
+- Enhanced metrics (histograms, percentiles)
+- .NET 9 support
+
+## Planned: 2.0.0 (Q4 2026)
+- Breaking: Simplified configuration API
+- Breaking: Remove deprecated methods from 1.x
+- New: Native AOT support
+- New: gRPC resilience (separate package)
+
+## Backlog (unprioritized)
+- Request caching (may be separate library)
+- Custom serializers
+- Request signing
+```
+
+This roadmap is a living document. It changes as priorities shift and new information emerges. But having it written down prevents the library from drifting aimlessly and helps consumers plan their own upgrades.
+
+### Documentation Maintenance
+
+Documentation decays. APIs change but examples don't get updated. New features ship without corresponding docs. Deprecated features linger in the guides long after they've been removed.
+
+Periodic documentation audits are essential:
+
+```
+Audit the documentation for Company.Http.Resilience:
+
+1. Compare public API surface to documented features
+2. Identify undocumented public members
+3. Identify documented features that no longer exist
+4. Check that code examples compile against current version
+5. Verify links are not broken
+
+Report discrepancies and suggest fixes.
+```
+
+This is exactly the kind of tedious, important work that agents excel at. They're patient enough to check every example and thorough enough to catch what humans skip.
+
+### The Maintenance Rhythm
+
+Rather than treating maintenance as ad-hoc work that happens when things break, establish a rhythm:
+
+**Weekly**: Dependency update review (automated alerts, manual triage)
+
+**Monthly**: Feature request review (batch similar requests, make decisions)
+
+**Quarterly**: Documentation audit, roadmap review
+
+**Yearly**: Major version planning, breaking change assessment
+
+This rhythm can be partially automated. Set up alerts for dependency updates. Create recurring calendar items for reviews. Use agents to generate the reports that feed into each review.
+
+The goal is to make maintenance a sustainable, predictable activity rather than a crisis response.
+
+---
+
+## Conclusion
+
+When I started this journey at my new company, staring down hundreds of codebases and thousands of interwoven concerns, I didn't have a grand plan. A laptop. A curiosity about what AI tools could actually do in practice. An allergy to doing the same thing twice. That's what I had.
+
+What emerged from that combination is what I've been calling "vibe engineering." Still somewhat tongue-in-cheek, but the name has stuck. It's not a methodology with certification programs and expensive consultants. It's a way of working that recognizes both the immense capability and the critical limitations of AI agents.
+
+The capability is real. Agents can read code faster than any human. They identify patterns across codebases that would take weeks to discover manually. They generate documentation, draft implementations, produce test suites at a pace that would have seemed like science fiction five years ago.
+
+The limitations are equally real. Agents don't understand your organization. They don't know why decisions were made. They can't navigate the political landscape that determines what solutions actually get adopted. They lack the judgment to know when "technically correct" isn't good enough.
+
+Here's the key insight: these capabilities and limitations are complementary.
+
+Agents excel at exactly the things humans find tedious. Reading vast amounts of code. Maintaining documentation. Generating boilerplate. Checking consistency. Humans excel at exactly the things agents struggle with. Understanding context. Making judgment calls. Navigating organizational dynamics. Designing for the long term.
+
+Vibe engineering is about creating the right handoff points. Humans define scope, make architectural decisions, review outputs. Agents do the heavy lifting of analysis, generation, and maintenance. The "vibe" is the context, constraints, and creative latitude that make this collaboration productive.
+
+And part of that vibe is aesthetic.
+
+I've come to believe that the code style you demand directly impacts the quality of agent collaboration. Flat beats nested. Declarative beats imperative. Fluent beats verbose. Pure functions beat stateful methods. These aren't just preferences. They're force multipliers. Code written in this style is easier to specify, easier to generate, easier to test, and easier to maintain.
+
+When everything chains cleanly. When each step is a transformation rather than a mutation. When the code reads like a specification of what should happen rather than instructions for how to make it happen. That's when you've created an environment where both humans and agents can do their best work.
+
+### What I've Learned
+
+Several months into this approach, a few lessons have crystallized.
+
+**Start small.** The temptation is to extract everything at once. Build the comprehensive platform SDK that solves all problems. Resist this. Extract one concern at a time. Make it work. Get it adopted. Then move to the next.
+
+**Build tools, not outputs.** This might be the most important lesson. When you have an agent write code directly, you're trusting its judgment for that specific case. When you have an agent build a source generator, analyzer, or scaffolding tool, you can validate the tool once and trust its output forever. The difference between "agent writes fifty repositories" and "agent writes a generator that produces fifty repositories" is the difference between reviewing fifty files and validating one tool. Always prefer the latter.
+
+**Demand flat, declarative code.** Agents default to nested, imperative spaghetti. That's what most of their training data looks like. Be explicit about wanting flat, functional, fluent code. Provide examples. The quality difference is enormous. Declarative code is inherently easier to validate because each step is a discrete, testable transformation.
+
+**Invest in specifications.** The time spent defining interfaces and writing scenarios is not overhead. It's the work. A clear specification makes implementation almost mechanical. Doesn't matter if it's done by an agent, a junior developer, or yourself at 2 AM.
+
+**Trust but verify.** Agent-generated code needs review. Always. Scenarios provide a safety net for behavioral correctness, but style, security, and maintainability require human eyes. This is doubly true for tools and generators, where a bug gets multiplied across every output.
+
+**Design for validation.** Every interface should be testable. Every behavior should be observable. If you can't write a test that proves the component works correctly, your interface is wrong. This isn't just good practice. It's essential when agents are involved, because validation is how you transform "trust" into "verify."
+
+**Prefer fluent APIs.** Fluent interfaces read like specifications. They're self-documenting. They force separation of concerns. They're easier for both humans and agents to use correctly. When in doubt, make it chainable.
+
+**Maintain the paper trail.** ADRs, inventories, roadmaps, documentation. These aren't bureaucratic overhead. They're institutional memory that keeps work coherent over time. They're also the context that makes future agent interactions productive.
+
+**Establish rhythms.** Maintenance is not a crisis response. It's a sustainable practice. Weekly dependency reviews. Monthly feature triage. Quarterly audits. Make it routine and it becomes manageable.
+
+### The Bigger Picture
+
+I've focused this essay on cross-cutting concerns because they're the Goldilocks zone for human-agent collaboration. Complex enough to be meaningful. Bounded enough to be tractable. Infrastructure-focused enough that deep business context isn't required.
+
+But the principles extend beyond infrastructure. Any well-scoped, clearly specified problem can benefit from this approach. The key is knowing when to reach for agent assistance and when to do the work yourself.
+
+The tools will continue to evolve. Rapidly. The boundary will shift. Tasks requiring heavy human involvement today will become more automatable. New categories of work will emerge that we can't yet imagine. The developers who thrive will be those who can fluidly navigate this shifting boundary, leveraging agents where they're effective and applying human judgment where it's essential.
+
+For now, though, there's plenty of spaghetti to untangle. Plenty of fungal colonies to dissect. Plenty of cross-cutting concerns hiding in plain sight, waiting to be identified, specified, extracted, and maintained.
+
+And I've got an agent ready to help.
+
+---
+
+*This is part one of what I expect to be an ongoing series on AI-assisted software engineering. Future posts will dive deeper into specific techniques, tooling, and real-world case studies. If you want to follow along, the best place is probably my blog at [jerrettdavis.com](https://jerrettdavis.com) or wherever you found this post.*
+
+*All code examples in this post are illustrative. The specific implementations would vary based on your stack, constraints, and preferences. The principles, however, are stack-agnostic.*
