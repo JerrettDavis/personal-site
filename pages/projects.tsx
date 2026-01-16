@@ -103,6 +103,8 @@ const formatContributionDate = (value: string) => {
 
 const PIPELINE_ANCHOR_ID = 'pipeline-metrics';
 const DENSITY_STORAGE_KEY = 'projects-density';
+const HEATMAP_DAYS = 365;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 type DensityMode = 'tiny' | 'normal' | 'roomy';
 const DENSITY_OPTIONS: {id: DensityMode; label: string}[] = [
     {id: 'tiny', label: 'Tiny'},
@@ -316,10 +318,50 @@ export default function Projects({projects, githubError, projectPosts}: Projects
                 : 1,
         [timelineMonths],
     );
-    const heatmapDays = useMemo(
-        () => timelineDays.slice(-365),
-        [timelineDays],
-    );
+    const heatmapDays = useMemo(() => {
+        // Create a rolling 365-day window ending on today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // Find if today's data exists in the timeline
+        const todayIndex = timelineDays.findIndex(day => day.date === todayStr);
+        
+        if (todayIndex !== -1) {
+            // If today exists, take up to HEATMAP_DAYS ending at today
+            const startIndex = Math.max(0, todayIndex - (HEATMAP_DAYS - 1));
+            return timelineDays.slice(startIndex, todayIndex + 1);
+        } else {
+            // If today doesn't exist yet, take the last HEATMAP_DAYS available
+            // and pad to today if needed
+            const lastDays = timelineDays.slice(-HEATMAP_DAYS);
+            
+            if (lastDays.length === 0) return [];
+            
+            const lastDate = parseContributionDate(lastDays[lastDays.length - 1].date);
+            if (!lastDate) return lastDays;
+            
+            // Fill in missing days from last available date to today
+            const paddedDays = [...lastDays];
+            const lastDateMs = lastDate.getTime();
+            const todayMs = today.getTime();
+            
+            if (todayMs > lastDateMs) {
+                let currentMs = lastDateMs + MS_PER_DAY;
+                while (currentMs <= todayMs) {
+                    const currentDate = new Date(currentMs);
+                    paddedDays.push({
+                        date: currentDate.toISOString().split('T')[0],
+                        count: 0,
+                    });
+                    currentMs += MS_PER_DAY;
+                }
+            }
+            
+            // Keep only the last HEATMAP_DAYS
+            return paddedDays.slice(-HEATMAP_DAYS);
+        }
+    }, [timelineDays]);
     const heatmapMax = useMemo(
         () => Math.max(...heatmapDays.map((day) => day.count), 1),
         [heatmapDays],

@@ -215,9 +215,21 @@
     gap: 0.15rem;
     z-index: 1;
     align-content: start;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     width: 100%;
-    justify-content: space-between;
+    max-width: 100%;
+    justify-content: center;
+    padding-bottom: 0.4rem;
+}
+
+.heatmap::-webkit-scrollbar {
+    height: 6px;
+}
+
+.heatmap::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-pill);
 }
 
 .cadenceSection {
