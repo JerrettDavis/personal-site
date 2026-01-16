@@ -4,7 +4,7 @@
         <title>Jerrett Davis | The Overengineer Blog Posts | RSS Feed</title>
         <link>https://jerrettdavis.com</link>
         <description>The Overengineer Blog. Anything worth doing is worth overdoing.</description>
-        <lastBuildDate>Sat, 27 Dec 2025 04:19:55 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 16 Jan 2026 03:54:32 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -12,7 +12,7 @@
             <url>https://jerrettdavis.com/profile.png</url>
             <link>https://jerrettdavis.com</link>
         </image>
-        <copyright>All rights reserved 2025, Jerrett Davis</copyright>
+        <copyright>All rights reserved 2026, Jerrett Davis</copyright>
         <item>
             <title><![CDATA[JD.Efcpt.Build]]></title>
             <link>https://jerrettdavis.com/blog/posts/jd.efcpt.build</link>
