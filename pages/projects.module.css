@@ -219,7 +219,7 @@
     overflow-y: hidden;
     width: 100%;
     max-width: 100%;
-    justify-content: start;
+    justify-content: center;
     padding-bottom: 0.4rem;
 }
 

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jerrettdavis.com</id>
     <title>Jerrett Davis | The Overengineer Blog Posts | RSS Feed</title>
-    <updated>2026-01-16T04:01:55.243Z</updated>
+    <updated>2026-01-16T04:50:05.114Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://jerrettdavis.com"/>
     <link rel="self" href="https://jerrettdavis.com/atom.xml"/>
