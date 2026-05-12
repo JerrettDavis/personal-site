@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.METRICS_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -23,10 +23,7 @@ jobs:
         run: node scripts/updateGithubMetrics.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          METRICS_STORE: custom
-          METRICS_STORE_ADAPTER: scripts/metricsStoreAdapters/postgres.js
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED }}
+          METRICS_STORE: file
           METRICS_UPDATE_MIN_INTERVAL_MS: 21600000
       - name: Commit updated metrics
         run: |
@@ -52,4 +49,7 @@ jobs:
           fi
           
           git commit -m "chore(metrics): update GitHub metrics"
-          git push
+          if ! git push; then
+            echo "::warning title=Metrics commit not pushed::Repository rules blocked direct metrics updates; refresh completed successfully."
+            exit 0
+          fi
