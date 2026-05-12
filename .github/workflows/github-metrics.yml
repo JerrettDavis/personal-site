@@ -49,4 +49,7 @@ jobs:
           fi
           
           git commit -m "chore(metrics): update GitHub metrics"
-          git push
+          if ! git push; then
+            echo "::warning title=Metrics commit not pushed::Repository rules blocked direct metrics updates; refresh completed successfully."
+            exit 0
+          fi
