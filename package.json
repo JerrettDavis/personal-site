@@ -82,5 +82,8 @@
     "jest-environment-jsdom": "^30.4.1",
     "semantic-release": "^25.0.5",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
   }
 }
