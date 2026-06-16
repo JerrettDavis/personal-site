@@ -44,13 +44,13 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -101,7 +101,7 @@ jobs:
 
       - name: Open syndication state PR
         if: github.event.inputs.dry_run != 'true' && env.SYNDICATION_STATE_BRANCH != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const {handleGithubScriptError} = require('./scripts/syndication/githubScriptHelpers.cjs');
@@ -133,7 +133,7 @@ jobs:
 
       - name: Create issue on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const {handleGithubScriptError} = require('./scripts/syndication/githubScriptHelpers.cjs');
