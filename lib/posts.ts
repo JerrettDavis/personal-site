@@ -1,11 +1,11 @@
 import fs from 'fs/promises'
 import path from 'path'
-import matter from 'gray-matter'
 import {formatTags} from "./tags";
 import {toSeriesSlug} from "./blog-utils";
 import {buildSummary} from './markdown-summary';
 import {renderMarkdown} from './markdown-render';
 import {parseOrderValue} from './frontmatter';
+import {parseFrontmatter, type ParsedFrontmatter} from './frontmatter-parser';
 
 const postsDirectory = path.join(process.cwd(), 'posts')
 
@@ -92,7 +92,7 @@ export async function getSortedPostsData(): Promise<PostSummary[]> {
             const id = fileName.replace(/\.mdx$/, '');
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
-            const matterResult = matter(fileContents);
+            const matterResult = parseFrontmatter(fileContents);
             const summary = buildSummary(matterResult.content, {ensureSuffix: true});
             const normalized = normalizePostFrontmatter(matterResult.data as PostFrontmatter);
             const {useToc, ...postBase} = normalized;
@@ -119,13 +119,13 @@ export async function getAllPostIds(): Promise<{ params: { id: string } }[]> {
     });
 }
 
-export const getAllPostMetadata = async () : Promise<matter.GrayMatterFile<string>[]> =>
+export const getAllPostMetadata = async () : Promise<ParsedFrontmatter[]> =>
     await Promise.all(
         (await readPostFileNames())
             .map(async (fileName: string) => {
                 const fullPath: string = path.join(postsDirectory, fileName);
                 const fileContents: string = await fs.readFile(fullPath, 'utf8');
-                return matter(fileContents);
+                return parseFrontmatter(fileContents);
             }));
 
 function multiSplit(str: string, seps: string[]) {
@@ -145,7 +145,7 @@ export async function getTotalPostWordCount(): Promise<number> {
         fileNames.map(async (fileName) => {
             const fullPath = path.join(postsDirectory, fileName);
             const fileContents = await fs.readFile(fullPath, 'utf8');
-            const matterResult = matter(fileContents);
+            const matterResult = parseFrontmatter(fileContents);
             return countWords(matterResult.content);
         })
     );
@@ -156,8 +156,7 @@ export async function getPostData(id: string): Promise<PostData> {
     const fullPath = path.join(postsDirectory, `${id}.mdx`)
     const fileContents = await fs.readFile(fullPath, 'utf8')
 
-    // Use gray-matter to parse the post metadata section
-    const matterResult = matter(fileContents)
+    const matterResult = parseFrontmatter(fileContents)
     const wordCount = countWords(matterResult.content);
     const stub = buildSummary(matterResult.content, {ensureSuffix: true});
     const normalized = normalizePostFrontmatter(matterResult.data as PostFrontmatter);

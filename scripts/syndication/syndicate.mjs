@@ -117,7 +117,7 @@ async function saveState(state) {
  * Load all posts from the posts directory
  */
 async function loadPosts() {
-    const { default: matter } = await import('gray-matter');
+    const {load: loadYaml} = await import('js-yaml');
     const postsDir = path.join(rootDir, 'posts');
     const files = await fs.readdir(postsDir);
 
@@ -128,7 +128,7 @@ async function loadPosts() {
         const postId = file.replace(/\.mdx$/, '');
         const fullPath = path.join(postsDir, file);
         const content = await fs.readFile(fullPath, 'utf-8');
-        const { data: frontmatter, content: markdown } = matter(content);
+        const {data: frontmatter, content: markdown} = parseFrontmatter(content, loadYaml);
 
         posts.push({
             id: postId,
@@ -139,6 +139,27 @@ async function loadPosts() {
     }
 
     return posts;
+}
+
+function parseFrontmatter(source, loadYaml) {
+    const normalized = source.replace(/^\uFEFF/, '');
+    const delimiter = '---';
+    if (!normalized.startsWith(`${delimiter}\n`) && !normalized.startsWith(`${delimiter}\r\n`)) {
+        return {data: {}, content: source};
+    }
+
+    const bodyStart = normalized.startsWith(`${delimiter}\r\n`) ? 5 : 4;
+    const closeMatch = /\r?\n---[ \t]*(?:\r?\n|$)/.exec(normalized.slice(bodyStart));
+    if (!closeMatch) {
+        return {data: {}, content: source};
+    }
+
+    const closeIndex = bodyStart + closeMatch.index;
+    const yaml = normalized.slice(bodyStart, closeIndex);
+    const content = normalized.slice(closeIndex + closeMatch[0].length);
+    const parsed = loadYaml(yaml);
+    const data = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    return {data, content};
 }
 
 /**

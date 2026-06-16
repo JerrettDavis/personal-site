@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import matter from 'gray-matter';
 import {buildSummary} from './markdown-summary';
 import {renderMarkdown} from './markdown-render';
 import {parseOrderValue} from './frontmatter';
+import {parseFrontmatter} from './frontmatter-parser';
 
 const docsDirectory = path.join(process.cwd(), 'docs');
 
@@ -114,7 +114,7 @@ export const getAllDocSummaries = async (): Promise<DocSummary[]> => {
         files.map(async (filePath) => {
             const slug = toSlugParts(filePath);
             const content = await fs.readFile(filePath, 'utf8');
-            const {data, content: body} = matter(content);
+            const {data, content: body} = parseFrontmatter(content);
             const summary = normalizeFrontmatter(data as DocFrontmatter, slug, body);
             return {
                 title: summary.title,
@@ -143,7 +143,7 @@ export const getAllDocSlugs = async (): Promise<string[][]> => {
 export const getDocBySlug = async (slug: string[]): Promise<DocData> => {
     const filePath = await resolveDocFile(slug);
     const fileContents = await fs.readFile(filePath, 'utf8');
-    const {data, content} = matter(fileContents);
+    const {data, content} = parseFrontmatter(fileContents);
     const summary = normalizeFrontmatter(data as DocFrontmatter, slug, content);
     const contentHtml = await renderMarkdown(content, summary.useToc, true);
 

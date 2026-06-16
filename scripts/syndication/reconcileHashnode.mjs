@@ -51,7 +51,7 @@ const loadState = async () => {
 };
 
 const loadLocalPosts = async () => {
-    const {default: matter} = await import('gray-matter');
+    const {load: loadYaml} = await import('js-yaml');
     const postsDir = path.join(rootDir, 'posts');
     const files = await fs.readdir(postsDir);
     const posts = [];
@@ -60,7 +60,7 @@ const loadLocalPosts = async () => {
         if (!file.endsWith('.mdx')) continue;
         const id = file.replace(/\.mdx$/, '');
         const content = await fs.readFile(path.join(postsDir, file), 'utf-8');
-        const {data} = matter(content);
+        const {data} = parseFrontmatter(content, loadYaml);
         posts.push({
             id,
             title: typeof data.title === 'string' ? data.title.trim() : id,
@@ -68,6 +68,27 @@ const loadLocalPosts = async () => {
     }
 
     return posts;
+};
+
+const parseFrontmatter = (source, loadYaml) => {
+    const normalized = source.replace(/^\uFEFF/, '');
+    const delimiter = '---';
+    if (!normalized.startsWith(`${delimiter}\n`) && !normalized.startsWith(`${delimiter}\r\n`)) {
+        return {data: {}, content: source};
+    }
+
+    const bodyStart = normalized.startsWith(`${delimiter}\r\n`) ? 5 : 4;
+    const closeMatch = /\r?\n---[ \t]*(?:\r?\n|$)/.exec(normalized.slice(bodyStart));
+    if (!closeMatch) {
+        return {data: {}, content: source};
+    }
+
+    const closeIndex = bodyStart + closeMatch.index;
+    const yaml = normalized.slice(bodyStart, closeIndex);
+    const content = normalized.slice(closeIndex + closeMatch[0].length);
+    const parsed = loadYaml(yaml);
+    const data = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    return {data, content};
 };
 
 const fetchHashnodePosts = async (publicationId, token) => {

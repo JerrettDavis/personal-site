@@ -13,7 +13,7 @@ export interface TagData {
 
 const getAllTags = async (): Promise<string[]> =>
     Array.from(new Set((await getAllPostMetadata())
-        .flatMap(m => formatTags(m.data.tags))));
+        .flatMap(m => formatTags(m.data.tags as string[] | string | undefined | null))));
 
 export async function getSortedTagsData(): Promise<TagData[]> {
     return (await getAllTags()).map((tag: string) => {
