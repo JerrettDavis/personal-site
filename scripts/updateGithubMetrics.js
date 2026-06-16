@@ -426,7 +426,7 @@ const updateGithubMetrics = async (options = {}) => {
         const snapshotDate = now.toISOString().slice(0, 10);
         const retentionDays = parseRetentionDays();
         const snapshotCutoff = retentionDays
-            ? now.getTime() - retentionDays * 24 * 60 * 60 * 1000
+            ? now.getTime() - retentionDays * DAY_MS
             : 0;
         const contributionWindowDays =
             retentionDays && retentionDays > 0 ? retentionDays : 365;
