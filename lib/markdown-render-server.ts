@@ -16,18 +16,17 @@ export const renderMarkdownServer = async (
     useToc: boolean,
     allowHtml = false,
 ): Promise<string> => {
-    let builder = unified()
+    const builder = unified()
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkRehype, allowHtml ? {allowDangerousHtml: true} : undefined)
         .use(rehypeHighlight, {
             languages: {...lowlightCommon, dockerfile, gherkin},
-            ignoreMissing: true,
         })
         .use(rehypeSlug);
 
     if (useToc) {
-        builder = builder.use(rehypeToc);
+        builder.use(rehypeToc);
     }
 
     const processed = await builder
