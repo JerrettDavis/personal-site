@@ -85,6 +85,7 @@
   },
   "overrides": {
     "js-yaml": "4.2.0",
-    "postcss": "8.5.10"
+    "postcss": "8.5.10",
+    "undici": "6.27.0"
   }
 }
