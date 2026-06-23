@@ -80,7 +80,7 @@ const getMappedPackagesForRepo = (fullName: string) => {
 export const parseNugetPackageId = (url: string) => {
     try {
         const parsed = new URL(url);
-        if (!parsed.hostname.includes('nuget.org')) return null;
+        if (parsed.hostname !== 'nuget.org' && !parsed.hostname.endsWith('.nuget.org')) return null;
         const parts = parsed.pathname.split('/').filter(Boolean);
         const packageIndex = parts.findIndex((part) => part.toLowerCase() === 'packages');
         if (packageIndex === -1) return null;
