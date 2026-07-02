@@ -404,7 +404,8 @@ const updateGithubMetrics = async (options = {}) => {
                 );
             }
         }
-        if (!forceUpdate && minIntervalMs > 0) {
+        const lastSyncCompleted = existing?.progress ? Boolean(existing.progress.finishedAt) : true;
+        if (!forceUpdate && minIntervalMs > 0 && lastSyncCompleted) {
             const updatedAt = existing?.generatedAt ? Date.parse(existing.generatedAt) : 0;
             if (updatedAt && Date.now() - updatedAt < minIntervalMs) {
                 return {
@@ -502,69 +503,90 @@ const updateGithubMetrics = async (options = {}) => {
             basePayload.repos.map((repo, index) => [repo.fullName, index]),
         );
 
+        const batchSize = Math.max(1, parseInt(process.env.METRICS_BATCH_SIZE || '10', 10));
+        const batchDelayMs = Math.max(0, parseInt(process.env.METRICS_BATCH_DELAY_MS || '500', 10));
         let processedRepos = 0;
-        for (const repo of ownedRepos) {
-            const fullName = repo.full_name;
-            const contributorStats = await fetchContributorStats(fullName, headers);
-            const contributor = contributorStats.find(
-                (entry) => entry.author && entry.author.login === login,
-            );
-            const weeks = Array.isArray(contributor?.weeks)
-                ? contributor.weeks.map((week) => ({
-                      week: week.w,
-                      commits: week.c,
-                      additions: week.a,
-                      deletions: week.d,
-                  }))
-                : [];
-            const trimmedWeeks = retentionDays
-                ? trimWeeks(weeks, snapshotCutoff)
-                : weeks;
-            const previous = existingMap.get(fullName);
-            const previousSnapshots = Array.isArray(previous?.snapshots)
-                ? previous.snapshots
-                : [];
-            const trimmedSnapshots = retentionDays
-                ? trimSnapshots(previousSnapshots, snapshotCutoff).filter(
-                      (snapshot) => snapshot.date !== snapshotDate,
-                  )
-                : previousSnapshots.filter((snapshot) => snapshot.date !== snapshotDate);
-            const snapshots = [
-                ...trimmedSnapshots,
-                {
-                    date: snapshotDate,
-                    stars: repo.stargazers_count ?? 0,
-                    forks: repo.forks_count ?? 0,
-                    pushedAt: repo.pushed_at ?? null,
-                },
-            ];
 
-            const updatedRepo = {
-                id: repo.id,
-                name: repo.name,
-                fullName: repo.full_name,
-                description: repo.description ?? null,
-                htmlUrl: repo.html_url,
-                stars: repo.stargazers_count ?? 0,
-                forks: repo.forks_count ?? 0,
-                pushedAt: repo.pushed_at ?? null,
-                visibility: repo.private ? 'private' : 'public',
-                weeks: trimmedWeeks,
-                snapshots,
-                updatedAt: new Date().toISOString(),
-            };
-            const index = repoIndex.get(fullName);
-            if (index !== undefined) {
-                basePayload.repos[index] = updatedRepo;
-            } else {
-                basePayload.repos.push(updatedRepo);
+        for (let i = 0; i < ownedRepos.length; i += batchSize) {
+            const batch = ownedRepos.slice(i, i + batchSize);
+            const batchResults = await Promise.all(
+                batch.map(async (repo) => {
+                    const fullName = repo.full_name;
+                    let contributorStats = [];
+                    try {
+                        contributorStats = await fetchContributorStats(fullName, headers);
+                    } catch (error) {
+                        console.warn(`Failed to fetch contributor stats for ${fullName}: ${error?.message ?? error}`);
+                    }
+                    const contributor = contributorStats.find(
+                        (entry) => entry.author && entry.author.login === login,
+                    );
+                    const weeks = Array.isArray(contributor?.weeks)
+                        ? contributor.weeks.map((week) => ({
+                              week: week.w,
+                              commits: week.c,
+                              additions: week.a,
+                              deletions: week.d,
+                          }))
+                        : [];
+                    const trimmedWeeks = retentionDays
+                        ? trimWeeks(weeks, snapshotCutoff)
+                        : weeks;
+                    const previous = existingMap.get(fullName);
+                    const previousSnapshots = Array.isArray(previous?.snapshots)
+                        ? previous.snapshots
+                        : [];
+                    const trimmedSnapshots = retentionDays
+                        ? trimSnapshots(previousSnapshots, snapshotCutoff).filter(
+                              (snapshot) => snapshot.date !== snapshotDate,
+                          )
+                        : previousSnapshots.filter((snapshot) => snapshot.date !== snapshotDate);
+                    const snapshots = [
+                        ...trimmedSnapshots,
+                        {
+                            date: snapshotDate,
+                            stars: repo.stargazers_count ?? 0,
+                            forks: repo.forks_count ?? 0,
+                            pushedAt: repo.pushed_at ?? null,
+                        },
+                    ];
+
+                    return {
+                        id: repo.id,
+                        name: repo.name,
+                        fullName: repo.full_name,
+                        description: repo.description ?? null,
+                        htmlUrl: repo.html_url,
+                        stars: repo.stargazers_count ?? 0,
+                        forks: repo.forks_count ?? 0,
+                        pushedAt: repo.pushed_at ?? null,
+                        visibility: repo.private ? 'private' : 'public',
+                        weeks: trimmedWeeks,
+                        snapshots,
+                        updatedAt: new Date().toISOString(),
+                    };
+                })
+            );
+
+            // Apply batch updates synchronously
+            for (const updatedRepo of batchResults) {
+                const index = repoIndex.get(updatedRepo.fullName);
+                if (index !== undefined) {
+                    basePayload.repos[index] = updatedRepo;
+                } else {
+                    basePayload.repos.push(updatedRepo);
+                }
             }
-            processedRepos += 1;
+
+            processedRepos += batch.length;
             basePayload.progress.processedRepos = processedRepos;
             basePayload.progress.updatedAt = new Date().toISOString();
             basePayload.generatedAt = basePayload.progress.updatedAt;
             await store.saveHistory(basePayload);
-            await sleep(250);
+
+            if (i + batchSize < ownedRepos.length && batchDelayMs > 0) {
+                await sleep(batchDelayMs);
+            }
         }
 
         basePayload.repos.sort((a, b) => {

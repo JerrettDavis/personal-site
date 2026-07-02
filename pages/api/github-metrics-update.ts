@@ -86,11 +86,12 @@ export default async function handler(
         }
 
         const history = await store.getHistory();
+        const lastSyncCompleted = history?.progress ? Boolean(history.progress.finishedAt) : true;
         const historyUpdatedAt = history?.generatedAt
             ? Date.parse(history.generatedAt)
             : 0;
         const minIntervalMs = getMinIntervalMs();
-        if (historyUpdatedAt && now - historyUpdatedAt < minIntervalMs) {
+        if (lastSyncCompleted && historyUpdatedAt && now - historyUpdatedAt < minIntervalMs) {
             return {
                 ok: false,
                 status: 'skipped',

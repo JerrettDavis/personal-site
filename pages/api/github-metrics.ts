@@ -254,9 +254,11 @@ const buildUpdateState = async (
     const progress = history?.progress;
     const totalRepos = progress?.totalRepos ?? history?.repos?.length ?? 0;
     const processedRepos = progress?.processedRepos ?? history?.repos?.length ?? 0;
+    const progressUpdatedAt = progress?.updatedAt ? Date.parse(progress.updatedAt) : 0;
+    const progressRecent = Number.isFinite(progressUpdatedAt) && (now - progressUpdatedAt < 10 * 60 * 1000); // 10 minutes
     const inProgress =
         lockActive ||
-        (progress ? Boolean(!progress.finishedAt && processedRepos < totalRepos) : false);
+        (progress ? Boolean(!progress.finishedAt && processedRepos < totalRepos && progressRecent) : false);
 
     if (!lockActive && !progress) {
         return null;

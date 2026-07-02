@@ -89,7 +89,8 @@ const fetchGithubRepos = async (owner) => {
         url.searchParams.set('type', 'owner');
         const response = await fetch(url.toString(), {headers});
         if (!response.ok) {
-            break;
+            const body = await response.text();
+            throw new Error(`GitHub repos fetch failed with status ${response.status}: ${body}`);
         }
         const payload = await response.json();
         if (!Array.isArray(payload) || payload.length === 0) {
