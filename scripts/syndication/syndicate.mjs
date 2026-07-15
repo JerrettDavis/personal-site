@@ -18,6 +18,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import devtoUtils from './devtoUtils.cjs';
+import hashnodeUtils from './hashnodeUtils.cjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,9 +32,12 @@ const {
     findDevtoCollision,
     interpretDevtoResponse,
 } = devtoUtils;
+const { interpretHashnodeResponse } = hashnodeUtils;
 
 // Platform-specific constraints
 const HASHNODE_MAX_TAGS = 5;
+const HASHNODE_MAX_ATTEMPTS = 3;
+const HASHNODE_RETRY_BASE_DELAY_MS = 1000;
 const DEVTO_MAX_TAGS = 4;
 const DEVTO_PER_PAGE = 100;
 const DEVTO_MAX_PAGES = 3;
@@ -304,27 +308,43 @@ async function publishToHashnode(post, config, state) {
         }
     };
 
-    const response = await fetch('https://gql.hashnode.com', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-        },
-        body: JSON.stringify({ query: mutation, variables })
-    });
+    let result;
+    let lastError;
+    for (let attempt = 1; attempt <= HASHNODE_MAX_ATTEMPTS; attempt += 1) {
+        try {
+            const response = await fetch('https://gql.hashnode.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({ query: mutation, variables })
+            });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Hashnode API error: ${response.status} - ${errorText}`);
+            result = await interpretHashnodeResponse(response);
+            break;
+        } catch (error) {
+            lastError = error;
+            const shouldRetry = error?.retryable === true && attempt < HASHNODE_MAX_ATTEMPTS;
+            if (!shouldRetry) {
+                throw error;
+            }
+            const retryDelayMs = HASHNODE_RETRY_BASE_DELAY_MS * attempt;
+            console.warn(
+                `  ⚠️  Hashnode request failed (attempt ${attempt}/${HASHNODE_MAX_ATTEMPTS}): ${error.message}`
+            );
+            await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+        }
     }
 
-    const result = await response.json();
-
-    if (result.errors) {
-        throw new Error(`Hashnode GraphQL error: ${JSON.stringify(result.errors)}`);
+    if (!result) {
+        throw lastError ?? new Error('Hashnode publish failed');
     }
 
-    const postData = result.data.publishPost.post;
+    const postData = result?.data?.publishPost?.post;
+    if (!postData?.id || !postData?.url) {
+        throw new Error(`Hashnode response missing post data: ${JSON.stringify(result?.data ?? {})}`);
+    }
 
     return {
         success: true,
