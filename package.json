@@ -22,16 +22,16 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@fortawesome/fontawesome-svg-core": "^7.3.0",
-    "@fortawesome/free-brands-svg-icons": "^7.3.0",
-    "@fortawesome/free-solid-svg-icons": "^7.3.0",
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-brands-svg-icons": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
     "@fortawesome/react-fontawesome": "^3.4.0",
     "@jsdevtools/rehype-toc": "^3.0.2",
     "@vercel/analytics": "^2.0.1",
     "better-sqlite3": "^12.11.1",
     "date-fns": "^4.4.0",
     "eslint-config-next": "^16.2.10",
-    "feed": "^5.0.0",
+    "feed": "^6.0.0",
     "highlight.js": "^11.9.0",
     "hoist-non-react-statics": "^3.3.2",
     "js-yaml": "5.2.1",
@@ -80,8 +80,8 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
-    "semantic-release": "^25.0.6",
-    "typescript": "^6.0.0"
+    "semantic-release": "^25.0.8",
+    "typescript": "^7.0.2"
   },
   "overrides": {
     "js-yaml": "5.2.1",
