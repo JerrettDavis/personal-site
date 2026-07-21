@@ -7,66 +7,73 @@
     "icon": "https://jerrettdavis.com/profile.png",
     "items": [
         {
+            "id": "https://jerrettdavis.com/blog/posts/vibe-engineering-small-cross-cutting-concerns",
+            "content_html": "A long-form essay on using AI agents to identify, extract, and maintain cross-cutting concerns, with a focus on tools-over-decisions, declarative code, and validation-first workflows.",
+            "url": "https://jerrettdavis.com/blog/posts/vibe-engineering-small-cross-cutting-concerns",
+            "title": "Vibe Engineering: Solving Small Cross-Cutting Concerns",
+            "date_modified": "2026-01-15T00:00:00.000Z"
+        },
+        {
             "id": "https://jerrettdavis.com/blog/posts/jd.efcpt.build",
+            "content_html": "JD.Efcpt.Build automates EF Core Power Tools scaffolding during the build, keeping database-first models in sync with schema changes without manual regeneration.",
             "url": "https://jerrettdavis.com/blog/posts/jd.efcpt.build",
             "title": "JD.Efcpt.Build",
-            "summary": "JD.Efcpt.Build automates EF Core Power Tools scaffolding during the build, keeping database-first models in sync with schema changes without manual regeneration.",
             "date_modified": "2025-12-21T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions",
+            "content_html": "Why developers misuse abstractions, how to design them from behavior and domain first, and how patterns, automation, and declarative modeling lead to better systems.",
             "url": "https://jerrettdavis.com/blog/posts/you-dont-hate-abstractions",
             "title": "You Don't Hate Abstractions",
-            "summary": "Why developers misuse abstractions, how to design them from behavior and domain first, and how patterns, automation, and declarative modeling lead to better systems.",
             "date_modified": "2025-12-05T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/tinybdd",
+            "content_html": "Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.",
             "url": "https://jerrettdavis.com/blog/posts/tinybdd",
             "title": "Announcing TinyBDD: Fluent, Executable Scenarios for .NET",
-            "summary": "Turn acceptance criteria into executable tests in minutes, use a fluent Gherkin-ish syntax for unit and integration testing, and let your tests shape a cleaner architecture.",
             "date_modified": "2025-09-17T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd",
+            "content_html": "What if your business wrote the tests, and developers just made them pass?",
             "url": "https://jerrettdavis.com/blog/posts/making-the-business-write-your-tests-with-bdd",
             "title": "BDD: Make the Business Write Your Tests",
-            "summary": "What if your business wrote the tests, and developers just made them pass?",
             "date_modified": "2025-09-01T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/what-is-code",
+            "content_html": "A beginner-friendly exploration of what \"code\" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
             "url": "https://jerrettdavis.com/blog/posts/what-is-code",
             "title": "What is \"Code\"?",
-            "summary": "A beginner-friendly exploration of what \"code\" really is — from its many forms and history to why it matters today. We'll look at how programming languages evolved, how code shapes the world around us, and why you don't need to be a professional to start creating with it.",
             "date_modified": "2025-08-11T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/automating-daily-database-restores",
+            "content_html": "Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.",
             "url": "https://jerrettdavis.com/blog/posts/automating-daily-database-restores",
             "title": "Automating Nightly Local Database Refreshes from Azure Blob Storage with Docker",
-            "summary": "Learn how to automate the retrieval and restoration of production database backups from Azure Blob Storage to a local SQL Server using Docker. This concise guide provides step-by-step instructions and scripts, enabling easy setup for development, testing, and analysis purposes.",
             "date_modified": "2024-02-27T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/a-year-in-review-1",
+            "content_html": "Reflecting on the author's experiences throughout 2022, including attempts at a 365-day coding challenge, the impact of significant life events such as the birth of their daughter, and the shifting priorities and challenges faced during the year.",
             "url": "https://jerrettdavis.com/blog/posts/a-year-in-review-1",
             "title": "A Year in Review",
-            "summary": "Reflecting on the author's experiences throughout 2022, including attempts at a 365-day coding challenge, the impact of significant life events such as the birth of their daughter, and the shifting priorities and challenges faced during the year.",
             "date_modified": "2023-08-13T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/365-days-of-code-week-1",
+            "content_html": "A recap of the first week participating in the \"365 Days of Code\" challenge, where the author commits and pushes code related to a personal project daily. The post discusses the motivation behind the challenge, the author's goals, and the results of the first week, including the migration of the personal website from WordPress to a Static Site built with Next.js and React, and the creation of a command line weather client.",
             "url": "https://jerrettdavis.com/blog/posts/365-days-of-code-week-1",
             "title": "365 Days of Code - Week 1",
-            "summary": "A recap of the first week participating in the \"365 Days of Code\" challenge, where the author commits and pushes code related to a personal project daily. The post discusses the motivation behind the challenge, the author's goals, and the results of the first week, including the migration of the personal website from WordPress to a Static Site built with Next.js and React, and the creation of a command line weather client.",
             "date_modified": "2022-01-02T00:00:00.000Z"
         },
         {
             "id": "https://jerrettdavis.com/blog/posts/ef-core-public-id",
+            "content_html": "A guide detailing the implementation of a simple public ID generation system in Entity Framework Core (EF Core). The post discusses the background motivation, problems encountered, and the implementation steps, including hiding primary keys, generating public identifiers, and simplifying operations on public entities.",
             "url": "https://jerrettdavis.com/blog/posts/ef-core-public-id",
             "title": "Simple Public ID Generation in EF Core",
-            "summary": "A guide detailing the implementation of a simple public ID generation system in Entity Framework Core (EF Core). The post discusses the background motivation, problems encountered, and the implementation steps, including hiding primary keys, generating public identifiers, and simplifying operations on public entities.",
             "date_modified": "2021-12-27T00:00:00.000Z"
         }
     ]
