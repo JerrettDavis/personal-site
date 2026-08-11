@@ -17,7 +17,8 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["jest", "node"]
   },
   "include": [
     "next-env.d.ts",
