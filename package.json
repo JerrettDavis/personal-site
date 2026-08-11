@@ -86,6 +86,11 @@
   "overrides": {
     "js-yaml": "5.2.3",
     "postcss": "8.5.10",
-    "undici": "6.27.0"
+    "undici": "6.27.0",
+    "eslint-config-next": {
+      "eslint-plugin-import": {
+        "eslint": "$eslint"
+      }
+    }
   }
 }
