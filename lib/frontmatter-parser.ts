@@ -1,8 +1,9 @@
 import {load} from 'js-yaml';
 
 export interface ParsedFrontmatter {
+    id?: string;
     data: Record<string, unknown>;
-    content: string;
+    content?: string;
 }
 
 const delimiter = '---';
