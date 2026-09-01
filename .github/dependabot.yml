@@ -39,6 +39,12 @@ updates:
       - dependency-name: "undici"
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # conventional-changelog-conventionalcommits@9+ requires conventional-changelog-writer@9+,
+      # but @semantic-release/release-notes-generator@14 bundles writer@8. Bumping past 8.x
+      # breaks the release job ("Missing helper" error). Revisit when release-notes-generator
+      # upgrades its writer dependency.
+      - dependency-name: "conventional-changelog-conventionalcommits"
+        update-types: ["version-update:semver-major"]
     groups:
       npm-dependencies:
         patterns:

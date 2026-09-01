@@ -75,7 +75,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@types/rss": "^0.0.32",
-    "conventional-changelog-conventionalcommits": "^10.4.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
     "eslint": "^10.9.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.5.0",
